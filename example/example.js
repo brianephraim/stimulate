@@ -7,7 +7,7 @@ document.body.appendChild(ticker);
 
 var counter = 0;
 var stimulation = stimulate({
-	cb: function(){
+	step: function(){
 		ticker.textContent = counter++;
 	}
 });

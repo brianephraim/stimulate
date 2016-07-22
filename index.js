@@ -11,8 +11,8 @@ window.stimulate = (function(){
 		this.options = options;
 		this.settings = !!this.options ? this.options : {};
 		this.noop = function(){};
-		this.settings.cb = !!this.settings.cb ? this.settings.cb : this.noop;
-		this.cb = this.settings.cb;
+		this.settings.step = !!this.settings.step ? this.settings.step : this.noop;
+		this.step = this.settings.step;
 		this.nextRafId = null;
 		this.start();
 	};
@@ -23,7 +23,7 @@ window.stimulate = (function(){
 	Stimulation.prototype.recurse = function(){
 		var self = this;
 		if(this.running){
-			this.cb();
+			this.step();
 			this.nextRafId = requestAnimationFrame(function(){
 				self.recurse();
 			});
