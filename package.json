@@ -1,0 +1,30 @@
+{
+  "name": "stimulate",
+  "version": "0.0.0",
+  "description": "animation utility",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/defualt/stimulate.git"
+  },
+  "keywords": [
+    "animation",
+    "animate",
+    "ui",
+    "request",
+    "animation",
+    "frame",
+    "easing",
+    "tween",
+    "timing"
+  ],
+  "author": "Brian Ephraim",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/defualt/stimulate/issues"
+  },
+  "homepage": "https://github.com/defualt/stimulate"
+}
