@@ -1,0 +1,2 @@
+# stimulate
+javascript animation utility
