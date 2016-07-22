@@ -1,6 +1,6 @@
 {
   "name": "stimulate",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "animation utility",
   "main": "index.js",
   "scripts": {
