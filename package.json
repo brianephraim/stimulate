@@ -1,6 +1,6 @@
 {
   "name": "stimulate",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "animation utility",
   "main": "dist/index.js",
   "scripts": {
@@ -29,7 +29,7 @@
     "url": "https://github.com/defualt/stimulate/issues"
   },
   "homepage": "https://github.com/defualt/stimulate",
-  "tonicExampleFilename":"tonicExample.js",
+  "tonicExampleFilename": "tonicExample.js",
   "devDependencies": {
     "babel-core": "^6.11.4",
     "babel-loader": "^6.2.4",
