@@ -1,10 +1,12 @@
+import raf from "raf";
+import {cancel as caf} from "raf";
 const stimulate = (function(){
 	function recurse() {
 		// Do whatever
-		requestAnimationFrame(recurse);
+		raf(recurse);
 	}
 
-	requestAnimationFrame(recurse);
+	raf(recurse);
 
 	var Stimulation = function(options){
 		this.running = false;
@@ -24,14 +26,14 @@ const stimulate = (function(){
 		var self = this;
 		if(this.running){
 			this.step();
-			this.nextRafId = requestAnimationFrame(function(){
+			this.nextRafId = raf(function(){
 				self.recurse();
 			});
 		}
 	};
 	Stimulation.prototype.stop = function(){
 		this.running = false;
-		cancelAnimationFrame(this.nextRafId)
+		caf(this.nextRafId)
 	};
 
 
