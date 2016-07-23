@@ -1,3 +1,5 @@
+import stimulatex from "../modules/index"
+console.log("Hello from example.js");
 var button = document.createElement("button");
 button.textContent = "Stop";
 document.body.appendChild(button);
@@ -6,7 +8,7 @@ var ticker = document.createElement("p");
 document.body.appendChild(ticker);
 
 var counter = 0;
-var stimulation = stimulate({
+var stimulation = stimulatex({
 	step: function(){
 		ticker.textContent = counter++;
 	}
@@ -15,3 +17,5 @@ var stimulation = stimulate({
 button.addEventListener("click", function(){
 	stimulation.stop();
 });
+
+export default null;

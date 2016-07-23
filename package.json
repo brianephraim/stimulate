@@ -2,11 +2,11 @@
   "name": "stimulate",
   "version": "0.0.2",
   "description": "animation utility",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "watch": "webpack-dev-server --progress --colors && echo 'http://localhost:8080/webpack-dev-server/'"
+    "watch": "webpack-dev-server --progress --colors  && echo 'http://localhost:8080/webpack-dev-server/'"
   },
   "repository": {
     "type": "git",

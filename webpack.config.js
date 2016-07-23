@@ -2,8 +2,21 @@ var path = require('path');
 var webpack = require('webpack');
 console.log(path);
 module.exports = {
-	entry: './main.js',
-	output: { path: "/Users/brianephraim/Sites/stimulate", filename: 'bundle.js' },
+	entry: {
+		"example/index": './example/example.js',
+
+		// Why am I using an array below? 
+		// because: 
+		//	Error: a dependency to an entry point is not allowed
+		// Workaround:
+		//	https://github.com/webpack/webpack/issues/300
+		"../dist/index": ['./modules/index.js'],
+	},
+	output: {
+		path: path.resolve(__dirname, "build"),
+		publicPath: "/assets/",
+		filename: '[name].js'
+	},
 	module: {
 		loaders: [
 			{
@@ -17,41 +30,3 @@ module.exports = {
 		]
 	}
 };
-
-// var webpack = require('webpack');
-// var path = require('path');
-// var OpenBrowserPlugin = require('open-browser-webpack-plugin');
-
-// module.exports = {
-//   devServer: {
-//     historyApiFallback: true,
-//     hot: true,
-//     inline: true,
-//     progress: true,
-//     contentBase: './app',
-//     port: 8080
-//   },
-//   entry: [
-//     'webpack/hot/dev-server',
-//     'webpack-dev-server/client?http://localhost:8080',
-//     path.resolve(__dirname, 'app/main.jsx')
-//   ],
-//   output: {
-//     path: __dirname + '/build',
-//     publicPath: '/',
-//     filename: './bundle.js'
-//   },
-//   module: {
-//     loaders:[
-//       { test: /\.css$/, include: path.resolve(__dirname, 'app'), loader: 'style-loader!css-loader' },
-//       { test: /\.js[x]?$/, include: path.resolve(__dirname, 'app'), exclude: /node_modules/, loader: 'babel-loader' },
-//     ]
-//   },
-//   resolve: {
-//     extensions: ['', '.js', '.jsx'],
-//   },
-//   plugins: [
-//     new webpack.HotModuleReplacementPlugin(),
-//     new OpenBrowserPlugin({ url: 'http://localhost:8080' })
-//   ]
-// };

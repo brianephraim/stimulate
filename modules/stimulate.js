@@ -1,4 +1,4 @@
-window.stimulate = (function(){
+const stimulate = (function(){
 	function recurse() {
 		// Do whatever
 		requestAnimationFrame(recurse);
@@ -40,3 +40,5 @@ window.stimulate = (function(){
 		return new Stimulation(options);
 	};
 })();
+
+export default stimulate;
