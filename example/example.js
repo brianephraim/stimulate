@@ -1,4 +1,4 @@
-import stimulatex from "../modules/index"
+import stimulatex from "../src/index"
 console.log("Hello from example.js");
 var button = document.createElement("button");
 button.textContent = "Stop";

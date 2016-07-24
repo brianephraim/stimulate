@@ -42,5 +42,5 @@ const stimulate = (function(){
 		return new Stimulation(options);
 	};
 })();
-
+export {stimulate};
 export default stimulate;
