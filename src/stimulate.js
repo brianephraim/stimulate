@@ -7,7 +7,8 @@ const stimulate = (function(){
 		this.options = options;
 		this.settings = !!this.options ? this.options : {};
 		this.noop = function(){};
-		
+		var a = {x:1};
+		var b = {y:2,...a};
 		this.settings.duration = !!this.settings.duration ? this.settings.duration : 1000;
 		this.settings.endless = !this.settings.duration || !!this.settings.endless;
 		this.settings.frame = !!this.settings.frame ? this.settings.frame : this.noop;
