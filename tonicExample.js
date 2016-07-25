@@ -1,7 +1,7 @@
 var stimulate = require("stimulate").default;
 var counter = 0;
 var stimulation = stimulate({
-	step: function(){
+	frame: function(){
         counter++;
 		console.log(counter);
 		if(counter > 2){

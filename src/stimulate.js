@@ -13,8 +13,8 @@ const stimulate = (function(){
 		this.options = options;
 		this.settings = !!this.options ? this.options : {};
 		this.noop = function(){};
-		this.settings.step = !!this.settings.step ? this.settings.step : this.noop;
-		this.step = this.settings.step;
+		this.settings.frame = !!this.settings.frame ? this.settings.frame : this.noop;
+		this.frame = this.settings.frame;
 		this.nextRafId = null;
 		this.start();
 	};
@@ -25,7 +25,7 @@ const stimulate = (function(){
 	Stimulation.prototype.recurse = function(){
 		var self = this;
 		if(this.running){
-			this.step();
+			this.frame();
 			this.nextRafId = raf(function(){
 				self.recurse();
 			});

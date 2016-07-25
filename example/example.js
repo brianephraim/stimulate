@@ -9,7 +9,7 @@ document.body.appendChild(ticker);
 
 var counter = 0;
 var stimulation = stimulatex({
-	step: function(){
+	frame: function(){
 		ticker.textContent = counter++;
 	}
 });
