@@ -61,7 +61,6 @@ describe('Given an instance returned by a call to my library', function() {
 
     describe('When I need to stop incrementing', function() {
         it('it has a stop method,', () => {
-        	console.log(stimulation)
             expect(typeof stimulation.stop).to.be.equal('function');
         });
         it('its stop method ends incrementation,', () => {

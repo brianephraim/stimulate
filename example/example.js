@@ -1,7 +1,6 @@
-import stimulatex from "../src/index"
-import prefixer from "react-prefixer"
-
-console.log(prefixer);
+import stimulatex from "../src/index";
+import {easings} from "../src/index";
+import prefixer from "react-prefixer";
 
 var button = document.createElement("button");
 button.textContent = "Stop";
@@ -31,12 +30,12 @@ var updateBallX = function(x){
 updateBallX(0);
 document.body.appendChild(ball);
 
-var counter = 0;
 var stimulation = stimulatex({
 	duration: 2000,
+	easing: easings.spring(),
 	frame: function(progress){
-		ticker.textContent = progress.ratioCompleted;
-		updateBallX(progress.ratioCompleted * 100)
+		var x = progress.easedRatioCompleted;
+		updateBallX(x * 100);
 	}
 });
 

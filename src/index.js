@@ -1,6 +1,7 @@
 import stimulate from './stimulate';
+import easings from './easings';
 // const stimulate = "aaaax";
-export {stimulate};
+export {stimulate, easings};
 export default stimulate;
 
 // module.exports = function() {  

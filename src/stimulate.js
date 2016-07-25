@@ -8,6 +8,7 @@ const stimulate = (function(){
 			duration: 1000,
 			endless: !options.duration || !!options.endless,
 			frame: this.noop,
+			easing: function(v){return v;},
 			...options
 		};
 		this.noop = function(){};
@@ -19,11 +20,14 @@ const stimulate = (function(){
 		this.timestamps = {};
 
 		this.progress = {
-			ratioCompleted: 0
+			ratioCompleted: 0,
+			easedRatioCompleted: 0
 		};
 		this.timestamps.start = Date.now();
 		this.running = true;
-		this.recurse();
+		raf(() => {
+			this.recurse();
+		});
 	};
 	Stimulation.prototype.frame = function(){
 		return this.settings.frame.apply(this, [this.progress]);
@@ -34,11 +38,14 @@ const stimulate = (function(){
 			this.nextRafId = raf(() => {
 				this.timestamps.recentFrame = Date.now();
 				var diff = this.timestamps.recentFrame - this.timestamps.start;
-				this.progress.ratioCompleted = diff/this.settings.duration;
+
 				if(this.progress.ratioCompleted < 1 || this.settings.endless){
+					this.progress.ratioCompleted = diff/this.settings.duration;
+					this.progress.easedRatioCompleted = this.settings.easing(this.progress.ratioCompleted);
 					this.recurse();
 				} else {
 					this.progress.ratioCompleted = 1;
+					this.progress.easedRatioCompleted = 1;
 					this.durationAchieved = true;
 					this.frame();
 				}
