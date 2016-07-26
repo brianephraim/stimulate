@@ -14,7 +14,9 @@ var translateVal = function(x=0,y=0,z=0){
 	return `translate3d(${x}px,${y}px,${z}px)`;
 };
 var startX = 200;
-var endX = 100;
+var startY = 100;
+var endX = 500;
+var endY = 0;
 var ball = document.createElement("div");
 var styles = prefixer({
 	background: "red",
@@ -23,13 +25,13 @@ var styles = prefixer({
 	borderRadius:"10px"
 });
 Object.assign(ball.style,styles);
-var updateBallX = function(x){
+var updateBall = function(x,y){
 	var styles = prefixer({
-		transform: translateVal(x,0,0)
+		transform: translateVal(x,y,0)
 	});
 	Object.assign(ball.style,styles);
 };
-updateBallX(startX);
+updateBall(startX,startY);
 document.body.appendChild(ball);
 setTimeout(function(){
 	var stimulation = stimulatex({
@@ -37,17 +39,27 @@ setTimeout(function(){
 		from: startX,
 		to: endX,
 		easing: easings.spring(),
-		frame: function(progress){
-			console.log(progress)
-			var x = progress.easedTweened;
-			updateBallX(x);
+		aspects:{
+			y:{
+				from:startY,
+				to:endY,
+				easing:function(v){return v}
+			},
+			x:{}
 		},
+		frame: function(progress){
+			// var x = progress.easedTweened;
+			var x = progress.aspects.x.easedTweened;
+			var y = progress.aspects.y.easedTweened;
+			
+			updateBall(x,y);
+		}
 		
 	});
 	button.addEventListener("click", function(){
 		stimulation.stop();
 	});
-},200)
+},500)
 
 
 export default null;

@@ -4,17 +4,39 @@ const stimulate = (function(){
 
 	var Stimulation = function(options){
 		this.running = false;
-		this.settings = {
-			duration: 1000,
-			endless: !options.duration || !!options.endless,
-			frame: this.noop,
+		this.noop = function(){};
+		this.aspectDefaults = {
 			from: 0,
 			to: 1,
-			easing: function(v){return v;},
-			...options
+			easing: function(v){return v;}
 		};
-		this.settings.range = this.settings.to - this.settings.from;
-		this.noop = function(){};
+		this.aspectDefaultKeys = Object.keys(this.aspectDefaults);
+		this.settings = {
+			...this.aspectDefaults,
+			duration: 1000,
+			endless: !options.duration || !!options.endless,
+			aspects: {},
+			...options,
+		};
+
+		this.progress = this.getProgressDefault(this.settings);
+		this.progress.aspects = {};
+
+		// Update aspectDefaults with result of settings generation.
+		// This will be applied as default for each aspect.
+		this.aspectDefaultKeys.forEach((aspectDefaultKey) => {
+			this.aspectDefaults[aspectDefaultKey] = this.settings[aspectDefaultKey];
+		});
+		this.settings.aspectNames = Object.keys(this.settings.aspects);
+
+		this.settings.aspectNames.forEach((name) => {
+			this.settings.aspects[name] = {
+				...this.aspectDefaults,
+				...this.settings.aspects[name]
+			};
+			this.progress.aspects[name] = this.getProgressDefault(this.settings.aspects[name]);
+		});
+		
 		var a = {x:1};
 		var b = {y:2,...a};
 
@@ -22,18 +44,21 @@ const stimulate = (function(){
 		this.nextRafId = null;
 		this.timestamps = {};
 
-		this.progress = {
-			ratioCompleted: 0,
-			easedRatioCompleted: 0,
-			tweened: this.settings.from,
-			easedTweened:this.settings.from
+		
 
-		};
 		this.timestamps.start = Date.now();
 		this.running = true;
 		raf(() => {
 			this.recurse();
 		});
+	};
+	Stimulation.prototype.getProgressDefault = function(settings){
+		return {
+			ratioCompleted: 0,
+			easedRatioCompleted: 0,
+			tweened: settings.from,
+			easedTweened: settings.from
+		};
 	};
 	Stimulation.prototype.frame = function(){
 		return this.settings.frame.apply(this, [this.progress]);
@@ -41,28 +66,42 @@ const stimulate = (function(){
 	Stimulation.prototype.getTween = function(from, to, ratioCompleted){
 		return from + (ratioCompleted * (to - from));
 	};
+	Stimulation.prototype.assignProgress = function(ratioCompleted,settings,progress){
+		var durationAchieved = false;
+		progress.ratioCompleted = ratioCompleted;
+		if(progress.ratioCompleted < 1 || this.settings.endless){
+			progress.easedRatioCompleted = settings.easing(progress.ratioCompleted);
+			progress.tweened = this.getTween(settings.from,settings.to,progress.ratioCompleted);
+			progress.easedTweened = this.getTween(settings.from,settings.to,progress.easedRatioCompleted);
+		} else {
+			progress.ratioCompleted = 1;
+			progress.easedRatioCompleted = 1;
+			progress.tweened = settings.to;
+			progress.easedTweened = settings.to;
+			durationAchieved = true;
+		}
+		return durationAchieved;
+	};
 	Stimulation.prototype.recurse = function(){
 		if(this.running){
 			this.frame();
 			this.nextRafId = raf(() => {
 				this.timestamps.recentFrame = Date.now();
 				var diff = this.timestamps.recentFrame - this.timestamps.start;
+				var ratioCompleted = diff/this.settings.duration;
 
-				if(this.progress.ratioCompleted < 1 || this.settings.endless){
-					this.progress.ratioCompleted = diff/this.settings.duration;
-					this.progress.easedRatioCompleted = this.settings.easing(this.progress.ratioCompleted);
-					var range = this.settings.to - this.settings.from;
-					this.progress.tweened = this.getTween(this.settings.from,this.settings.to,this.progress.ratioCompleted);
-					this.progress.easedTweened = this.getTween(this.settings.from,this.settings.to,this.progress.easedRatioCompleted);
+				this.durationAchieved = this.assignProgress(ratioCompleted, this.settings, this.progress);
+
+				this.settings.aspectNames.forEach((name) => {
+					var aspectSettings = this.settings.aspects[name];
+					var aspectProgress = this.progress.aspects[name];
+					this.assignProgress(ratioCompleted, aspectSettings, aspectProgress);
+				});
+				if(!this.durationAchieved){
 					this.recurse();
 				} else {
-					this.progress.ratioCompleted = 1;
-					this.progress.easedRatioCompleted = 1;
-					this.progress.tweened = this.settings.to;
-					this.durationAchieved = true;
 					this.frame();
 				}
-				
 			});
 		}
 	};
