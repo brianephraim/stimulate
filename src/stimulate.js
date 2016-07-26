@@ -16,6 +16,9 @@ const stimulate = (function(){
 			duration: 1000,
 			endless: !options.duration || !!options.endless,
 			aspects: {},
+			onComplete: this.noop,
+			onStop: this.noop,
+			skipZeroFrame: true,
 			...options,
 		};
 
@@ -48,7 +51,7 @@ const stimulate = (function(){
 
 		this.timestamps.start = Date.now();
 		this.running = true;
-		raf(() => {
+		this.nextRafId = raf(() => {
 			this.recurse();
 		});
 	};
@@ -84,30 +87,36 @@ const stimulate = (function(){
 	};
 	Stimulation.prototype.recurse = function(){
 		if(this.running){
-			this.frame();
+			if(this.progress.ratioCompleted > 0 || !this.settings.skipZeroFrame){
+				this.frame();
+			}
 			this.nextRafId = raf(() => {
-				this.timestamps.recentFrame = Date.now();
-				var diff = this.timestamps.recentFrame - this.timestamps.start;
-				var ratioCompleted = diff/this.settings.duration;
+				if(this.running){
+					this.timestamps.recentFrame = Date.now();
+					var diff = this.timestamps.recentFrame - this.timestamps.start;
+					var ratioCompleted = diff/this.settings.duration;
+					this.durationAchieved = this.assignProgress(ratioCompleted, this.settings, this.progress);
 
-				this.durationAchieved = this.assignProgress(ratioCompleted, this.settings, this.progress);
-
-				this.settings.aspectNames.forEach((name) => {
-					var aspectSettings = this.settings.aspects[name];
-					var aspectProgress = this.progress.aspects[name];
-					this.assignProgress(ratioCompleted, aspectSettings, aspectProgress);
-				});
-				if(!this.durationAchieved){
-					this.recurse();
-				} else {
-					this.frame();
+					this.settings.aspectNames.forEach((name) => {
+						var aspectSettings = this.settings.aspects[name];
+						var aspectProgress = this.progress.aspects[name];
+						this.assignProgress(ratioCompleted, aspectSettings, aspectProgress);
+					});
+					if(!this.durationAchieved){
+						this.recurse();
+					} else {
+						this.running = false;
+						this.frame();
+						this.settings.onComplete.apply(this,[this.progress]);
+					}
 				}
 			});
 		}
 	};
 	Stimulation.prototype.stop = function(){
 		this.running = false;
-		caf(this.nextRafId)
+		caf(this.nextRafId);
+		this.settings.onStop.apply(this,[this.progress]);
 	};
 
 
