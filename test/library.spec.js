@@ -1,6 +1,7 @@
 import chai from 'chai';
 // import Library from '../dist/stimulate.min.js';
 import stimulate from '../src/index';
+import {raf,caf} from '../src/stimulate';;
 
 chai.expect();
 
@@ -187,21 +188,26 @@ describe('Given an instance returned by a call to my library', function() {
     describe('When I need to control the initial frame behavior', function() {
     	var s1,s2;
     	before(function(done) {
-    		s1 = stimulate({
-    			skipZeroFrame:true,
-    			frame:function(progress){
-    				this.stop();
-    			}
+    		var initialTime = Date.now();
+    		raf(function(){
+    		raf(function(){
+	    		s1 = stimulate({
+	    			skipZeroFrame:true,
+	    			frame:function(progress){
+	    				this.stop();
+	    			}
+	    		});
+	    		s2 = stimulate({
+	    			skipZeroFrame:false,
+	    			duration:1234,
+	    			frame:function(progress){
+	    				this.stop();
+	    				setTimeout(function(){
+		    				done();
+	    				},100);
+	    			}
+	    		});
     		});
-    		s2 = stimulate({
-    			skipZeroFrame:false,
-    			duration:1234,
-    			frame:function(progress){
-    				this.stop();
-    				setTimeout(function(){
-	    				done();
-    				},100);
-    			}
     		});
 	    });
 	    it('the first frame progress.ratioCompleted of a stimulation with a settings of skipZeroFrame:true is greater than 0 ', () => {

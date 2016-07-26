@@ -1,7 +1,6 @@
 import raf from "raf";
 import {cancel as caf} from "raf";
 const stimulate = (function(){
-
 	var Stimulation = function(options){
 		this.running = false;
 		this.noop = function(){};
@@ -51,9 +50,13 @@ const stimulate = (function(){
 
 		this.timestamps.start = Date.now();
 		this.running = true;
-		this.nextRafId = raf(() => {
+		if(this.settings.skipZeroFrame) {
 			this.recurse();
-		});
+		} else {
+			this.nextRafId = raf(() => {
+				this.recurse();
+			});
+		}
 	};
 	Stimulation.prototype.getProgressDefault = function(settings){
 		return {
@@ -125,5 +128,5 @@ const stimulate = (function(){
 		return new Stimulation(options);
 	};
 })();
-export {stimulate};
+export {stimulate,raf,caf};
 export default stimulate;
