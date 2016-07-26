@@ -46,10 +46,9 @@ const stimulate = (function(){
 		this.nextRafId = null;
 		this.timestamps = {};
 
-		
-
 		this.timestamps.start = Date.now();
 		this.running = true;
+
 		if(this.settings.skipZeroFrame) {
 			this.recurse();
 		} else {
