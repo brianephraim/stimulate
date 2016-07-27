@@ -4,48 +4,42 @@ const stimulate = (function(){
 	var Stimulation = function(options,debug){
 		this.debug = debug;
 		this.running = false;
-		this.aspectDefaults = {
-			from: 0,
-			to: 1,
-			easing: function(v){return v;}
-		};
 		this.aspects = {};
-		this.aspectDefaultKeys = Object.keys(this.aspectDefaults);
+		this.toInherit = [
+			"duration",
+			"aspectTree",
+			"skipZeroFrame",
+			"delay"
+		];
 		this.settings = {
-			...this.aspectDefaults,
 			duration: 1000,
 			endless: !options.duration || !!options.endless,
-			aspects: this.aspects,
 			aspectTree: this,
 			skipZeroFrame: true,
 			delay:0,
+			from: 0,
+			to: 1,
+			easing: function(v){return v;},
+			aspects: this.aspects,
 			frame: null,
+			unchainedStop: false,
 			...options,
 		};
+
 		this.aspects = this.settings.aspects;
 		this.aspectTree = this.settings.aspectTree;
 
 		this.progress = this.getProgressDefault(this.settings);
 		this.progress.aspects = {};
-
-
-		// Update aspectDefaults with result of settings generation.
-		// This will be applied as default for each aspect.
-		// this.aspectDefaultKeys.forEach((aspectDefaultKey) => {
-		// 	this.aspectDefaults[aspectDefaultKey] = this.settings[aspectDefaultKey];
-		// });
+		var inherit = {};
+		this.toInherit.forEach((key) => {
+			inherit[key] = this.settings[key]
+		});
 		this.iterateAspectNames((name) => {
 			this.aspects[name] = new Stimulation({
-				...this.settings,
-				aspects:{},
-				frame:null,
+				...inherit,
 				...this.settings.aspects[name]
 			},name);
-			// this.settings.aspects[name] = {
-			// 	...this.aspectDefaults,
-			// 	...this.settings.aspects[name]
-			// };
-			// this.progress.aspects[name] = this.getProgressDefault(this.settings.aspects[name]);
 		});
 
 		var a = {x:1};
@@ -84,11 +78,6 @@ const stimulate = (function(){
 	Stimulation.prototype.frame = function(){
 		var now = Date.now();
 		if(!this.settings.delay || this.timestamps.start + this.settings.delay <= now){
-			// this.iterateAspectNames((name) => {
-			// 	if(this.settings.aspects[name].frame){
-			// 		this.settings.aspects[name].frame.apply(this, [this.progress.aspects[name],this.progress]);
-			// 	}
-			// });
 			if(this.settings.frame){
 				this.settings.frame.apply(this, [this.progress]);
 			}
@@ -125,11 +114,6 @@ const stimulate = (function(){
 					var ratioCompleted = diff/this.settings.duration;
 					this.durationAchieved = this.assignProgress(ratioCompleted, this.settings, this.progress);
 
-					// this.settings.aspectNames.forEach((name) => {
-					// 	var aspectSettings = this.settings.aspects[name];
-					// 	var aspectProgress = this.progress.aspects[name];
-					// 	this.assignProgress(ratioCompleted, aspectSettings, aspectProgress);
-					// });
 					if(!this.durationAchieved){
 						this.recurse();
 					} else {
@@ -149,6 +133,12 @@ const stimulate = (function(){
 		if(this.settings.onStop){
 			this.settings.onStop.apply(this,[this.progress]);
 		}
+		this.iterateAspectNames((name) => {
+			var aspect = this.aspects[name];
+			if(!aspect.settings.unchainedStop){
+				this.aspects[name].stop();
+			}
+		});
 	};
 	Stimulation.prototype.aspectAt = function(path){
 		var pathSplit = path.split('.');
@@ -158,7 +148,6 @@ const stimulate = (function(){
 			pathSplit.push(lastItem)
 		}
 		var place = this.aspectTree;
-		console.log(pathSplit)
 		if(path){
 			try{
 				pathSplit.forEach((name) => {

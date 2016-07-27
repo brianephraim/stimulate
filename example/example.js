@@ -6,6 +6,10 @@ var button = document.createElement("button");
 button.textContent = "Stop";
 document.body.appendChild(button);
 
+var button2 = document.createElement("button");
+button2.textContent = "Stop 2";
+document.body.appendChild(button2);
+
 var ticker = document.createElement("p");
 document.body.appendChild(ticker);
 
@@ -51,17 +55,20 @@ setTimeout(function(){
 		to:200,
 		aspects:{
 			x:{
+				// unchainedStop:true,
 				from:coords.start.x,
 				to:coords.end.x,
-				frame:function(aspectProgress, allProgress){
+				frame:function(aspectProgress){
 					// console.log("aspectProgress",this)
 				},
 				aspects:{
 					deepY:{
+						// unchainedStop:true,
 						from:30,
 						to:250,
 						frame:function(){
-							// console.log("deep")
+							// console.log('y')
+							// this.stop();
 						}
 					}
 				},
@@ -83,7 +90,6 @@ setTimeout(function(){
 			// console.log(progress)
 			// console.log(progress.aspects.y.tweenedEased);
 			// console.log("THIS",this.aspects);
-			console.log(this.aspectAt("x.deepY.ratioCompleted"))
 			updateBall({
 				x: this.aspectAt(""),
 				y: this.aspectAt("x.deepY")
@@ -99,6 +105,10 @@ setTimeout(function(){
 	});
 	button.addEventListener("click", function(){
 		stimulation.stop();
+	});
+	button2.addEventListener("click", function(){
+		// stimulation.aspects.x.aspects.deepY.stop();
+		stimulation.aspects.x.stop();
 	});
 },0)
 

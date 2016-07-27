@@ -168,24 +168,10 @@ describe('Given an instance returned by a call to my library', function() {
         	expect(r.midProgressSnapshot.tweened).to.be.greaterThan(settings.from);
         	expect(r.midProgressSnapshot.tweened).to.be.lessThan(settings.to);
         });
-        it('aspects inherit from, to from parent settings', () => {
-        	var parentTweened = r.midProgressSnapshot.tweened;
-        	var xTweened = r.midProgressSnapshot.aspects.x.tweened;
-        	var yTweened = r.midProgressSnapshot.aspects.y.tweened;
-        	// var zTweened = r.midProgressSnapshot.aspects.z.tweened;
-        	expect(parentTweened).to.be.equal(xTweened).to.be.equal(yTweened);
-        	// expect(r.midProgressSnapshot.aspects.x.tweened).to.be.greaterThan(settings.from);
-        });
+        
         it('easing eases', () => {
         	var p = r.midProgressSnapshot.easedRatioCompleted;
         	expect(r.midProgressSnapshot.ratioCompleted).to.not.equal(r.midProgressSnapshot.easedRatioCompleted);
-        });
-        it('aspects inherit easing from parent settings', () => {
-        	var p = r.midProgressSnapshot.easedRatioCompleted;
-        	var x = r.midProgressSnapshot.aspects.x.easedRatioCompleted;
-        	var y = r.midProgressSnapshot.aspects.y.easedRatioCompleted;
-        	var z = r.midProgressSnapshot.aspects.z.easedRatioCompleted;
-        	expect(p).to.be.equal(x).to.be.equal(z).to.not.equal(y);
         });
 
         it('aspect frame callbacks work', () => {
