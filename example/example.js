@@ -46,14 +46,25 @@ document.body.appendChild(ball);
 setTimeout(function(){
 	var stimulation = stimulatex({
 		duration: 2000,
-		delay:3000,
+		delay:500,
+		from:100,
+		to:200,
 		aspects:{
 			x:{
 				from:coords.start.x,
 				to:coords.end.x,
 				frame:function(aspectProgress, allProgress){
-
-				}
+					// console.log("aspectProgress",this)
+				},
+				aspects:{
+					deepY:{
+						from:30,
+						to:200,
+						frame:function(){
+							// console.log("deep")
+						}
+					}
+				},
 				// easing:function(ratio){return Math.sin(ratio)}
 			},
 			y:{
@@ -69,13 +80,16 @@ setTimeout(function(){
 			}
 		},
 		frame: function(progress){
+			// console.log(progress)
 			// console.log(progress.aspects.y.tweenedEased);
+			console.log("THIS",this.aspects)
 			updateBall({
-				x: progress.aspects.x.easedTweened,
-				y: (
-					(Math.sin(progress.ratioCompleted*15) * 100)
-					+ progress.aspects.y.easedTweened
-				),
+				x: progress.easedTweened,
+				y: this.aspects.x.aspects.deepY.progress.easedTweened
+				// y: (
+				// 	(Math.sin(progress.ratioCompleted*15) * 100)
+				// 	+ progress.aspects.y.easedTweened
+				// ),
 				// y:progress.aspects.y.tweenedEased,
 				// y:progress.aspects.y.easedTweened * (1 - Math.pow(progress.ratioCompleted,.4))
 			});
@@ -85,7 +99,7 @@ setTimeout(function(){
 	button.addEventListener("click", function(){
 		stimulation.stop();
 	});
-},500)
+},0)
 
 
 export default null;
