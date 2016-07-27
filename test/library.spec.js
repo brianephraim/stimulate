@@ -100,7 +100,7 @@ describe('Given an instance returned by a call to my library', function() {
         });
 
         it('its frame method takes time (significantly exceeds processing speed benchmarks)', () => {
-            expect(r.stimulationTestedDuration).to.be.greaterThan(processingTimeBenchmark * 2);
+            expect(r.stimulationTestedDuration).to.be.greaterThan(processingTimeBenchmark * 1.5);
         });
         it('its frame method calls repeatedly,', () => {
             expect(r.counter).to.be.greaterThan(2);

@@ -3,7 +3,6 @@ import {cancel as caf} from "raf";
 const stimulate = (function(){
 	var Stimulation = function(options){
 		this.running = false;
-		this.noop = function(){};
 		this.aspectDefaults = {
 			from: 0,
 			to: 1,
@@ -15,9 +14,8 @@ const stimulate = (function(){
 			duration: 1000,
 			endless: !options.duration || !!options.endless,
 			aspects: {},
-			onComplete: this.noop,
-			onStop: this.noop,
 			skipZeroFrame: true,
+			delay:0,
 			...options,
 		};
 
@@ -29,19 +27,10 @@ const stimulate = (function(){
 		this.aspectDefaultKeys.forEach((aspectDefaultKey) => {
 			this.aspectDefaults[aspectDefaultKey] = this.settings[aspectDefaultKey];
 		});
-		this.settings.aspectNames = Object.keys(this.settings.aspects);
-		this.settings.aspectNames.forEach((name) => {
-			this.settings.aspects[name] = {
-				...this.aspectDefaults,
-				frame:this.noop,
-				...this.settings.aspects[name]
-			};
-			this.progress.aspects[name] = this.getProgressDefault(this.settings.aspects[name]);
-		});
+
 		this.iterateAspectNames((name) => {
 			this.settings.aspects[name] = {
 				...this.aspectDefaults,
-				frame:this.noop,
 				...this.settings.aspects[name]
 			};
 			this.progress.aspects[name] = this.getProgressDefault(this.settings.aspects[name]);
@@ -55,6 +44,7 @@ const stimulate = (function(){
 		this.timestamps = {};
 
 		this.timestamps.start = Date.now();
+		this.timestamps.startDelay = this.timestamps.start + this.settings.delay;
 		this.running = true;
 
 		if(this.settings.skipZeroFrame) {
@@ -80,10 +70,17 @@ const stimulate = (function(){
 		};
 	};
 	Stimulation.prototype.frame = function(){
-		this.iterateAspectNames((name) => {
-			this.settings.aspects[name].frame.apply(this, [this.progress.aspects[name],this.progress]);
-		});
-		this.settings.frame.apply(this, [this.progress]);
+		var now = Date.now();
+		if(!this.settings.delay || this.timestamps.start + this.settings.delay <= now){
+			this.iterateAspectNames((name) => {
+				if(this.settings.aspects[name].frame){
+					this.settings.aspects[name].frame.apply(this, [this.progress.aspects[name],this.progress]);
+				}
+			});
+			if(this.settings.frame){
+				this.settings.frame.apply(this, [this.progress]);
+			}
+		}
 	};
 	Stimulation.prototype.getTween = function(from, to, ratioCompleted){
 		return from + (ratioCompleted * (to - from));
@@ -112,7 +109,7 @@ const stimulate = (function(){
 			this.nextRafId = raf(() => {
 				if(this.running){
 					this.timestamps.recentFrame = Date.now();
-					var diff = this.timestamps.recentFrame - this.timestamps.start;
+					var diff = this.timestamps.recentFrame - this.timestamps.startDelay;
 					var ratioCompleted = diff/this.settings.duration;
 					this.durationAchieved = this.assignProgress(ratioCompleted, this.settings, this.progress);
 
@@ -126,7 +123,9 @@ const stimulate = (function(){
 					} else {
 						this.running = false;
 						this.frame();
-						this.settings.onComplete.apply(this,[this.progress]);
+						if(this.settings.onComplete){
+							this.settings.onComplete.apply(this,[this.progress]);
+						}
 					}
 				}
 			});
@@ -135,7 +134,9 @@ const stimulate = (function(){
 	Stimulation.prototype.stop = function(){
 		this.running = false;
 		caf(this.nextRafId);
-		this.settings.onStop.apply(this,[this.progress]);
+		if(this.settings.onStop){
+			this.settings.onStop.apply(this,[this.progress]);
+		}
 	};
 
 

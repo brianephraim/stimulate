@@ -46,6 +46,7 @@ document.body.appendChild(ball);
 setTimeout(function(){
 	var stimulation = stimulatex({
 		duration: 2000,
+		delay:3000,
 		aspects:{
 			x:{
 				from:coords.start.x,
