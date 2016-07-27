@@ -30,10 +30,18 @@ const stimulate = (function(){
 			this.aspectDefaults[aspectDefaultKey] = this.settings[aspectDefaultKey];
 		});
 		this.settings.aspectNames = Object.keys(this.settings.aspects);
-
 		this.settings.aspectNames.forEach((name) => {
 			this.settings.aspects[name] = {
 				...this.aspectDefaults,
+				frame:this.noop,
+				...this.settings.aspects[name]
+			};
+			this.progress.aspects[name] = this.getProgressDefault(this.settings.aspects[name]);
+		});
+		this.iterateAspectNames((name) => {
+			this.settings.aspects[name] = {
+				...this.aspectDefaults,
+				frame:this.noop,
 				...this.settings.aspects[name]
 			};
 			this.progress.aspects[name] = this.getProgressDefault(this.settings.aspects[name]);
@@ -57,6 +65,12 @@ const stimulate = (function(){
 			});
 		}
 	};
+	Stimulation.prototype.iterateAspectNames = function(cb){
+		this.settings.aspectNames = Object.keys(this.settings.aspects);
+		this.settings.aspectNames.forEach((name) => {
+			cb(name);
+		});
+	};
 	Stimulation.prototype.getProgressDefault = function(settings){
 		return {
 			ratioCompleted: 0,
@@ -66,7 +80,10 @@ const stimulate = (function(){
 		};
 	};
 	Stimulation.prototype.frame = function(){
-		return this.settings.frame.apply(this, [this.progress]);
+		this.iterateAspectNames((name) => {
+			this.settings.aspects[name].frame.apply(this, [this.progress.aspects[name],this.progress]);
+		});
+		this.settings.frame.apply(this, [this.progress]);
 	};
 	Stimulation.prototype.getTween = function(from, to, ratioCompleted){
 		return from + (ratioCompleted * (to - from));

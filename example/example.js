@@ -50,6 +50,9 @@ setTimeout(function(){
 			x:{
 				from:coords.start.x,
 				to:coords.end.x,
+				frame:function(aspectProgress, allProgress){
+
+				}
 				// easing:function(ratio){return Math.sin(ratio)}
 			},
 			y:{

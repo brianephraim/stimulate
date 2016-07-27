@@ -128,6 +128,7 @@ describe('Given an instance returned by a call to my library', function() {
     describe('When I need to increment over a specified duration', function() {
 	    
 	    var r;
+	    var aspectFrameCalled = false;
 	    var settings = {
     		duration:100,
     		from:100,
@@ -137,6 +138,9 @@ describe('Given an instance returned by a call to my library', function() {
 				x:{},
 				y:{
 					easing:function(ratioCompleted){return Math.pow(ratioCompleted,40)},
+					frame:function(){
+						aspectFrameCalled = true
+					},
 				},
 				z:{
 					from: 25,
@@ -183,6 +187,12 @@ describe('Given an instance returned by a call to my library', function() {
         	var z = r.midProgressSnapshot.aspects.z.easedRatioCompleted;
         	expect(p).to.be.equal(x).to.be.equal(z).to.not.equal(y);
         });
+
+        it('aspect frame callbacks work', () => {
+        	expect(aspectFrameCalled).to.be.equal(true);
+        });
+
+        
     });
 
     describe('When I need to control the initial frame behavior', function() {
