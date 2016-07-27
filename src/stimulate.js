@@ -150,6 +150,32 @@ const stimulate = (function(){
 			this.settings.onStop.apply(this,[this.progress]);
 		}
 	};
+	Stimulation.prototype.aspectAt = function(path){
+		var pathSplit = path.split('.');
+		var lastItem = pathSplit[pathSplit.length - 1];
+		if(typeof this.progress[lastItem] === "undefined"){
+			lastItem = "easedTweened";
+			pathSplit.push(lastItem)
+		}
+		var place = this.aspectTree;
+		console.log(pathSplit)
+		if(path){
+			try{
+				pathSplit.forEach((name) => {
+					if(name !== lastItem){
+						place = place.aspects[name];
+					} else {
+						place = place.progress[name];
+					}
+				});
+			} catch (e){
+				throw("Error: You specified an invalid aspect path for .aspectAt().")
+			}
+		} else {
+			place = place.progress[lastItem];
+		}
+		return place;
+	};
 
 
 

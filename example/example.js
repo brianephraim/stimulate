@@ -59,7 +59,7 @@ setTimeout(function(){
 				aspects:{
 					deepY:{
 						from:30,
-						to:200,
+						to:250,
 						frame:function(){
 							// console.log("deep")
 						}
@@ -82,10 +82,11 @@ setTimeout(function(){
 		frame: function(progress){
 			// console.log(progress)
 			// console.log(progress.aspects.y.tweenedEased);
-			console.log("THIS",this.aspects)
+			// console.log("THIS",this.aspects);
+			console.log(this.aspectAt("x.deepY.ratioCompleted"))
 			updateBall({
-				x: progress.easedTweened,
-				y: this.aspects.x.aspects.deepY.progress.easedTweened
+				x: this.aspectAt(""),
+				y: this.aspectAt("x.deepY")
 				// y: (
 				// 	(Math.sin(progress.ratioCompleted*15) * 100)
 				// 	+ progress.aspects.y.easedTweened
