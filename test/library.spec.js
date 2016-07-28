@@ -214,4 +214,71 @@ describe('Given an instance returned by a call to my library', function() {
         });
     });
 
+    describe('When I need to delay the first frame', function() {
+    	var s1;
+    	var order = [];
+    	var stimulationTimestamps = [];
+    	var timestampDif = Infinity;
+    	var countA = 0;
+    	var countB = 0;
+    	before(function(done) {
+    		s1 = stimulate({
+    			delay:200,
+    			frame:function(){
+    				stimulationTimestamps.push(Date.now());
+    				order.push('stimulation1');
+    				this.stop();
+    				
+    			},
+    			aspects:{
+    				a:{
+    					chainedStop:false,
+    					frame:function(){
+    						countA++;
+    						stimulationTimestamps.push(Date.now());
+    						order.push('stimulation2');
+    						this.stop();
+    					}
+    				},
+    				b:{
+    					delay:100,
+    					frame:function(){
+    						countB++;
+    					}
+    				}
+    			}
+    		});
+    		setTimeout(function(){
+    			order.push('timeout1');
+    		},100);
+    		setTimeout(function(){
+    			order.push('timeout2');
+    			timestampDif = Math.abs(stimulationTimestamps[0] - stimulationTimestamps[1]);
+    			done();
+    		},250);
+    	});
+
+    	it('the delay setting property works ', () => {
+        	expect(order[0]).to.be.equal('timeout1');
+        	expect(order[1]).to.contain('stimulation');
+        });
+        it('aspects inherit delay', () => {
+        	console.log(order)
+        	expect(order[0]).to.be.equal('timeout1');
+        	expect(order[1]).to.contain('stimulation');
+        	expect(order[2]).to.contain('stimulation');
+        	expect(order[3]).to.be.equal('timeout2');
+        	expect(timestampDif).to.be.lessThan(10);
+        });
+        it('aspects can have delays shorter than parents\'',() => {
+        	expect(countA).to.be.lessThan(countB);
+        });
+
+        it('chainedStop');
+        it('delayAddsParentDelay');
+        it('aspectAt');
+        it('aspect frame can update progress argument and affect root frame progress');
+        it('aspect frame can return new progress progress object that updates its this.progress');
+    });
+
 });

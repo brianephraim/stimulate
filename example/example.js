@@ -55,19 +55,24 @@ setTimeout(function(){
 		to:200,
 		aspects:{
 			x:{
-				// unchainedStop:true,
+				// delay:400,
+				// delayAddsParentDelay:true,
 				from:coords.start.x,
 				to:coords.end.x,
 				frame:function(aspectProgress){
+					console.log("B");
 					// console.log("aspectProgress",this)
 				},
 				aspects:{
 					deepY:{
-						// unchainedStop:true,
 						from:30,
 						to:250,
 						frame:function(){
-							// console.log('y')
+							console.log('y');
+							// this.progress.easedTweened = this.progress.easedTweened * 4;
+							return {
+								easedTweened: this.progress.easedTweened * 4
+							}
 							// this.stop();
 						}
 					}
@@ -87,6 +92,7 @@ setTimeout(function(){
 			}
 		},
 		frame: function(progress){
+			console.log("A");
 			// console.log(progress)
 			// console.log(progress.aspects.y.tweenedEased);
 			// console.log("THIS",this.aspects);

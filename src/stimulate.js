@@ -9,7 +9,8 @@ const stimulate = (function(){
 			"duration",
 			"aspectTree",
 			"skipZeroFrame",
-			"delay"
+			"delay",
+			"cumulativeDelay"
 		];
 		this.settings = {
 			duration: 1000,
@@ -22,15 +23,39 @@ const stimulate = (function(){
 			easing: function(v){return v;},
 			aspects: this.aspects,
 			frame: null,
-			unchainedStop: false,
+			chainedStop: false,
+			delayAddsParentDelay: false,
 			...options,
 		};
+		if(!this.settings.delayAddsParentDelay){
+			this.settings.cumulativeDelay = this.settings.delay;
+		} else {
+			this.settings.cumulativeDelay = this.settings.delay + this.settings.cumulativeDelay;
+		}
 
 		this.aspects = this.settings.aspects;
 		this.aspectTree = this.settings.aspectTree;
 
 		this.progress = this.getProgressDefault(this.settings);
 		this.progress.aspects = {};
+		
+
+		this.durationAchieved = false;
+		this.nextRafId = null;
+		this.timestamps = {};
+
+		this.timestamps.start = Date.now();
+		this.timestamps.startDelay = this.timestamps.start + this.settings.cumulativeDelay;
+		this.running = true;
+
+		if(this.settings.skipZeroFrame) {
+			this.recurse();
+		} else {
+			this.nextRafId = raf(() => {
+				this.recurse();
+			});
+		}
+
 		var inherit = {};
 		this.toInherit.forEach((key) => {
 			inherit[key] = this.settings[key]
@@ -41,25 +66,6 @@ const stimulate = (function(){
 				...this.settings.aspects[name]
 			},name);
 		});
-
-		var a = {x:1};
-		var b = {y:2,...a};
-
-		this.durationAchieved = false;
-		this.nextRafId = null;
-		this.timestamps = {};
-
-		this.timestamps.start = Date.now();
-		this.timestamps.startDelay = this.timestamps.start + this.settings.delay;
-		this.running = true;
-
-		if(this.settings.skipZeroFrame) {
-			this.recurse();
-		} else {
-			this.nextRafId = raf(() => {
-				this.recurse();
-			});
-		}
 	};
 	Stimulation.prototype.iterateAspectNames = function(cb){
 		this.settings.aspectNames = Object.keys(this.settings.aspects);
@@ -77,9 +83,11 @@ const stimulate = (function(){
 	};
 	Stimulation.prototype.frame = function(){
 		var now = Date.now();
-		if(!this.settings.delay || this.timestamps.start + this.settings.delay <= now){
+		if(!this.settings.cumulativeDelay || this.timestamps.start + this.settings.cumulativeDelay <= now){
 			if(this.settings.frame){
-				this.settings.frame.apply(this, [this.progress]);
+				var progressChanges = this.settings.frame.apply(this, [this.progress]);
+				Object.assign(this.progress,progressChanges);
+
 			}
 		}
 	};
@@ -135,7 +143,7 @@ const stimulate = (function(){
 		}
 		this.iterateAspectNames((name) => {
 			var aspect = this.aspects[name];
-			if(!aspect.settings.unchainedStop){
+			if(aspect.settings.chainedStop){
 				this.aspects[name].stop();
 			}
 		});
