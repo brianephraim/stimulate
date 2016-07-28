@@ -3,6 +3,10 @@ import {cancel as caf} from "raf";
 const stimulate = (function(){
 	var Stimulation = function(options,debug){
 		this.debug = debug;
+		this.options = options;
+		this.init();
+	};
+	Stimulation.prototype.init = function(resetAll){
 		this.running = false;
 		this.aspects = {};
 		this.toInherit = [
@@ -14,18 +18,21 @@ const stimulate = (function(){
 		];
 		this.settings = {
 			duration: 1000,
-			endless: !options.duration || !!options.endless,
+			endless: !this.options.duration || !!this.options.endless,
 			aspectTree: this,
 			skipZeroFrame: true,
 			delay:0,
+			delayAddsParentDelay: false,
 			from: 0,
 			to: 1,
 			easing: function(v){return v;},
 			aspects: this.aspects,
 			frame: null,
-			chainedStop: false,
+			chainedStop: true,
 			delayAddsParentDelay: false,
-			...options,
+			loop:false,
+			delayLoop:false,
+			...this.options,
 		};
 		if(!this.settings.delayAddsParentDelay){
 			this.settings.cumulativeDelay = this.settings.delay;
@@ -38,14 +45,15 @@ const stimulate = (function(){
 
 		this.progress = this.getProgressDefault(this.settings);
 		this.progress.aspects = {};
+
+		this.currentLoopCount = 1;
 		
 
 		this.durationAchieved = false;
 		this.nextRafId = null;
 		this.timestamps = {};
 
-		this.timestamps.start = Date.now();
-		this.timestamps.startDelay = this.timestamps.start + this.settings.cumulativeDelay;
+		this.timestamps.startDelay = Date.now() + this.settings.cumulativeDelay;
 		this.running = true;
 
 		if(this.settings.skipZeroFrame) {
@@ -61,12 +69,17 @@ const stimulate = (function(){
 			inherit[key] = this.settings[key]
 		});
 		this.iterateAspectNames((name) => {
-			this.aspects[name] = new Stimulation({
-				...inherit,
-				...this.settings.aspects[name]
-			},name);
+			if(!resetAll){
+				this.aspects[name] = new Stimulation({
+					...inherit,
+					...this.settings.aspects[name]
+				},name);
+			} else {
+				this.aspects[name].init(true)
+			}
 		});
 	};
+
 	Stimulation.prototype.iterateAspectNames = function(cb){
 		this.settings.aspectNames = Object.keys(this.settings.aspects);
 		this.settings.aspectNames.forEach((name) => {
@@ -83,7 +96,7 @@ const stimulate = (function(){
 	};
 	Stimulation.prototype.frame = function(){
 		var now = Date.now();
-		if(!this.settings.cumulativeDelay || this.timestamps.start + this.settings.cumulativeDelay <= now){
+		if(!this.settings.cumulativeDelay || this.timestamps.startDelay <= now){
 			if(this.settings.frame){
 				var progressChanges = this.settings.frame.apply(this, [this.progress]);
 				Object.assign(this.progress,progressChanges);
@@ -110,7 +123,7 @@ const stimulate = (function(){
 		}
 		return durationAchieved;
 	};
-	Stimulation.prototype.recurse = function(){
+	Stimulation.prototype.recurse = function(reset){
 		if(this.running){
 			if(this.progress.ratioCompleted > 0 || !this.settings.skipZeroFrame){
 				this.frame();
@@ -118,12 +131,36 @@ const stimulate = (function(){
 			this.nextRafId = raf(() => {
 				if(this.running){
 					this.timestamps.recentFrame = Date.now();
+					if(reset){
+						this.timestamps.startDelay = this.timestamps.recentFrame + this.settings.cumulativeDelay;
+					}
 					var diff = this.timestamps.recentFrame - this.timestamps.startDelay;
 					var ratioCompleted = diff/this.settings.duration;
 					this.durationAchieved = this.assignProgress(ratioCompleted, this.settings, this.progress);
+					var stillLooping = false;
+					if(
+						this.durationAchieved &&
+						(
+							this.settings.loop === true ||
+							(
+								this.settings.loop && 
+								this.currentLoopCount < this.settings.loop
+							)
+						)
+					){
+						this.currentLoopCount++;
+						this.durationAchieved = false;
+						stillLooping = true;
+						if(this.settings.delayLoop){
+							this.settings.cumulativeDelay = this.settings.delay;
+						} else {
+							this.settings.cumulativeDelay = 0;
+						}
+					}
+					
 
 					if(!this.durationAchieved){
-						this.recurse();
+						this.recurse(stillLooping);
 					} else {
 						this.running = false;
 						this.frame();
@@ -135,16 +172,22 @@ const stimulate = (function(){
 			});
 		}
 	};
-	Stimulation.prototype.stop = function(){
+	Stimulation.prototype.resetAll = function(skipCallback){
+		this.stop(true);
+		this.init(true);
+	}
+	Stimulation.prototype.stop = function(skipCallback){
 		this.running = false;
 		caf(this.nextRafId);
 		if(this.settings.onStop){
-			this.settings.onStop.apply(this,[this.progress]);
+			if(!skipCallback){
+				this.settings.onStop.apply(this,[this.progress]);
+			}
 		}
 		this.iterateAspectNames((name) => {
 			var aspect = this.aspects[name];
 			if(aspect.settings.chainedStop){
-				this.aspects[name].stop();
+				this.aspects[name].stop(skipCallback);
 			}
 		});
 	};

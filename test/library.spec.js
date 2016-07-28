@@ -274,11 +274,190 @@ describe('Given an instance returned by a call to my library', function() {
         	expect(countA).to.be.lessThan(countB);
         });
 
-        it('chainedStop');
-        it('delayAddsParentDelay');
         it('aspectAt');
         it('aspect frame can update progress argument and affect root frame progress');
         it('aspect frame can return new progress progress object that updates its this.progress');
+        it('loop');
+        it('delayLoop')
+        it('resetAll')
+    });
+
+
+    describe('When I need to stop incrementing', function() {
+    	var counter = {
+			progress:0,
+			atTimeOfStop:100,
+			shortlyAfterStop:200
+		};
+    	var counters = {
+    		root: {...counter},
+    		aspects: {
+    			default: {...counter},
+    			chained: {...counter},
+    			unchained: {...counter}
+    		}
+    	};
+
+    	before(function(done){
+    		var stimulation = stimulate({
+    			aspects:{
+    				default:{
+    					frame:function(){
+    						counters.aspects.default.progress++;
+    					}
+    				},
+    				chained:{
+    					chainedStop: true,
+    					frame:function(){
+    						counters.aspects.chained.progress++;
+    					}
+    				},
+    				unchained:{
+    					chainedStop: false,
+    					frame:function(){
+    						counters.aspects.unchained.progress++;
+    					}
+    				}
+    			},
+    			frame:function(){
+    				counters.root.progress++;
+    			}
+    		});
+    		setTimeout(function(){
+    			stimulation.stop();
+    			counters.root.atTimeOfStop = counters.root.progress;
+    			counters.aspects.default.atTimeOfStop = counters.aspects.default.progress;
+    			counters.aspects.chained.atTimeOfStop = counters.aspects.chained.progress;
+    			counters.aspects.unchained.atTimeOfStop = counters.aspects.unchained.progress;
+    			setTimeout(function(){
+	    			counters.root.shortlyAfterStop = counters.root.progress;
+	    			counters.aspects.default.shortlyAfterStop = counters.aspects.default.progress;
+	    			counters.aspects.chained.shortlyAfterStop = counters.aspects.chained.progress;
+	    			counters.aspects.unchained.shortlyAfterStop = counters.aspects.unchained.progress;
+	    			stimulation.aspects.unchained.stop();
+	    			done();
+	    		},50);
+    		},50);
+    		
+    	});
+    	it('calling its `stop` method stops it',() => {
+    		expect(counters.root.atTimeOfStop).to.be.equal(counters.root.shortlyAfterStop);
+    	});
+    	it('calling its `stop` method also stops aspects with `chainedStop:true` setting or with `chainedStop` unspecified/default',() => {
+    		expect(counters.root.atTimeOfStop).to.be.equal(counters.root.shortlyAfterStop);
+    		expect(counters.aspects.chained.atTimeOfStop).to.be.equal(counters.aspects.chained.shortlyAfterStop);
+    		expect(counters.aspects.default.atTimeOfStop).to.be.equal(counters.aspects.default.shortlyAfterStop);
+    	});
+    	it('calling its `stop` method doesn\'t stop aspects with `chainedStop:false` setting',() => {
+    		expect(counters.root.atTimeOfStop).to.be.equal(counters.root.shortlyAfterStop);
+    		expect(counters.aspects.unchained.atTimeOfStop).to.be.lessThan(counters.aspects.unchained.shortlyAfterStop);
+    	});
+    });
+
+    describe('When I need to delay the initial incrementation', function() {
+    	var counter = {
+			progress:0,
+			betweenStartAndRootDelay:100,
+			shortlyAfterRootDelay:9999
+		};
+		var counters = {
+			root: {...counter},
+			aspects: {
+				inheritsDelayAndAdds: {...counter},
+				inheritsDelay: {...counter},
+				defaultAddFalse: {...counter},
+				adds: {...counter},
+				doesNotAdd: {...counter},
+				subtracts: {...counter}
+			}
+		};
+		before(function(done){
+			var stimulation = stimulate({
+				delay:150,
+				duration:200,
+				aspects: {
+					inheritsDelay:{
+						frame: function(){
+							counters.aspects.inheritsDelay.progress++;
+						},
+					},
+					defaultAddFalse:{
+						delay:50,
+						frame: function(){
+							counters.aspects.defaultAddFalse.progress++;
+						},
+					},
+					adds:{
+						delayAddsParentDelay:true,
+						delay:50,
+						frame: function(){
+							counters.aspects.adds.progress++;
+						},
+
+					},
+					inheritsDelayAndAdds:{
+						delayAddsParentDelay:true,
+						frame: function(){
+							counters.aspects.inheritsDelayAndAdds.progress++;
+						},
+					},
+					
+					subtracts:{
+						delayAddsParentDelay:true,
+						delay:-50,
+						frame: function(){
+							counters.aspects.subtracts.progress++;
+						},
+
+					},
+					doesNotAdd:{
+						delayAddsParentDelay:false,
+						delay:50,
+						frame: function(){
+							counters.aspects.doesNotAdd.progress++;
+						},
+					}
+				},
+				frame:function(){
+					counters.root.progress++;
+				}
+			});
+			setTimeout(function(){
+				counters.root.betweenStartAndRootDelay = counters.root.progress;
+				Object.keys(counters.aspects).forEach((aspectName)=>{
+					counters.aspects[aspectName].betweenStartAndRootDelay = counters.aspects[aspectName].progress;
+				})
+				
+			},100);
+			setTimeout(function(){
+				counters.root.shortlyAfterRootDelay = counters.root.progress;
+				Object.keys(counters.aspects).forEach((aspectName)=>{
+					counters.aspects[aspectName].shortlyAfterRootDelay = counters.aspects[aspectName].progress;
+				})
+				done();
+			},220);
+		});
+    	it('it uses a delay setting',() => {
+    		expect(counters.root.betweenStartAndRootDelay).to.be.equal(0);
+    		expect(counters.root.shortlyAfterRootDelay).to.be.greaterThan(0);
+    	});
+    	it('its aspects without `delay` settings inherits from its parent',() => {
+    		expect(counters.aspects.inheritsDelay.betweenStartAndRootDelay).to.be.equal(counters.root.betweenStartAndRootDelay);
+    		expect(counters.aspects.inheritsDelay.shortlyAfterRootDelay).to.be.equal(counters.root.shortlyAfterRootDelay);
+    	});
+    	it('its aspects with `delay` setting can start before its parent delay. Also, `delayAddsParentDelay:false` is a default setting.',() => {
+    		expect(counters.aspects.defaultAddFalse.betweenStartAndRootDelay).to.be.greaterThan(counters.root.betweenStartAndRootDelay);
+    		expect(counters.aspects.doesNotAdd.betweenStartAndRootDelay).to.be.equal(counters.aspects.defaultAddFalse.betweenStartAndRootDelay);
+    	});
+    	it('its aspects with `delay:number` and `delayAddsParentDelay:true` settings will start later than the parent',() => {
+    		expect(counters.root.shortlyAfterRootDelay).to.be.greaterThan(counters.aspects.adds.shortlyAfterRootDelay);
+    	});
+    	it('when an aspect inherits `delay` setting, and it has `delayAddsParentDelay:true`, it adds the inherited delay (essentially doubling it)',() => {
+    		expect(counters.root.shortlyAfterRootDelay).to.be.greaterThan(counters.aspects.inheritsDelayAndAdds.shortlyAfterRootDelay);
+    	});
+    	it('its aspects with `delay:negative number` and `delayAddsParentDelay:true` settings will start earlier than the parent',() => {
+    		expect(counters.root.shortlyAfterRootDelay).to.be.lessThan(counters.aspects.subtracts.shortlyAfterRootDelay);
+    	});
     });
 
 });
