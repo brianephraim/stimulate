@@ -54,13 +54,13 @@ var asdf = function(){
 			delay:500,
 			from:100,
 			to:200,
-			// loop:2,
+			loop:2,
 			delayLoop:true,
 			aspects:{
 				x:{
 					// delay:400,
 					// delayAddsParentDelay:true,
-					// loop:2,
+					loop:2,
 					delayLoop:true,
 					from:coords.start.x,
 					to:coords.end.x,
@@ -71,7 +71,7 @@ var asdf = function(){
 					},
 					aspects:{
 						deepY:{
-							// loop:2,
+							loop:2,
 							delayLoop:true,
 							from:30,
 							to:250,
@@ -88,7 +88,7 @@ var asdf = function(){
 					// easing:function(ratio){return Math.sin(ratio)}
 				},
 				y:{
-					// loop:2,
+					loop:2,
 					delayLoop:true,
 					from:coords.start.y,
 					to:coords.end.y,
