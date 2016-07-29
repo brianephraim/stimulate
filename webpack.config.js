@@ -13,54 +13,62 @@ var entry = {};
 
 
 if (env === 'build') {
-	plugins.push(new UglifyJsPlugin({ minimize: true }));
-	outputFile = libraryName + '.min.js';
+    plugins.push(new UglifyJsPlugin({ minimize: true }));
+    outputFile = libraryName + '.min.js';
 } else {
-	entry["example/index.js"] = './example/example.js';
-	outputFile = libraryName + '.js';
+    entry["example/index.js"] = './example/example.js';
+    outputFile = libraryName + '.js';
 }
 // Why am I using an array below? 
-	// because for dev: 
-	//	Error: a dependency to an entry point is not allowed
-	// Workaround:
-	//	https://github.com/webpack/webpack/issues/300
+// because for dev: 
+//  Error: a dependency to an entry point is not allowed
+// Workaround:
+//  https://github.com/webpack/webpack/issues/300
 entry[outputFile] = [__dirname + '/src/index.js'];
 
 
 var config = {
-  entry: entry,
-  devtool: 'source-map',
-  output: {
-    path: __dirname + '/dist',
-    filename: '[name]',
-    library: libraryName,
-    libraryTarget: 'umd',
-    umdNamedDefine: true,
-    publicPath: "/assets/",
-  },
-  module: {
-    loaders: [
-      {
-        // test: /(\.jsx|\.js)$/,
-        loader: 'babel',
-        exclude: /(node_modules|bower_components)/,
-        query: {
-        	"presets": ["es2015"],
-        	// "plugins": ["babel-plugin-add-module-exports"]
-        }
-       }
-      // {
-      //   test: /(\.jsx|\.js)$/,
-      //   loader: "eslint-loader",
-      //   exclude: /node_modules/
-      // }
-    ]
-  },
-  resolve: {
-    root: path.resolve('./src'),
-    extensions: ['', '.js']
-  },
-  plugins: plugins
+    entry: entry,
+    devtool: 'source-map',
+    output: {
+        path: __dirname + '/dist',
+        filename: '[name]',
+        library: libraryName,
+        libraryTarget: 'umd',
+        umdNamedDefine: true,
+        publicPath: "/assets/",
+    },
+    module: {
+        loaders: [{
+                // test: /(\.jsx|\.js)$/,
+                loader: 'babel',
+
+                exclude: /(node_modules|bower_components)/,
+                query: {
+                    "presets": ["es2015"],
+                    // "plugins": ["babel-plugin-add-module-exports"]
+                }
+            }, {
+                test: /stimulate\.js$/,
+                loader: "eslint-loader",
+                exclude: /node_modules/,
+                query: {
+                    "presets": ["es2015"],
+                    // "plugins": ["babel-plugin-add-module-exports"]
+                }
+            }
+            // {
+            //   test: /(\.jsx|\.js)$/,
+            //   loader: "eslint-loader",
+            //   exclude: /node_modules/
+            // }
+        ]
+    },
+    resolve: {
+        root: path.resolve('./src'),
+        extensions: ['', '.js']
+    },
+    plugins: plugins
 };
 
 module.exports = config;

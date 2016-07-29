@@ -1,40 +1,39 @@
-import raf from "raf";
-import {cancel as caf} from "raf";
-const stimulate = (function(){
-	var Stimulation = function(options,debug){
-		this.debug = debug ? debug : 'root';
+import raf, { cancel as caf } from 'raf';
+
+class Stimulation {
+	constructor(options, debug = 'root') {
+		this.debug = debug;
 		this.options = options;
 		this.init();
-	};
-	Stimulation.prototype.init = function(resetAll){
+	}
+	init(resetAll) {
 		this.running = false;
 		this.aspects = {};
 		this.toInherit = [
-			"duration",
-			"aspectTree",
-			"skipZeroFrame",
-			"delay",
-			"cumulativeDelay"
+			'duration',
+			'aspectTree',
+			'skipZeroFrame',
+			'delay',
+			'cumulativeDelay',
 		];
 		this.settings = {
 			duration: 1000,
 			endless: !this.options.duration || !!this.options.endless,
 			aspectTree: this,
 			skipZeroFrame: true,
-			delay:0,
+			delay: 0,
 			delayAddsParentDelay: false,
 			from: 0,
 			to: 1,
-			easing: function(v){return v;},
+			easing(v) { return v; },
 			aspects: this.aspects,
 			frame: null,
 			chainedStop: true,
-			delayAddsParentDelay: false,
-			loop:false,
-			delayLoop:false,
+			loop: false,
+			delayLoop: false,
 			...this.options,
 		};
-		if(!this.settings.delayAddsParentDelay){
+		if (!this.settings.delayAddsParentDelay) {
 			this.settings.cumulativeDelay = this.settings.delay;
 		} else {
 			this.settings.cumulativeDelay = this.settings.delay + this.settings.cumulativeDelay;
@@ -47,100 +46,99 @@ const stimulate = (function(){
 		this.progress.aspects = {};
 
 		this.currentLoopCount = 1;
-		
+
 
 		this.durationAchieved = false;
 		this.nextRafId = null;
 		this.timestamps = {};
 
-		if(!this.aspectTree.startTimestamp){
+		if (!this.aspectTree.startTimestamp) {
 			this.aspectTree.startTimestamp = Date.now();
 		}
 		this.timestamps.startDelay = this.aspectTree.startTimestamp + this.settings.cumulativeDelay;
 		this.running = true;
 
 		this.skipZeroFrameConfirmed = this.settings.skipZeroFrame || !!this.settings.cumulativeDelay;
-		
-		
 
-		var inherit = {};
+
+		const inherit = {};
 		this.toInherit.forEach((key) => {
-			inherit[key] = this.settings[key]
+			inherit[key] = this.settings[key];
 		});
 		this.iterateAspectNames((name) => {
-			if(!resetAll){
+			if (!resetAll) {
 				this.aspects[name] = new Stimulation({
 					...inherit,
-					...this.settings.aspects[name]
-				},name);
+					...this.settings.aspects[name],
+				}, name);
 			} else {
-				this.aspects[name].init(true)
+				this.aspects[name].init(true);
 			}
 		});
 
-		if(this.skipZeroFrameConfirmed) {
+		if (this.skipZeroFrameConfirmed) {
 			this.recurse();
 		} else {
 			this.nextRafId = raf(() => {
 				this.recurse();
 			});
 		}
-	};
-
-	Stimulation.prototype.iterateAspectNames = function(cb){
+	}
+	iterateAspectNames(cb) {
 		this.settings.aspectNames = Object.keys(this.settings.aspects);
 		this.settings.aspectNames.forEach((name) => {
 			cb(name);
 		});
-	};
-	Stimulation.prototype.getProgressDefault = function(settings){
+	}
+	getProgressDefault(settings) {
 		return {
 			ratioCompleted: 0,
 			easedRatioCompleted: 0,
 			tweened: settings.from,
-			easedTweened: settings.from
+			easedTweened: settings.from,
 		};
-	};
-	Stimulation.prototype.frame = function(){
-		var progressChanges = this.settings.frame.apply(this, [this.progress]);
-		Object.assign(this.progress,progressChanges);
-	};
-	Stimulation.prototype.getTween = function(from, to, ratioCompleted){
+	}
+	frame() {
+		const progressChanges = this.settings.frame.apply(this, [this.progress]);
+		Object.assign(this.progress, progressChanges);
+	}
+	getTween(from, to, ratioCompleted) {
 		return from + (ratioCompleted * (to - from));
-	};
-	Stimulation.prototype.assignProgress = function(ratioCompleted,settings,progress){
-		var durationAchieved = false;
-		progress.ratioCompleted = ratioCompleted;
-		if(progress.ratioCompleted < 1 || this.settings.endless){
-			progress.easedRatioCompleted = settings.easing(progress.ratioCompleted);
-			progress.tweened = this.getTween(settings.from,settings.to,progress.ratioCompleted);
-			progress.easedTweened = this.getTween(settings.from,settings.to,progress.easedRatioCompleted);
+	}
+	assignProgress(ratioCompleted, settings) {
+		let durationAchieved = false;
+		const p = this.progress;
+		p.ratioCompleted = ratioCompleted;
+		if (p.ratioCompleted < 1 || this.settings.endless) {
+			p.easedRatioCompleted = settings.easing(p.ratioCompleted);
+			p.tweened = this.getTween(settings.from, settings.to, p.ratioCompleted);
+			p.easedTweened = this.getTween(settings.from, settings.to, p.easedRatioCompleted);
 		} else {
-			progress.ratioCompleted = 1;
-			progress.easedRatioCompleted = 1;
-			progress.tweened = settings.to;
-			progress.easedTweened = settings.to;
+			p.ratioCompleted = 1;
+			p.easedRatioCompleted = 1;
+			p.tweened = settings.to;
+			p.easedTweened = settings.to;
 			durationAchieved = true;
 		}
 		return durationAchieved;
-	};
-	Stimulation.prototype.recurse = function(reset){
-		if(this.running){
-			if(this.progress.ratioCompleted > 0 || !this.skipZeroFrameConfirmed){
-				if(this.settings.frame){
+	}
+	recurse(reset) {
+		if (this.running) {
+			if (this.progress.ratioCompleted > 0 || !this.skipZeroFrameConfirmed) {
+				if (this.settings.frame) {
 					this.frame();
 				}
 			}
-			if(!this.aspectTree.runningCount){
+			if (!this.aspectTree.runningCount) {
 				this.aspectTree.runningCount = 1;
 			} else {
-				this.aspectTree.runningCount++
+				this.aspectTree.runningCount++;
 			}
 			// console.log("this.aspectTree.runningCount",this.aspectTree.runningCount)
 			this.nextRafId = raf(() => {
-				if(this.running){
+				if (this.running) {
 					// console.log("this.aspectTree.runningCount",this.aspectTree.runningCount)
-					if(!this.aspectTree.runningLimit){
+					if (!this.aspectTree.runningLimit) {
 						this.aspectTree.runningLimit = this.aspectTree.runningCount;
 						this.aspectTree.recentFrameTimestamp = Date.now();
 						this.aspectTree.runningCount = 0;
@@ -150,106 +148,109 @@ const stimulate = (function(){
 					this.aspectTree.runningLimit--;
 
 					this.timestamps.recentFrame = this.aspectTree.recentFrameTimestamp;
-					if(reset){
-						this.timestamps.startDelay = this.timestamps.recentFrame + this.settings.cumulativeDelay;
+					if (reset) {
+						const sum = this.timestamps.recentFrame + this.settings.cumulativeDelay;
+						this.timestamps.startDelay = sum;
 					}
-					var diff = this.timestamps.recentFrame - this.timestamps.startDelay;
-					var ratioCompleted = diff/this.settings.duration;
-					this.durationAchieved = this.assignProgress(ratioCompleted, this.settings, this.progress);
-					var stillLooping = false;
-					if(
+					const diff = this.timestamps.recentFrame - this.timestamps.startDelay;
+					const ratioCompleted = diff / this.settings.duration;
+					this.durationAchieved = this.assignProgress(ratioCompleted, this.settings);
+					let stillLooping = false;
+					if (
 						this.durationAchieved &&
 						(
 							this.settings.loop === true ||
 							(
-								this.settings.loop && 
+								this.settings.loop &&
 								this.currentLoopCount < this.settings.loop
 							)
 						)
-					){
+					) {
 						this.currentLoopCount++;
 						this.durationAchieved = false;
 						stillLooping = true;
-						if(this.settings.delayLoop){
+						if (this.settings.delayLoop) {
 							this.settings.cumulativeDelay = this.settings.delay;
 						} else {
 							this.settings.cumulativeDelay = 0;
 						}
 					}
-					
 
-					if(!this.durationAchieved){
+
+					if (!this.durationAchieved) {
 						this.recurse(stillLooping);
 					} else {
 						this.running = false;
 
-						if(!this.settings.cumulativeDelay || this.timestamps.startDelay <= this.aspectTree.recentFrameTimestamp){
-							if(this.settings.frame){
-								this.frame();
-							}
+						if (
+							(
+								!this.settings.cumulativeDelay ||
+								this.timestamps.startDelay <= this.aspectTree.recentFrameTimestamp
+							) &&
+							this.settings.frame
+						) {
+							this.frame();
 						}
 
 						// this.frame();
-						if(this.settings.onComplete){
-							this.settings.onComplete.apply(this,[this.progress]);
+						if (this.settings.onComplete) {
+							this.settings.onComplete.apply(this, [this.progress]);
 						}
 					}
 				}
 			});
 		}
-	};
-	Stimulation.prototype.resetAll = function(skipCallback){
+	}
+	resetAll() {
 		this.stop(true);
 		delete this.aspectTree.startTimestamp;
 		this.aspectTree.runningCount = 0;
 		this.init(true);
 	}
-	Stimulation.prototype.stop = function(skipCallback){
+	stop(skipCallback) {
 		this.running = false;
 		caf(this.nextRafId);
-		if(this.settings.onStop){
-			if(!skipCallback){
-				this.settings.onStop.apply(this,[this.progress]);
+		if (this.settings.onStop) {
+			if (!skipCallback) {
+				this.settings.onStop.apply(this, [this.progress]);
 			}
 		}
 		this.iterateAspectNames((name) => {
-			var aspect = this.aspects[name];
-			if(aspect.settings.chainedStop){
+			const aspect = this.aspects[name];
+			if (aspect.settings.chainedStop) {
 				this.aspects[name].stop(skipCallback);
 			}
 		});
-	};
-	Stimulation.prototype.aspectAt = function(path){
-		var pathSplit = path.split('.');
-		var lastItem = pathSplit[pathSplit.length - 1];
-		if(typeof this.progress[lastItem] === "undefined"){
-			lastItem = "easedTweened";
-			pathSplit.push(lastItem)
+	}
+	aspectAt(path) {
+		const pathSplit = path.split('.');
+		let lastItem = pathSplit[pathSplit.length - 1];
+		if (typeof this.progress[lastItem] === 'undefined') {
+			lastItem = 'easedTweened';
+			pathSplit.push(lastItem);
 		}
-		var place = this.aspectTree;
-		if(path){
-			try{
+		let place = this.aspectTree;
+		if (path) {
+			try {
 				pathSplit.forEach((name) => {
-					if(name !== lastItem){
+					if (name !== lastItem) {
 						place = place.aspects[name];
 					} else {
 						place = place.progress[name];
 					}
 				});
-			} catch (e){
-				throw("Error: You specified an invalid aspect path for .aspectAt().")
+			} catch (e) {
+				throw new Error('Error: You specified an invalid aspect path for .aspectAt().');
 			}
 		} else {
 			place = place.progress[lastItem];
 		}
 		return place;
-	};
+	}
+}
 
-
-
-	return function(options){
-		return new Stimulation(options);
-	};
-})();
-export {stimulate,raf,caf};
+const stimulate = (options) => {
+	return new Stimulation(options);
+};
+export { stimulate, raf, caf };
 export default stimulate;

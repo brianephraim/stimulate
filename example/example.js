@@ -65,7 +65,7 @@ var asdf = function(){
 					from:coords.start.x,
 					to:coords.end.x,
 					frame:function(aspectProgress){
-						console.log('b',this.progress.ratioCompleted)
+						// console.log('b',this.progress.ratioCompleted)
 						// console.log("B");
 						// console.log("aspectProgress",this)
 					},
@@ -102,7 +102,7 @@ var asdf = function(){
 				}
 			},
 			frame: function(progress){
-				console.log('a',this.progress.ratioCompleted)
+				// console.log('a',this.progress.ratioCompleted)
 				// console.log("A");
 				// console.log(progress)
 				// console.log(progress.aspects.y.tweenedEased);
