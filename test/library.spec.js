@@ -263,7 +263,6 @@ describe('Given an instance returned by a call to my library', function() {
         	expect(order[1]).to.contain('stimulation');
         });
         it('aspects inherit delay', () => {
-        	console.log(order)
         	expect(order[0]).to.be.equal('timeout1');
         	expect(order[1]).to.contain('stimulation');
         	expect(order[2]).to.contain('stimulation');
@@ -457,6 +456,45 @@ describe('Given an instance returned by a call to my library', function() {
     	});
     	it('its aspects with `delay:negative number` and `delayAddsParentDelay:true` settings will start earlier than the parent',() => {
     		expect(counters.root.shortlyAfterRootDelay).to.be.lessThan(counters.aspects.subtracts.shortlyAfterRootDelay);
+    	});
+    });
+
+    describe('ensure aspects progresses are in sync',function(){
+    	var stimulation;
+    	var sequence = [];
+    	before(function(done){
+    		stimulation = stimulate({
+    			duration:200,
+    			aspects:{
+    				a:{
+    					aspects:{
+    						b:{
+    							frame:function(){
+    								sequence.push(1);
+		    					}
+    						}
+    					},
+    					frame:function(){
+    						sequence.push(2);
+    					}
+    				}
+    			},
+    			frame:function(){
+    				sequence.push(3);
+    				if(this.progress.ratioCompleted > .5){
+    					this.stop();
+    					done();
+    				}
+    			}
+    		});
+    	});
+    	it('root and child aspects with inherited duration settings have synced ratioCompleted',() => {
+    		expect(stimulation.progress.ratioCompleted).to.be.equal(stimulation.aspects.a.progress.ratioCompleted);
+    	});
+    	it('children aspect frames are called before parents',() => {
+    		expect(sequence[sequence.length -1]).to.be.equal(3);
+    		expect(sequence[sequence.length -2]).to.be.equal(2);
+    		expect(sequence[sequence.length -3]).to.be.equal(1);
     	});
     });
 

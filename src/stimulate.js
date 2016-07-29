@@ -2,7 +2,7 @@ import raf from "raf";
 import {cancel as caf} from "raf";
 const stimulate = (function(){
 	var Stimulation = function(options,debug){
-		this.debug = debug;
+		this.debug = debug ? debug : 'root';
 		this.options = options;
 		this.init();
 	};
@@ -53,16 +53,15 @@ const stimulate = (function(){
 		this.nextRafId = null;
 		this.timestamps = {};
 
-		this.timestamps.startDelay = Date.now() + this.settings.cumulativeDelay;
+		if(!this.aspectTree.startTimestamp){
+			this.aspectTree.startTimestamp = Date.now();
+		}
+		this.timestamps.startDelay = this.aspectTree.startTimestamp + this.settings.cumulativeDelay;
 		this.running = true;
 
-		if(this.settings.skipZeroFrame) {
-			this.recurse();
-		} else {
-			this.nextRafId = raf(() => {
-				this.recurse();
-			});
-		}
+		this.skipZeroFrameConfirmed = this.settings.skipZeroFrame || !!this.settings.cumulativeDelay;
+		
+		
 
 		var inherit = {};
 		this.toInherit.forEach((key) => {
@@ -78,6 +77,14 @@ const stimulate = (function(){
 				this.aspects[name].init(true)
 			}
 		});
+
+		if(this.skipZeroFrameConfirmed) {
+			this.recurse();
+		} else {
+			this.nextRafId = raf(() => {
+				this.recurse();
+			});
+		}
 	};
 
 	Stimulation.prototype.iterateAspectNames = function(cb){
@@ -95,14 +102,8 @@ const stimulate = (function(){
 		};
 	};
 	Stimulation.prototype.frame = function(){
-		var now = Date.now();
-		if(!this.settings.cumulativeDelay || this.timestamps.startDelay <= now){
-			if(this.settings.frame){
-				var progressChanges = this.settings.frame.apply(this, [this.progress]);
-				Object.assign(this.progress,progressChanges);
-
-			}
-		}
+		var progressChanges = this.settings.frame.apply(this, [this.progress]);
+		Object.assign(this.progress,progressChanges);
 	};
 	Stimulation.prototype.getTween = function(from, to, ratioCompleted){
 		return from + (ratioCompleted * (to - from));
@@ -125,12 +126,30 @@ const stimulate = (function(){
 	};
 	Stimulation.prototype.recurse = function(reset){
 		if(this.running){
-			if(this.progress.ratioCompleted > 0 || !this.settings.skipZeroFrame){
-				this.frame();
+			if(this.progress.ratioCompleted > 0 || !this.skipZeroFrameConfirmed){
+				if(this.settings.frame){
+					this.frame();
+				}
 			}
+			if(!this.aspectTree.runningCount){
+				this.aspectTree.runningCount = 1;
+			} else {
+				this.aspectTree.runningCount++
+			}
+			// console.log("this.aspectTree.runningCount",this.aspectTree.runningCount)
 			this.nextRafId = raf(() => {
 				if(this.running){
-					this.timestamps.recentFrame = Date.now();
+					// console.log("this.aspectTree.runningCount",this.aspectTree.runningCount)
+					if(!this.aspectTree.runningLimit){
+						this.aspectTree.runningLimit = this.aspectTree.runningCount;
+						this.aspectTree.recentFrameTimestamp = Date.now();
+						this.aspectTree.runningCount = 0;
+						// console.log("LIMIT",this.aspectTree.runningCount);
+					}
+
+					this.aspectTree.runningLimit--;
+
+					this.timestamps.recentFrame = this.aspectTree.recentFrameTimestamp;
 					if(reset){
 						this.timestamps.startDelay = this.timestamps.recentFrame + this.settings.cumulativeDelay;
 					}
@@ -163,7 +182,14 @@ const stimulate = (function(){
 						this.recurse(stillLooping);
 					} else {
 						this.running = false;
-						this.frame();
+
+						if(!this.settings.cumulativeDelay || this.timestamps.startDelay <= this.aspectTree.recentFrameTimestamp){
+							if(this.settings.frame){
+								this.frame();
+							}
+						}
+
+						// this.frame();
 						if(this.settings.onComplete){
 							this.settings.onComplete.apply(this,[this.progress]);
 						}
@@ -174,6 +200,8 @@ const stimulate = (function(){
 	};
 	Stimulation.prototype.resetAll = function(skipCallback){
 		this.stop(true);
+		delete this.aspectTree.startTimestamp;
+		this.aspectTree.runningCount = 0;
 		this.init(true);
 	}
 	Stimulation.prototype.stop = function(skipCallback){

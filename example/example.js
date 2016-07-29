@@ -54,23 +54,24 @@ var asdf = function(){
 			delay:500,
 			from:100,
 			to:200,
-			loop:2,
+			// loop:2,
 			delayLoop:true,
 			aspects:{
 				x:{
 					// delay:400,
 					// delayAddsParentDelay:true,
-					loop:2,
+					// loop:2,
 					delayLoop:true,
 					from:coords.start.x,
 					to:coords.end.x,
 					frame:function(aspectProgress){
+						console.log('b',this.progress.ratioCompleted)
 						// console.log("B");
 						// console.log("aspectProgress",this)
 					},
 					aspects:{
 						deepY:{
-							loop:2,
+							// loop:2,
 							delayLoop:true,
 							from:30,
 							to:250,
@@ -87,7 +88,7 @@ var asdf = function(){
 					// easing:function(ratio){return Math.sin(ratio)}
 				},
 				y:{
-					loop:2,
+					// loop:2,
 					delayLoop:true,
 					from:coords.start.y,
 					to:coords.end.y,
@@ -101,6 +102,7 @@ var asdf = function(){
 				}
 			},
 			frame: function(progress){
+				console.log('a',this.progress.ratioCompleted)
 				// console.log("A");
 				// console.log(progress)
 				// console.log(progress.aspects.y.tweenedEased);
