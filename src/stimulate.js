@@ -17,6 +17,9 @@ const sharedTiming = {
 	},
 	rafIdRegistry: {},
 	raf(cb) {
+		if(!this){
+			console.log("XXXXX",this)
+		}
 		if (!this.running.count) {
 			this.running.count = 1;
 		} else {

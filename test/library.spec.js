@@ -185,26 +185,26 @@ describe('Given an instance returned by a call to my library', function() {
     	var s1,s2;
     	before(function(done) {
     		var initialTime = Date.now();
-    		raf(function(){
-    		raf(function(){
-	    		s1 = stimulate({
-	    			skipZeroFrame:true,
-	    			frame:function(progress){
-	    				this.stop();
-	    			}
-	    		});
-	    		s2 = stimulate({
-	    			skipZeroFrame:false,
-	    			duration:1234,
-	    			frame:function(progress){
-	    				this.stop();
-	    				setTimeout(function(){
-		    				done();
-	    				},100);
-	    			}
-	    		});
-    		});
-    		});
+    		// raf(function(){
+	    		// raf(function(){
+		    		s1 = stimulate({
+		    			skipZeroFrame:true,
+		    			frame:function(progress){
+		    				this.stop();
+		    			}
+		    		});
+		    		s2 = stimulate({
+		    			skipZeroFrame:false,
+		    			duration:1234,
+		    			frame:function(progress){
+		    				this.stop();
+		    				setTimeout(function(){
+			    				done();
+		    				},100);
+		    			}
+		    		});
+	    		// });
+    		// });
 	    });
 	    it('the first frame progress.ratioCompleted of a stimulation with a settings of skipZeroFrame:true is greater than 0 ', () => {
         	expect(s1.progress.ratioCompleted).to.be.greaterThan(0);
