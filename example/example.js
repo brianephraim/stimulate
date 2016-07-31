@@ -1,6 +1,9 @@
 import stimulatex from "../src/index";
+import {raf} from "../src/index";
 import {easings} from "../src/index";
 import prefixer from "react-prefixer";
+
+console.log(raf);
 
 var appendElement = function(tag,text){
 	var el = document.createElement(tag);
@@ -65,6 +68,14 @@ var asdf = function(){
 					from:coords.start.x,
 					to:coords.end.x,
 					frame:function(aspectProgress){
+
+						if(this.progress.ratioCompleted > .5 && !this.aspects.crixus){
+							this.birthAspect('crixus',{
+								frame:function(){
+									console.log('HERE I AM');
+								}
+							});
+						}
 						// console.log('b',this.progress.ratioCompleted)
 						// console.log("B");
 						// console.log("aspectProgress",this)
