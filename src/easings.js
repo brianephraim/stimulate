@@ -1,3 +1,8 @@
+// https://www.kirupa.com/forum/showthread.php?300358-Reversing-an-easing-function
+var reversedEase = function(originalEase,completedRatio, duration) {
+    return 1 - (originalEase(completedRatio));
+}
+
 // adapted from https://raw.github.com/michaelvillar/dynamics.js/master/src/dynamics.coffee
 var applyDefaults = function(options, defaults) {
     var k, results, v;

@@ -17,9 +17,6 @@ const sharedTiming = {
 	},
 	rafIdRegistry: {},
 	raf(cb) {
-		if(!this){
-			console.log("XXXXX",this)
-		}
 		if (!this.running.count) {
 			this.running.count = 1;
 		} else {
@@ -38,6 +35,14 @@ const sharedTiming = {
 		});
 		this.rafIdRegistry[rafId] = true;
 		return rafId;
+	},
+	caf(rafId) {
+		if (rafId && this.rafIdRegistry[rafId]) {
+			caf(rafId);
+			this.stamps.start = null;
+			this.running.count--;
+			delete this.rafIdRegistry[rafId];
+		}
 	},
 };
 // window.a = sharedTiming;
@@ -236,12 +241,7 @@ class StimulationAspect {
 	}
 	stop(skipCallback) {
 		this.running = false;
-		if (this.nextRafId && sharedTiming.rafIdRegistry[this.nextRafId]) {
-			caf(this.nextRafId);
-			sharedTiming.stamps.start = null;
-			sharedTiming.running.count--;
-			delete sharedTiming.rafIdRegistry[this.nextRafId];
-		}
+		sharedTiming.caf(this.nextRafId);
 		if (this.settings.onStop) {
 			if (!skipCallback) {
 				this.settings.onStop.apply(this, [this.progress]);

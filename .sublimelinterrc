@@ -2,6 +2,7 @@
     "linters": {
         "eslint": {
             "excludes": [
+            	"**/src/easings.js",
             	"**/library.spec.js",
             	"**/webpack.config.js",
                 "**/node_modules/**",
