@@ -298,5 +298,6 @@ const stimulate = (options) => {
 	return new StimulationAspect(options);
 };
 const sharedTimingRaf = sharedTiming.raf;
-export { stimulate, sharedTimingRaf as raf, caf };
+const sharedTimingCaf = sharedTiming.caf;
+export { stimulate, sharedTimingRaf as raf, sharedTimingCaf as caf };
 export default stimulate;

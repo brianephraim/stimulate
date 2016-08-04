@@ -32,11 +32,12 @@ var setupBall = function(coords){
 		borderRadius:"10px"
 	});
 	Object.assign(ball.style,styles);
-	var updateBall = function(coords){
+	var updateBall = function(coords,b){
+		b = b ? b : ball;
 		var styles = prefixer({
 			transform: translateVal(coords.x,coords.y,0)
 		});
-		Object.assign(ball.style,styles);
+		Object.assign(b.style,styles);
 	};
 	updateBall(coords.start);
 	var spring = easings.spring();
@@ -57,11 +58,11 @@ var setupBall = function(coords){
 						from:coords.start.x,
 						to:coords.end.x,
 						// easing:function(r){return 1 - spring(1-r);},
-						easing: function(r){
-							var toReturn = ((Math.round(Math.sin(Math.PI*r)*10000)/10000) + 1)/2
-							// console.log(toReturn,r)
-							return toReturn;
-						},
+						// easing: function(r){
+						// 	var toReturn = ((Math.round(Math.sin(Math.PI*r)*10000)/10000) + 1)/2
+						// 	// console.log(toReturn,r)
+						// 	return toReturn;
+						// },
 						frame:function(aspectProgress){
 
 							if(this.progress.ratioCompleted > .5 && !this.aspects.crixus){
@@ -95,7 +96,7 @@ var setupBall = function(coords){
 						// easing:function(ratio){return Math.sin(ratio)}
 					},
 					y:{
-						easing:spring,
+						// easing:spring,
 						// loop:2,
 						delayLoop:true,
 						from:coords.start.y,
@@ -111,6 +112,23 @@ var setupBall = function(coords){
 				},
 				frame: function(progress){
 					console.log(this.progress.ratioCompleted);
+
+					var ballz = appendElement("div","",frame);
+					var styles = prefixer({
+						background: "pink",
+						width: "20px",
+						height: "20px",
+						borderRadius:"10px",
+						position:"absolute",
+						// top:this.aspectAt("x")+"px",
+						// left:this.aspectAt("x.deepY")+"px",
+					});
+					Object.assign(ballz.style,styles);
+					updateBall({
+						x: this.aspectAt("x"),
+						y: this.aspectAt("x.deepY")
+					},ballz);
+
 					// console.log('a',this.progress.ratioCompleted)
 					// console.log("A");
 					// console.log(progress)
