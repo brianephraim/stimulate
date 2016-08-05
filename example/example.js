@@ -1,9 +1,15 @@
+
+import "./stylesheet.css";
+import "./file.scss";
+
+import zxcv from "./cssJsSharedConstants.json";
+
 import stimulatex from "../src/index";
 import {raf} from "../src/index";
 import {easings} from "../src/index";
 import prefixer from "react-prefixer";
 
-console.log(raf);
+console.log(zxcv);
 
 var appendElement = function(tag,text,appendTo){
 	appendTo = appendTo ? appendTo : document.body;

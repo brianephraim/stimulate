@@ -1,0 +1,7 @@
+@import "./cssJsSharedConstants.json";
+
+body{
+	div {
+		border: map-get($a,b)+px solid orange;
+	}
+}

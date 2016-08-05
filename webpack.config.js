@@ -1,5 +1,7 @@
 var extend = require('util')._extend;
 var webpack = require('webpack');
+var jsonImporter = require('node-sass-json-importer');
+// import jsonImporter from 'node-sass-json-importer';
 var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 var path = require('path');
 // env comes from package.json's scipts item property mode arguments
@@ -48,14 +50,27 @@ var config = {
                     "presets": ["es2015"],
                     // "plugins": ["babel-plugin-add-module-exports"]
                 }
-            }, {
+            }, 
+            {
                 test: /stimulate\.js$/,
                 loader: "eslint-loader",
                 exclude: /node_modules/,
                 query: {
                     "presets": ["es2015"],
                     // "plugins": ["babel-plugin-add-module-exports"]
-                }
+            }
+            }, 
+            {
+                test: /\.css$/,
+                loader: "style-loader!css-loader"
+            }, 
+            {
+                test: /\.scss$/,
+                loaders: ["style", "css?sourceMap", "sass?sourceMap"]
+            },
+            {
+                test: /\.json$/,
+                loaders: ["json"]
             }
             // {
             //   test: /(\.jsx|\.js)$/,
@@ -64,11 +79,15 @@ var config = {
             // }
         ]
     },
+    sassLoader: {
+	    data: "$asdf: 5px;",
+	    importer: jsonImporter
+	},
     resolve: {
         root: path.resolve('./src'),
         extensions: ['', '.js']
     },
-    plugins: plugins
+    plugins: plugins,
 };
 
 module.exports = config;
