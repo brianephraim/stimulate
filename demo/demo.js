@@ -1,25 +1,11 @@
 
-import "./stylesheet.css";
-import "./file.scss";
+import './stylesheet.css';
+import './file.scss';
+import { easings } from '../src/index';
+import { setupEl, setupDemo, demoCoords, ready } from './util';
 
-
-
-import {raf} from "../src/index";
-import {easings} from "../src/index";
-
-import {setupEl, setupDemo, demoCoords} from './util'
-
-function ready(fn) {
-  if (document.readyState != 'loading'){
-    fn();
-  } else {
-    document.addEventListener('DOMContentLoaded', fn);
-  }
-}
-
-
-var coords = demoCoords;
-var spring = easings.spring();
+const coords = demoCoords;
+const spring = easings.spring();
 
 
 ready(() => {
@@ -27,11 +13,11 @@ ready(() => {
 		appendTo: document.body,
 		onStart: (frame, ball, stimulation) => {
 			setupEl({
-				el:ball,
-				xy: coords.start
+				el: ball,
+				xy: coords.start,
 			});
 
-			var stopButton = setupEl({
+			setupEl({
 				tag: 'button',
 				text: 'Stop',
 				appendTo: frame,
@@ -40,7 +26,7 @@ ready(() => {
 				},
 			});
 
-			var stopButton2 = setupEl({
+			setupEl({
 				tag: 'button',
 				text: 'Stop21',
 				appendTo: frame,
@@ -52,67 +38,53 @@ ready(() => {
 		prepareStimulationSettings: (frame, ball) => {
 			return {
 				duration: 1000,
-				delay:500,
-				loop:2,
-				delayLoop:true,
-				aspects:{
-					x:{
-						delayLoop:true,
-						from:coords.start.x,
-						to:coords.end.x,
-						loop:2,
-						frame:function(aspectProgress){
-
-							if(this.progress.ratioCompleted > .5 && !this.aspects.crixus){
-								this.birthAspect('crixus',{
-									frame:function(){
-										// console.log('HERE I AMx');
-									}
-								});
-							}
-						},
-						aspects:{
-							deepY:{
-								loop:2,
-								easing:spring,
-								delayLoop:true,
-								from:coords.start.y,
-								to:coords.end.y,
-							}
+				delay: 500,
+				loop: 2,
+				delayLoop: true,
+				aspects: {
+					x: {
+						delayLoop: true,
+						from: coords.start.x,
+						to: coords.end.x,
+						loop: 2,
+						aspects: {
+							deepY: {
+								loop: 2,
+								easing: spring,
+								delayLoop: true,
+								from: coords.start.y,
+								to: coords.end.y,
+							},
 						},
 					},
-					y:{
-						delayLoop:true,
-						from:coords.start.y,
-						to:coords.end.y,
-					}
+					y: {
+						delayLoop: true,
+						from: coords.start.y,
+						to: coords.end.y,
+					},
 				},
-				frame: function(progress){
-
+				frame() {
 					setupEl({
 						el: ball,
 						xy: {
-							x: this.aspectAt("x"),
-							y: this.aspectAt("x.deepY")
-						}
+							x: this.aspectAt('x'),
+							y: this.aspectAt('x.deepY'),
+						},
 					});
 
 					setupEl({
 						className: 'ball ball--ghost',
 						tag: 'div',
 						xy: {
-							x: this.aspectAt("x"),
-							y: this.aspectAt("x.deepY")
+							x: this.aspectAt('x'),
+							y: this.aspectAt('x.deepY'),
 						},
-						appendTo: frame
+						appendTo: frame,
 					});
-				}
-			}
-		}
+				},
+			};
+		},
 	});
-})
-
-
-
+});
 
 export default null;
