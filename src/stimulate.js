@@ -51,46 +51,50 @@ const sharedTiming = new SharedTiming();
 // window.a = sharedTiming;
 
 class StimulationAspect {
-	constructor(options, debug = 'root') {
+	constructor(options, debug = 'root', parent) {
+		this.parent = parent;
 		this.debug = debug;
 		this.options = options;
 		this.init();
 	}
+	getCumulativeDelay() {
+		let total = this.lookupSetting('delay');
+		if (this.parent && this.settings.delayAddsParentDelay) {
+			total += this.parent.getCumulativeDelay();
+		}
+		return total;
+	}
 	init(resetAll) {
 		this.running = false;
 		this.aspects = {};
-		this.toInherit = [
-			'duration',
-			'aspectTree',
-			'skipZeroFrame',
-			'delay',
-			'cumulativeDelay',
-		];
-		this.settings = {
+		this.inheritableDefaults = {
 			duration: 1000,
-			endless: !this.options.duration || !!this.options.endless,
-			aspectTree: this,
-			skipZeroFrame: true,
 			delay: 0,
+			delayLoop: false,
+			loop: false,
+			skipZeroFrame: true,
+			aspectTree: this,
+			endless: false,
+		};
+		this.settings = {
 			delayAddsParentDelay: false,
 			from: 0,
 			to: 1,
-			easing(v) { return v; },
+			easing: null,
 			aspects: this.aspects,
 			frame: null,
 			chainedStop: true,
-			loop: false,
-			delayLoop: false,
 			...this.options,
 		};
-		if (!this.settings.delayAddsParentDelay) {
-			this.settings.cumulativeDelay = this.settings.delay;
-		} else {
-			this.settings.cumulativeDelay = this.settings.delay + this.settings.cumulativeDelay;
+
+		let cumulativeDelay = 0;
+		if (this.currentLoopCount && this.lookupSetting('delayLoop')) {
+			cumulativeDelay = this.getCumulativeDelay();
 		}
 
+
 		this.aspects = this.settings.aspects;
-		this.aspectTree = this.settings.aspectTree;
+		this.aspectTree = this.lookupSetting('aspectTree');
 
 		this.progress = this.getProgressDefault(this.settings);
 		this.progress.aspects = {};
@@ -104,37 +108,37 @@ class StimulationAspect {
 
 		sharedTiming.get('start');
 
-		this.timestamps.startDelay = sharedTiming.stamps.start + this.settings.cumulativeDelay;
+		this.timestamps.start = sharedTiming.stamps.start;
+
 		this.running = true;
 
-		this.skipZeroFrameConfirmed = this.settings.skipZeroFrame || !!this.settings.cumulativeDelay;
+		const skipZeroFrameConfirmed = this.lookupSetting('skipZeroFrame') || !!cumulativeDelay;
 
-
-		const inherit = {};
-		this.toInherit.forEach((key) => {
-			inherit[key] = this.settings[key];
-		});
 		this.iterateAspectNames((name) => {
 			if (!resetAll) {
 				this.aspects[name] = new StimulationAspect({
-					...inherit,
 					...this.settings.aspects[name],
-				}, name);
+				}, name, this);
 			} else {
 				this.aspects[name].init(true);
 			}
 		});
 
-		if (this.skipZeroFrameConfirmed) {
+		if (skipZeroFrameConfirmed) {
 			this.recurse();
 		} else {
 			this.nextRafId = sharedTiming.raf(() => {
-				// delete sharedTiming.rafIdRegistry[this.nextRafId];
-				// sharedTiming.stamps.start = null;
 				this.recurse();
 			});
-			// sharedTiming.rafIdRegistry[this.nextRafId] = true;
 		}
+	}
+	lookupSetting(settingsName) {
+		if (typeof this.settings[settingsName] !== 'undefined') {
+			return this.settings[settingsName];
+		} else if (this.parent) {
+			return this.parent.lookupSetting(settingsName);
+		}
+		return this.inheritableDefaults[settingsName];
 	}
 	iterateAspectNames(cb) {
 		this.settings.aspectNames = Object.keys(this.settings.aspects);
@@ -161,8 +165,13 @@ class StimulationAspect {
 		let durationAchieved = false;
 		const p = this.progress;
 		p.ratioCompleted = ratioCompleted;
-		if (p.ratioCompleted < 1 || this.settings.endless) {
-			p.easedRatioCompleted = settings.easing(p.ratioCompleted);
+		const duration = this.lookupSetting('duration');
+		if (p.ratioCompleted < 1 || (!duration || this.lookupSetting('endless'))) {
+			if (settings.easing) {
+				p.easedRatioCompleted = settings.easing(p.ratioCompleted);
+			} else {
+				p.easedRatioCompleted = p.ratioCompleted;
+			}
 			p.tweened = this.getTween(settings.from, settings.to, p.ratioCompleted);
 			p.easedTweened = this.getTween(settings.from, settings.to, p.easedRatioCompleted);
 		} else {
@@ -176,7 +185,9 @@ class StimulationAspect {
 	}
 	recurse(reset) {
 		if (this.running) {
-			if (this.progress.ratioCompleted > 0 || !this.skipZeroFrameConfirmed) {
+			const cumulativeDelay = this.getCumulativeDelay();
+			const skipZeroFrameConfirmed = this.lookupSetting('skipZeroFrame') || !!cumulativeDelay;
+			if (this.progress.ratioCompleted > 0 || !skipZeroFrameConfirmed) {
 				if (this.settings.frame) {
 					this.frame();
 				}
@@ -184,49 +195,52 @@ class StimulationAspect {
 
 			this.nextRafId = sharedTiming.raf(() => {
 				if (this.running) {
+					
+					let startDelay = this.timestamps.start + cumulativeDelay;
 					this.timestamps.recentFrame = sharedTiming.stamps.raf;
 					if (reset) {
-						const sum = this.timestamps.recentFrame + this.settings.cumulativeDelay;
-						this.timestamps.startDelay = sum;
+						
+						const sum = this.timestamps.recentFrame + cumulativeDelay;
+						this.timestamps.start = this.timestamps.recentFrame;
+						startDelay = sum;
 					}
-					const diff = this.timestamps.recentFrame - this.timestamps.startDelay;
-					const ratioCompleted = diff / this.settings.duration;
+					const diff = this.timestamps.recentFrame - startDelay;
+					const duration = this.lookupSetting('duration');
+					const ratioCompleted = diff / duration;
 					this.durationAchieved = this.assignProgress(ratioCompleted, this.settings);
-					let stillLooping = false;
+					this.stillLooping = false;
+					const loop = this.lookupSetting('loop');
 					if (
 						this.durationAchieved &&
 						(
-							this.settings.loop === true ||
+							loop === true ||
 							(
-								this.settings.loop &&
-								this.currentLoopCount < this.settings.loop
+								loop &&
+								this.currentLoopCount < loop
 							)
 						)
 					) {
 						this.currentLoopCount++;
 						this.durationAchieved = false;
-						stillLooping = true;
-						if (this.settings.delayLoop) {
-							this.settings.cumulativeDelay = this.settings.delay;
-						} else {
-							this.settings.cumulativeDelay = 0;
-						}
+						this.stillLooping = true;
 					}
 
 
 					if (!this.durationAchieved) {
-						this.recurse(stillLooping);
+						this.recurse(this.stillLooping);
 					} else {
 						this.running = false;
 
 						if (
 							this.settings.frame &&
 							(
-								!this.settings.cumulativeDelay ||
-								this.timestamps.startDelay <= sharedTiming.stamps.raf
+								!cumulativeDelay ||
+								startDelay <= sharedTiming.stamps.raf
 							)
 						) {
-							this.frame();
+							// sharedTiming.raf(() => {
+								this.frame();
+							// });
 						}
 
 						if (this.settings.onComplete) {
@@ -235,7 +249,6 @@ class StimulationAspect {
 					}
 				}
 			});
-			// sharedTiming.rafIdRegistry[this.nextRafId] = true;
 		}
 	}
 	resetAll() {
@@ -261,14 +274,9 @@ class StimulationAspect {
 		if (this.aspects[name]) {
 			this.aspects[name].stop();
 		}
-		const inherit = {};
-		this.toInherit.forEach((key) => {
-			inherit[key] = this.settings[key];
-		});
 		this.aspects[name] = new StimulationAspect({
-			...inherit,
 			...settings,
-		}, name);
+		}, name, this);
 	}
 	aspectAt(path) {
 		const pathSplit = path.split('.');
@@ -297,8 +305,8 @@ class StimulationAspect {
 	}
 }
 
-const stimulate = (options) => {
-	return new StimulationAspect(options);
+const stimulate = (...args) => {
+	return new StimulationAspect(...args);
 };
 function sharedTimingRaf(...args) {
 	return sharedTiming.raf(...args);

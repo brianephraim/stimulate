@@ -12,6 +12,7 @@ ready(() => {
 	setupDemo({
 		appendTo: document.body,
 		onStart: (container, ball, stimulation) => {
+			console.log(stimulation)
 			setupEl({
 				el: ball,
 				xy: coords.start,
@@ -43,42 +44,40 @@ ready(() => {
 				delayLoop: true,
 				aspects: {
 					x: {
-						delayLoop: true,
 						from: coords.start.x,
 						to: coords.end.x,
-						loop: 2,
-						aspects: {
-							deepY: {
-								loop: 2,
-								easing: spring,
-								delayLoop: true,
-								from: coords.start.y,
-								to: coords.end.y,
-							},
-						},
 					},
 					y: {
-						delayLoop: true,
+						easing: spring,
 						from: coords.start.y,
 						to: coords.end.y,
+						// delayAddsParentDelay: true,
+						// delay: 10,
+						aspects: {
+							asdf: {
+								delayAddsParentDelay: true,
+								delay: 10,
+								frame() {
+									console.log(this.getCumulativeDelay());
+								},
+							},
+						}
 					},
 				},
 				frame() {
+					const freshCoords = {
+						x: this.aspectAt('x'),
+						y: this.aspectAt('y'),
+					};
 					setupEl({
 						el: ball,
-						xy: {
-							x: this.aspectAt('x'),
-							y: this.aspectAt('x.deepY'),
-						},
+						xy: freshCoords,
 					});
 
 					setupEl({
 						className: 'ball ball--ghost',
 						tag: 'div',
-						xy: {
-							x: this.aspectAt('x'),
-							y: this.aspectAt('x.deepY'),
-						},
+						xy: freshCoords,
 						appendTo: container,
 					});
 				},
