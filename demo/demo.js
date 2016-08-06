@@ -11,7 +11,7 @@ const spring = easings.spring();
 ready(() => {
 	setupDemo({
 		appendTo: document.body,
-		onStart: (frame, ball, stimulation) => {
+		onStart: (container, ball, stimulation) => {
 			setupEl({
 				el: ball,
 				xy: coords.start,
@@ -20,7 +20,7 @@ ready(() => {
 			setupEl({
 				tag: 'button',
 				text: 'Stop',
-				appendTo: frame,
+				appendTo: container,
 				onClick: () => {
 					stimulation.stop();
 				},
@@ -29,13 +29,13 @@ ready(() => {
 			setupEl({
 				tag: 'button',
 				text: 'Stop21',
-				appendTo: frame,
+				appendTo: container,
 				onClick: () => {
 					stimulation.aspects.x.stop();
 				},
 			});
 		},
-		prepareStimulationSettings: (frame, ball) => {
+		prepareStimulationSettings: (container, ball) => {
 			return {
 				duration: 1000,
 				delay: 500,
@@ -79,7 +79,7 @@ ready(() => {
 							x: this.aspectAt('x'),
 							y: this.aspectAt('x.deepY'),
 						},
-						appendTo: frame,
+						appendTo: container,
 					});
 				},
 			};

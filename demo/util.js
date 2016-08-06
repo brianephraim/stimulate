@@ -50,13 +50,13 @@ export const setupEl = (o) => {
 };
 
 export const setupDemo = (options) => {
-	const frame = setupEl({
+	const container = setupEl({
 		className: 'demo',
 		tag: 'div',
 	});
 	if (options.appendTo) {
 		setupEl({
-			el: frame,
+			el: container,
 			appendTo: options.appendTo,
 		});
 	}
@@ -64,25 +64,25 @@ export const setupDemo = (options) => {
 	const ball = setupEl({
 		className: 'ball',
 		tag: 'div',
-		appendTo: frame,
+		appendTo: container,
 	});
 
-	const stimulation = stimulate(options.prepareStimulationSettings(frame, ball));
+	const stimulation = stimulate(options.prepareStimulationSettings(container, ball));
 
 	setupEl({
 		tag: 'button',
 		text: 'Reset',
-		appendTo: frame,
+		appendTo: container,
 		onClick: () => {
 			stimulation.resetAll();
 		},
 	});
 
 	if (options.onStart) {
-		options.onStart(frame, ball, stimulation);
+		options.onStart(container, ball, stimulation);
 	}
 
-	return frame;
+	return container;
 };
 
 export const demoCoords = {
