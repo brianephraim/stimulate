@@ -2,6 +2,29 @@
 
 body{
 	div {
-		border: map-get($a,b)+px solid orange;
+		// border: map-get($a,b)+px solid orange;
 	}
+}
+
+
+.ball{
+	width: $ballDiameter+px;
+	height: $ballDiameter+px;
+	background: blue;
+	border-radius: ($ballDiameter/2)+px;
+	position: absolute;
+	z-index:2;
+	top:0;
+	left:0;
+	&--ghost {
+		background: lightBlue;
+		z-index:1;
+	}
+}
+
+.demo{
+	border: 2px solid black;
+	height: $demoHeight+px;
+	width: $demoWidth+px;
+	position:relative;
 }

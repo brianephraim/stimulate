@@ -1,21 +1,23 @@
 import raf, { cancel as caf } from 'raf';
 
-const sharedTiming = {
-	running: {
-		count: 0,
-		limit: 0,
-	},
-	stamps: {
-		start: null,
-		raf: null,
-	},
+class SharedTiming {
+	constructor() {
+		this.running = {
+			count: 0,
+			limit: 0,
+		};
+		this.stamps = {
+			start: null,
+			raf: null,
+		};
+		this.rafIdRegistry = {};
+	}
 	get(stamp, reset) {
 		if (!this.stamps[stamp] || reset) {
 			this.stamps[stamp] = Date.now();
 		}
 		return this.stamps[stamp];
-	},
-	rafIdRegistry: {},
+	}
 	raf(cb) {
 		if (!this.running.count) {
 			this.running.count = 1;
@@ -35,7 +37,7 @@ const sharedTiming = {
 		});
 		this.rafIdRegistry[rafId] = true;
 		return rafId;
-	},
+	}
 	caf(rafId) {
 		if (rafId && this.rafIdRegistry[rafId]) {
 			caf(rafId);
@@ -43,8 +45,9 @@ const sharedTiming = {
 			this.running.count--;
 			delete this.rafIdRegistry[rafId];
 		}
-	},
-};
+	}
+}
+const sharedTiming = new SharedTiming();
 // window.a = sharedTiming;
 
 class StimulationAspect {
@@ -297,7 +300,11 @@ class StimulationAspect {
 const stimulate = (options) => {
 	return new StimulationAspect(options);
 };
-const sharedTimingRaf = sharedTiming.raf;
-const sharedTimingCaf = sharedTiming.caf;
+function sharedTimingRaf(...args) {
+	return sharedTiming.raf(...args);
+}
+function sharedTimingCaf(...args) {
+	return sharedTiming.caf(...args);
+}
 export { stimulate, sharedTimingRaf as raf, sharedTimingCaf as caf };
 export default stimulate;

@@ -1,6 +1,9 @@
 {
 	"qwer":20,
 	"a":{
-		"b":100
-	}
+		"b":2
+	},
+	"demoHeight": 100,
+	"demoWidth": 162,
+	"ballDiameter": 20
 }
