@@ -6,8 +6,7 @@
             	"**/library.spec.js",
             	"**/webpack.config.js",
                 "**/node_modules/**",
-                "**/vendor/**",
-                "**/example/**"
+                "**/vendor/**"
             ]
         }
     }

@@ -18,7 +18,7 @@ if (env === 'build') {
     plugins.push(new UglifyJsPlugin({ minimize: true }));
     outputFile = libraryName + '.min.js';
 } else {
-    entry["example/index.js"] = './example/example.js';
+    entry["demo/index.js"] = './demo/demo.js';
     outputFile = libraryName + '.js';
 }
 // Why am I using an array below? 
