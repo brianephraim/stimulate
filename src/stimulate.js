@@ -95,16 +95,10 @@ class StimulationAspect {
 			...this.options,
 		};
 
-		let cumulativeDelay = 0;
-		if (this.currentLoopCount && this.lookupSetting('delayLoop')) {
-			cumulativeDelay = this.getCumulativeDelay();
-		}
-
-
 		this.aspects = this.settings.aspects;
 		this.aspectTree = this.lookupSetting('aspectTree');
-
-		this.progress = this.getProgressDefault(this.settings);
+		const reverse = !!this.lookupSetting('reverse');
+		this.progress = this.getProgressDefault(reverse);
 		this.progress.aspects = {};
 
 		this.currentLoopCount = 1;
@@ -120,8 +114,7 @@ class StimulationAspect {
 
 		this.running = true;
 
-		const skipZeroFrameConfirmed = this.lookupSetting('skipZeroFrame') || !!cumulativeDelay;
-
+		this.frameAlreadySkippedOnce = false;
 		this.iterateAspectNames((name) => {
 			if (!resetAll) {
 				this.aspects[name] = new StimulationAspect({
@@ -132,13 +125,7 @@ class StimulationAspect {
 			}
 		});
 
-		if (skipZeroFrameConfirmed) {
-			this.recurse();
-		} else {
-			this.nextRafId = sharedTiming.raf(() => {
-				this.recurse();
-			});
-		}
+		this.recurse();
 	}
 	lookupSetting(settingsName) {
 		if (
@@ -157,12 +144,20 @@ class StimulationAspect {
 			cb(name);
 		});
 	}
-	getProgressDefault(settings) {
+	getProgressDefault(reverse) {
+		if (reverse) {
+			return {
+				ratioCompleted: 1,
+				easedRatioCompleted: 1,
+				tweened: this.settings.to,
+				easedTweened: this.settings.to,
+			};
+		}
 		return {
 			ratioCompleted: 0,
 			easedRatioCompleted: 0,
-			tweened: settings.from,
-			easedTweened: settings.from,
+			tweened: this.settings.from,
+			easedTweened: this.settings.from,
 		};
 	}
 	frame() {
@@ -205,45 +200,74 @@ class StimulationAspect {
 		}
 		return durationAchieved;
 	}
-	getRatio(cumulativeDelay, duration) {
-		let startDelay = this.timestamps.start + cumulativeDelay;
-		const diff = sharedTiming.stamps.raf - startDelay;
-		let ratioCompleted = diff / duration;
+	getRatio(recentRaf, cumulativeDelay, duration) {
+		const startDelay = this.timestamps.start + cumulativeDelay;
+		const diff = recentRaf - startDelay;
+		const ratioCompleted = diff / duration;
 		return ratioCompleted;
 	}
 	recurse(reset) {
 		if (this.running) {
-			const cumulativeDelay = this.getCumulativeDelay();
-			const skipZeroFrameConfirmed = this.lookupSetting('skipZeroFrame') || !!cumulativeDelay;
-			if (this.progress.ratioCompleted > 0 || !skipZeroFrameConfirmed) {
+			const duration = this.lookupSetting('duration');
+			const reverse = !!this.lookupSetting('reverse');
+			const cumulativeDelay = this.delayImmune ? 0 : this.getCumulativeDelay();
+			// const skipZeroFrameConfirmed = this.lookupSetting('skipZeroFrame') || !!cumulativeDelay;
+
+			if (reset) {
+				Object.assign(this.progress, this.getProgressDefault(reverse));
+			}
+
+			let withinRatioBounds = this.progress.ratioCompleted > 0;
+			if (reverse) {
+				withinRatioBounds = this.progress.ratioCompleted < 1;
+			}
+
+			let atBeginning = this.progress.ratioCompleted === 0;
+			if (reverse) {
+				atBeginning = this.progress.ratioCompleted === 1;
+			}
+
+			// if (withinRatioBounds || !skipZeroFrameConfirmed || reset) {
+			// 	if (this.settings.frame) {
+			// 		this.frame();
+			// 	}
+			// }
+
+			if (withinRatioBounds || (atBeginning && this.frameAlreadySkippedOnce)) {
 				if (this.settings.frame) {
 					this.frame();
 				}
 			}
 
+			if (typeof this.timestamps.recentRaf !== 'undefined') {
+
+
+			}
+
 			this.nextRafId = sharedTiming.raf(() => {
+				this.timestamps.recentRaf = sharedTiming.stamps.raf;
 				if (this.running) {
-					const reverse = !!this.lookupSetting('reverse');
 					if (typeof this.previouslyReversed === 'undefined') {
 						this.previouslyReversed = reverse;
 					}
 					const changedDirections = this.previouslyReversed !== reverse;
 					this.previouslyReversed = reverse;
 
-					if (reset) {
-						this.timestamps.start = sharedTiming.stamps.raf;
+					if (reset || (atBeginning && !this.frameAlreadySkippedOnce && !this.lookupSetting('skipZeroFrame'))) {
+						this.timestamps.start = this.timestamps.recentRaf;
 					}
+					this.frameAlreadySkippedOnce = true;
 
-					const duration = this.lookupSetting('duration');
 
-					let ratioCompleted = this.getRatio(cumulativeDelay, duration);
+					let ratioCompleted = this.getRatio(this.timestamps.recentRaf, cumulativeDelay, duration);
 
 
 					if (changedDirections) {
+						this.delayImmune = true;
 						const timeRemaining = (1 - ratioCompleted) * duration;
-						const d = timeRemaining - (sharedTiming.stamps.raf - (this.timestamps.start));
+						const d = timeRemaining - (this.timestamps.recentRaf - (this.timestamps.start));
 						this.timestamps.start -= d;
-						ratioCompleted = this.getRatio(cumulativeDelay, duration);
+						ratioCompleted = this.getRatio(this.timestamps.recentRaf, cumulativeDelay, duration);
 					}
 
 					if (reverse) {
@@ -252,8 +276,14 @@ class StimulationAspect {
 
 					this.durationAchieved = this.assignProgress(ratioCompleted, reverse);
 
+
 					this.stillLooping = false;
 					const loop = this.lookupSetting('loop');
+
+					if (this.durationAchieved) {
+						this.delayImmune = false;
+					}
+
 					if (
 						this.durationAchieved &&
 						(
@@ -275,12 +305,16 @@ class StimulationAspect {
 					} else {
 						this.running = false;
 
+						let pastDelay = ratioCompleted >= 0;
+						if (reverse) {
+							pastDelay = ratioCompleted <= 1;
+						}
+
 						if (
 							this.settings.frame &&
 							(
 								!cumulativeDelay ||
-								ratioCompleted >= 0
-								// startDelay <= sharedTiming.stamps.raf
+								pastDelay
 							)
 						) {
 							// sharedTiming.raf(() => {

@@ -17,15 +17,16 @@ ready(() => {
 	const stimulation = stimulate({
 		duration: demoDuration,
 		// delay: 500,
-		loop: true,
+		// loop: true,
 		delayLoop: true,
+		// skipZeroFrame: false,
 		aspects: {
 			x: {
 				from: demoCoords.start.x,
 				to: demoCoords.end.x,
 			},
 			y: {
-				easing: spring,
+				// easing: spring,
 				from: demoCoords.start.y,
 				to: demoCoords.end.y,
 				// delayAddsParentDelay: true,
@@ -42,6 +43,7 @@ ready(() => {
 			},
 		},
 		frame() {
+			console.log(this.progress.ratioCompleted);
 			const freshCoords = {
 				x: this.aspectAt('x'),
 				y: this.aspectAt('y'),

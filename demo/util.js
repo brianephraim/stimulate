@@ -1,7 +1,7 @@
 import { demoHeight, demoWidth, ballDiameter } from './cssJsSharedConstants.json';
 import prefixer from 'react-prefixer';
 
-export const demoDuration = 3000;
+export const demoDuration = 1000;
 const duration = demoDuration;
 
 export const ready = (fn) => {
