@@ -1,7 +1,7 @@
 import { demoHeight, demoWidth, ballDiameter } from './cssJsSharedConstants.json';
 import prefixer from 'react-prefixer';
 
-export const demoDuration = 1000;
+export const demoDuration = 3000;
 const duration = demoDuration;
 
 export const ready = (fn) => {
@@ -102,6 +102,7 @@ export const setupEl = (o) => {
 
 export const buildDemo = (ball, stimulation) => {
 	const coords = demoCoords;
+	let reverse = false;
 	setupEl({
 		className: 'demo',
 		tag: 'div',
@@ -133,6 +134,16 @@ export const buildDemo = (ball, stimulation) => {
 				text: 'Stop X',
 				onClick: () => {
 					stimulation.aspects.x.stop();
+				},
+			},
+			{
+				tag: 'button',
+				text: 'Reverse',
+				onClick: () => {
+					reverse = !reverse;
+					stimulation.updateSettings({
+						reverse,
+					});
 				},
 			},
 			{

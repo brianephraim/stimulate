@@ -16,7 +16,7 @@ ready(() => {
 
 	const stimulation = stimulate({
 		duration: demoDuration,
-		delay: 500,
+		// delay: 500,
 		loop: true,
 		delayLoop: true,
 		aspects: {

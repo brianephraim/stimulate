@@ -78,6 +78,7 @@ class StimulationAspect {
 			skipZeroFrame: true,
 			aspectTree: this,
 			endless: false,
+			reverse: false,
 		};
 
 		this.defaultSettings = {
@@ -171,27 +172,44 @@ class StimulationAspect {
 	getTween(from, to, ratioCompleted) {
 		return from + (ratioCompleted * (to - from));
 	}
-	assignProgress(ratioCompleted, settings) {
+	assignProgress(ratioCompleted, reverse) {
+		const settings = this.settings;
+		let ratioLimit = 1;
+		let withinLimit = ratioCompleted < ratioLimit;
+		const from = settings.from;
+		const to = settings.to;
+		if (reverse) {
+			ratioLimit = 0;
+			withinLimit = ratioCompleted > ratioLimit;
+			// from = settings.to;
+			// to = settings.from;
+		}
 		let durationAchieved = false;
 		const p = this.progress;
 		p.ratioCompleted = ratioCompleted;
 		const duration = this.lookupSetting('duration');
-		if (p.ratioCompleted < 1 || (!duration || this.lookupSetting('endless'))) {
+		if (withinLimit || (!duration || this.lookupSetting('endless'))) {
 			if (settings.easing) {
 				p.easedRatioCompleted = settings.easing(p.ratioCompleted);
 			} else {
 				p.easedRatioCompleted = p.ratioCompleted;
 			}
-			p.tweened = this.getTween(settings.from, settings.to, p.ratioCompleted);
-			p.easedTweened = this.getTween(settings.from, settings.to, p.easedRatioCompleted);
+			p.tweened = this.getTween(from, to, p.ratioCompleted);
+			p.easedTweened = this.getTween(from, to, p.easedRatioCompleted);
 		} else {
-			p.ratioCompleted = 1;
-			p.easedRatioCompleted = 1;
-			p.tweened = settings.to;
-			p.easedTweened = settings.to;
+			p.ratioCompleted = ratioLimit;
+			p.easedRatioCompleted = ratioLimit;
+			p.tweened = to;
+			p.easedTweened = to;
 			durationAchieved = true;
 		}
 		return durationAchieved;
+	}
+	getRatio(cumulativeDelay, duration) {
+		let startDelay = this.timestamps.start + cumulativeDelay;
+		const diff = sharedTiming.stamps.raf - startDelay;
+		let ratioCompleted = diff / duration;
+		return ratioCompleted;
 	}
 	recurse(reset) {
 		if (this.running) {
@@ -205,17 +223,35 @@ class StimulationAspect {
 
 			this.nextRafId = sharedTiming.raf(() => {
 				if (this.running) {
-					let startDelay = this.timestamps.start + cumulativeDelay;
-					this.timestamps.recentFrame = sharedTiming.stamps.raf;
-					if (reset) {
-						const sum = this.timestamps.recentFrame + cumulativeDelay;
-						this.timestamps.start = this.timestamps.recentFrame;
-						startDelay = sum;
+					const reverse = !!this.lookupSetting('reverse');
+					if (typeof this.previouslyReversed === 'undefined') {
+						this.previouslyReversed = reverse;
 					}
-					const diff = this.timestamps.recentFrame - startDelay;
+					const changedDirections = this.previouslyReversed !== reverse;
+					this.previouslyReversed = reverse;
+
+					if (reset) {
+						this.timestamps.start = sharedTiming.stamps.raf;
+					}
+
 					const duration = this.lookupSetting('duration');
-					const ratioCompleted = diff / duration;
-					this.durationAchieved = this.assignProgress(ratioCompleted, this.settings);
+
+					let ratioCompleted = this.getRatio(cumulativeDelay, duration);
+
+
+					if (changedDirections) {
+						const timeRemaining = (1 - ratioCompleted) * duration;
+						const d = timeRemaining - (sharedTiming.stamps.raf - (this.timestamps.start));
+						this.timestamps.start -= d;
+						ratioCompleted = this.getRatio(cumulativeDelay, duration);
+					}
+
+					if (reverse) {
+						ratioCompleted = 1 - ratioCompleted;
+					}
+
+					this.durationAchieved = this.assignProgress(ratioCompleted, reverse);
+
 					this.stillLooping = false;
 					const loop = this.lookupSetting('loop');
 					if (
@@ -243,7 +279,8 @@ class StimulationAspect {
 							this.settings.frame &&
 							(
 								!cumulativeDelay ||
-								startDelay <= sharedTiming.stamps.raf
+								ratioCompleted >= 0
+								// startDelay <= sharedTiming.stamps.raf
 							)
 						) {
 							// sharedTiming.raf(() => {
