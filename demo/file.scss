@@ -24,6 +24,29 @@ body{
 
 .demo{
 	border: 2px solid black;
+	width: $demoWidth+px;
+	position:relative;
+
+	label {
+		padding-left:20px;
+		margin-bottom: 1em;
+	}
+	label, button{
+		height: 2em;
+	}
+	input {
+		height: 1em;
+	}
+	input, label, button{
+		display: inline-block;
+		height: 40px;
+		vertical-align: top;
+		font-size: 16px;
+		line-height: 2em;
+	}
+}
+.stage{
+	border-bottom: 2px solid black;
 	height: $demoHeight+px;
 	width: $demoWidth+px;
 	position:relative;

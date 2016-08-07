@@ -3,7 +3,7 @@
 	"a":{
 		"b":2
 	},
-	"demoHeight": 100,
-	"demoWidth": 162,
+	"demoHeight": 400,
+	"demoWidth": 600,
 	"ballDiameter": 20
 }

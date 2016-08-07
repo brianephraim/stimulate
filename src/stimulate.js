@@ -64,6 +64,9 @@ class StimulationAspect {
 		}
 		return total;
 	}
+	updateSettings(changeDict) {
+		Object.assign(this.settings, changeDict);
+	}
 	init(resetAll) {
 		this.running = false;
 		this.aspects = {};
@@ -76,7 +79,8 @@ class StimulationAspect {
 			aspectTree: this,
 			endless: false,
 		};
-		this.settings = {
+
+		this.defaultSettings = {
 			delayAddsParentDelay: false,
 			from: 0,
 			to: 1,
@@ -84,6 +88,9 @@ class StimulationAspect {
 			aspects: this.aspects,
 			frame: null,
 			chainedStop: true,
+		};
+		this.settings = {
+			...this.defaultSettings,
 			...this.options,
 		};
 
@@ -133,7 +140,10 @@ class StimulationAspect {
 		}
 	}
 	lookupSetting(settingsName) {
-		if (typeof this.settings[settingsName] !== 'undefined') {
+		if (
+			typeof this.settings[settingsName] !== 'undefined' &&
+			this.settings[settingsName] !== 'inherit'
+		) {
 			return this.settings[settingsName];
 		} else if (this.parent) {
 			return this.parent.lookupSetting(settingsName);
@@ -195,11 +205,9 @@ class StimulationAspect {
 
 			this.nextRafId = sharedTiming.raf(() => {
 				if (this.running) {
-					
 					let startDelay = this.timestamps.start + cumulativeDelay;
 					this.timestamps.recentFrame = sharedTiming.stamps.raf;
 					if (reset) {
-						
 						const sum = this.timestamps.recentFrame + cumulativeDelay;
 						this.timestamps.start = this.timestamps.recentFrame;
 						startDelay = sum;
@@ -239,7 +247,7 @@ class StimulationAspect {
 							)
 						) {
 							// sharedTiming.raf(() => {
-								this.frame();
+							this.frame();
 							// });
 						}
 

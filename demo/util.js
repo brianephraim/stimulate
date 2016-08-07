@@ -1,6 +1,8 @@
 import { demoHeight, demoWidth, ballDiameter } from './cssJsSharedConstants.json';
 import prefixer from 'react-prefixer';
-import stimulate from '../src/index';
+
+export const demoDuration = 1000;
+const duration = demoDuration;
 
 export const ready = (fn) => {
 	if (document.readyState !== 'loading') {
@@ -18,6 +20,19 @@ const xy = (el, coords) => {
 	});
 	Object.assign(el.style, styles);
 };
+
+export const demoCoords = {
+	start: {
+		x: 0,
+		y: 0,
+	},
+	end: {
+		x: demoWidth - ballDiameter,
+		y: demoHeight - ballDiameter,
+	},
+};
+
+
 export const setupEl = (o) => {
 	let el = o.el;
 	if (o.tag) {
@@ -43,55 +58,211 @@ export const setupEl = (o) => {
 		el.addEventListener('click', o.onClick);
 	}
 
-	if (o.appendTo) {
-		o.appendTo.appendChild(el);
+	if (o.onChange) {
+		el.addEventListener('change', o.onChange);
 	}
-	return el;
-};
 
-export const setupDemo = (options) => {
-	const container = setupEl({
-		className: 'demo',
-		tag: 'div',
-	});
-	if (options.appendTo) {
-		setupEl({
-			el: container,
-			appendTo: options.appendTo,
+	if (o.onInput) {
+		el.addEventListener('input', o.onInput);
+	}
+
+	if (o.attrs) {
+		Object.keys(o.attrs).forEach((attrName) => {
+			el.setAttribute(attrName, o.attrs[attrName]);
 		});
 	}
 
-	const ball = setupEl({
-		className: 'ball',
-		tag: 'div',
-		appendTo: container,
-	});
-
-	const stimulation = stimulate(options.prepareStimulationSettings(container, ball));
-
-	setupEl({
-		tag: 'button',
-		text: 'Reset',
-		appendTo: container,
-		onClick: () => {
-			stimulation.resetAll();
-		},
-	});
-
-	if (options.onStart) {
-		options.onStart(container, ball, stimulation);
+	if (o.appendTo) {
+		o.appendTo.appendChild(el);
 	}
 
-	return container;
+	if (o.children) {
+		o.children.forEach((child) => {
+			if (child.el) {
+				el.appendChild(child.el);
+			} else {
+				setupEl({
+					...child,
+					appendTo: el,
+				});
+			}
+		});
+	}
+	return {
+		el,
+		update(options) {
+			setupEl({
+				xy: o.xy,
+				...options,
+				el,
+			});
+		},
+	};
 };
 
-export const demoCoords = {
-	start: {
-		x: 0,
-		y: 0,
-	},
-	end: {
-		x: demoWidth - ballDiameter,
-		y: demoHeight - ballDiameter,
-	},
+export const buildDemo = (ball, stimulation) => {
+	const coords = demoCoords;
+	setupEl({
+		className: 'demo',
+		tag: 'div',
+		appendTo: document.body,
+		children: [
+			{
+				tag: 'div',
+				className: 'stage',
+				children: [
+					ball,
+				],
+			},
+			{
+				tag: 'button',
+				text: 'Reset',
+				onClick: () => {
+					stimulation.resetAll();
+				},
+			},
+			{
+				tag: 'button',
+				text: 'Stop all',
+				onClick: () => {
+					stimulation.stop();
+				},
+			},
+			{
+				tag: 'button',
+				text: 'Stop X',
+				onClick: () => {
+					stimulation.aspects.x.stop();
+				},
+			},
+			{
+				tag: 'label',
+				text: 'Loop:',
+				children: [
+					{
+						tag: 'input',
+						onChange: (e) => {
+							stimulation.updateSettings({
+								loop: e.target.checked,
+							});
+
+							if (!stimulation.running && e.target.checked) {
+								stimulation.resetAll();
+							}
+						},
+						attrs: {
+							type: 'checkbox',
+							checked: true,
+						},
+					},
+				],
+			},
+			{
+				tag: 'label',
+				text: 'Duration:',
+				children: [
+					{
+						tag: 'input',
+						onInput: (e) => {
+							stimulation.updateSettings({
+								duration: +e.target.value,
+							});
+						},
+						attrs: {
+							type: 'range',
+							min: 1,
+							max: 3000,
+							value: duration,
+						},
+					},
+				],
+			},
+			{
+				tag: 'label',
+				text: 'From X:',
+				children: [
+					{
+						tag: 'input',
+						onInput: (e) => {
+							// stimulation.settings.duration = +e.target.value;
+							stimulation.aspects.x.updateSettings({
+								from: +e.target.value,
+							});
+						},
+						attrs: {
+							type: 'range',
+							min: 0,
+							max: demoWidth - ballDiameter,
+							value: coords.start.x,
+							// step: 10,
+						},
+					},
+				],
+			},
+			{
+				tag: 'label',
+				text: 'To X:',
+				children: [
+					{
+						tag: 'input',
+						onInput: (e) => {
+							// stimulation.settings.duration = +e.target.value;
+							stimulation.aspects.x.updateSettings({
+								to: +e.target.value,
+							});
+						},
+						attrs: {
+							type: 'range',
+							min: 0,
+							max: demoWidth - ballDiameter,
+							value: coords.end.x,
+							// step: 10,
+						},
+					},
+				],
+			},
+			{
+				tag: 'label',
+				text: 'From Y:',
+				children: [
+					{
+						tag: 'input',
+						onInput: (e) => {
+							// stimulation.settings.duration = +e.target.value;
+							stimulation.aspects.y.updateSettings({
+								from: +e.target.value,
+							});
+						},
+						attrs: {
+							type: 'range',
+							min: 0,
+							max: demoHeight - ballDiameter,
+							value: coords.start.y,
+							// step: 10,
+						},
+					},
+				],
+			},
+			{
+				tag: 'label',
+				text: 'To Y:',
+				children: [
+					{
+						tag: 'input',
+						onInput: (e) => {
+							stimulation.aspects.y.updateSettings({
+								to: +e.target.value,
+							});
+						},
+						attrs: {
+							type: 'range',
+							min: 0,
+							max: demoHeight - ballDiameter,
+							value: coords.end.y,
+						},
+					},
+				],
+			},
+		],
+	});
 };
