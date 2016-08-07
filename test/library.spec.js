@@ -178,10 +178,13 @@ describe('Given an instance returned by a call to my library', () => {
 	describe('When I need to control the initial frame behavior', () => {
 		let s1;
 		let s2;
+		let valWhenTrue = null;
+		let valWhenFalse = null;
 		before((done) => {
 			s1 = stimulate({
 				skipZeroFrame: true,
 				frame() {
+					valWhenTrue = s1.progress.ratioCompleted;
 					this.stop();
 				},
 			});
@@ -189,6 +192,7 @@ describe('Given an instance returned by a call to my library', () => {
 				skipZeroFrame: false,
 				duration: 1234,
 				frame() {
+					valWhenFalse = s2.progress.ratioCompleted;
 					this.stop();
 					setTimeout(() => {
 						done();
@@ -198,9 +202,11 @@ describe('Given an instance returned by a call to my library', () => {
 		});
 		it('the first frame progress.ratioCompleted of a stimulation with a settings of skipZeroFrame:true is greater than 0 ', () => {
 			expect(s1.progress.ratioCompleted).to.be.greaterThan(0);
+			expect(valWhenTrue).to.be.greaterThan(0);
 		});
 		it('the first frame progress.ratioCompleted of a stimulation with a settings of skipZeroFrame:false is 0 ', () => {
 			expect(s2.progress.ratioCompleted).to.be.equal(0);
+			expect(valWhenFalse).to.be.equal(0);
 		});
 	});
 

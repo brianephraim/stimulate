@@ -19,7 +19,8 @@ ready(() => {
 		// delay: 500,
 		// loop: true,
 		delayLoop: true,
-		// skipZeroFrame: false,
+		skipZeroFrame: false,
+		usePersistedSettings: true,
 		aspects: {
 			x: {
 				from: demoCoords.start.x,
