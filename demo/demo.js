@@ -2,7 +2,8 @@ import './stylesheet.css';
 import './file.scss';
 import stimulate, { easings } from '../src/index';
 import buildDemoUI from './buildDemoUI';
-import { setupEl, demoCoords, ready, demoDuration } from './util';
+import { setupEl, demoCoords, ready } from './util';
+import { demoDuration  } from './cssJsSharedConstants.json';
 
 const spring = easings.spring();
 
@@ -53,17 +54,35 @@ ready(() => {
 				xy: freshCoords,
 			});
 
-			if (this.progress.ratioCompleted > 0.6 && !this.settings.reverse) {
-				this.updateSettings({
-					reverse: true,
-				});
-			}
+			// if (this.progress.ratioCompleted > 0.5 && !this.settings.reverse) {
+			// 	this.updateSettings({
+			// 		delay: 1500,
+			// 	});
+			// }
 
-			if (this.progress.ratioCompleted < 0.3 && this.settings.reverse) {
-				this.updateSettings({
-					reverse: false,
-				});
-			}
+			// if (this.progress.ratioCompleted > 0.6 && !this.settings.reverse) {
+			// 	this.updateSettings({
+			// 		reverse: true,
+			// 	});
+			// }
+
+			// if (this.progress.ratioCompleted < 0.5 && this.settings.reverse) {
+			// 	this.updateSettings({
+			// 		delay: 1200,
+			// 	});
+			// }
+
+			// if (this.progress.ratioCompleted < 0.4 && this.settings.reverse) {
+			// 	this.updateSettings({
+			// 		reverse: false,
+			// 	});
+			// }
+
+			// if (this.progress.ratioCompleted < 0.3 && this.settings.reverse) {
+			// 	this.updateSettings({
+			// 		reverse: false,
+			// 	});
+			// }
 
 			// setupEl({
 			// 	el: ball.el,

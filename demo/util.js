@@ -1,7 +1,6 @@
-import { demoHeight, demoWidth, ballDiameter } from './cssJsSharedConstants.json';
+import { demoHeight, demoWidth, ballDiameter, demoDuration } from './cssJsSharedConstants.json';
 import prefixer from 'react-prefixer';
 
-export const demoDuration = 1000;
 
 export const ready = (fn) => {
 	if (document.readyState !== 'loading') {

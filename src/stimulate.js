@@ -175,7 +175,11 @@ class StimulationAspect {
 		const startDelay = options.start + delay;
 		const diff = options.later - startDelay;
 		const ratioCompleted = diff / options.duration;
-		if (this.progress.ratioCompleted > 0 && this.progress.ratioCompleted < 1 && this.delayLock === null) {
+		if (
+			this.progress.ratioCompleted > 0 &&
+			this.progress.ratioCompleted < 1 &&
+			this.delayLock === null
+		) {
 			this.delayLock = delay;
 		}
 
@@ -196,6 +200,17 @@ class StimulationAspect {
 		}
 		return withinRatioBounds;
 	}
+	determineIfDirectionChanged(reverse) {
+		if (typeof this.previouslyReversed === 'undefined') {
+			this.previouslyReversed = reverse;
+		}
+		const changedDirections = (
+			this.previouslyReversed !== reverse &&
+			this.frameAlreadySkippedOnce
+		);
+		this.previouslyReversed = reverse;
+		return changedDirections;
+	}
 	recurse(reset) {
 		if (this.running) {
 			this.nextRafId = sharedTiming.raf(() => {
@@ -208,15 +223,7 @@ class StimulationAspect {
 					}
 					let updatedProgress;
 					if (this.timestamps.recentRaf) {
-						if (typeof this.previouslyReversed === 'undefined') {
-							this.previouslyReversed = reverse;
-						}
-						const changedDirections = (
-							this.previouslyReversed !== reverse &&
-							this.frameAlreadySkippedOnce
-						);
-						this.previouslyReversed = reverse;
-
+						const changedDirections = this.determineIfDirectionChanged(reverse);
 						if (reset || (
 							this.isAtBeginning(reverse) &&
 							!this.frameAlreadySkippedOnce &&
@@ -227,6 +234,7 @@ class StimulationAspect {
 						this.frameAlreadySkippedOnce = true;
 
 						const cumulativeDelay = this.getCumulativeDelay();
+
 						const delayForRatioConsideration = this.delayImmune ? 0 : cumulativeDelay;
 
 						let ratioCompleted = this.calculateRatio({
@@ -238,19 +246,46 @@ class StimulationAspect {
 
 						if (changedDirections) {
 							this.delayImmune = true;
-							const timeRemaining = (1 - ratioCompleted) * duration;
-							const d = timeRemaining - (this.timestamps.recentRaf - (this.timestamps.start));
-							let delayAdjustment = 0;
-							if (this.delayLock) {
-								delayAdjustment = cumulativeDelay;
+							// const timeRemaining = (1 - ratioCompleted) * duration;
+							// const d = timeRemaining - (this.timestamps.recentRaf - (this.timestamps.start));
+							// let delayAdjustment = 0;
+							// if (this.delayLock) {
+							// 	delayAdjustment = cumulativeDelay;
+							// }
+							// this.timestamps.start -= d + delayAdjustment;
+							const options = {
+								start: this.timestamps.start,
+								later: this.timestamps.recentRaf,
+								delay: delayForRatioConsideration,
+								duration,
+							};
+
+							let delay = options.delay;
+							if (this.delayLock !== null) {
+								delay = this.delayLock;
 							}
-							this.timestamps.start -= d + delayAdjustment;
+							let reverseAdjustedRatioCompleted = this.progress.ratioCompleted;
+							if (reverse) {
+								reverseAdjustedRatioCompleted = 1 - this.progress.ratioCompleted;
+							}
+							const diff = reverseAdjustedRatioCompleted * options.duration;
+							const startDelay = options.later - diff;
+							this.timestamps.start = startDelay - delay;
+
 							ratioCompleted = this.calculateRatio({
 								start: this.timestamps.start,
 								later: this.timestamps.recentRaf,
 								delay: delayForRatioConsideration,
 								duration,
 							});
+
+							if (
+								this.progress.ratioCompleted > 0 &&
+								this.progress.ratioCompleted < 1 &&
+								this.delayLock === null
+							) {
+								this.delayLock = delay;
+							}
 						}
 
 						if (reverse) {
