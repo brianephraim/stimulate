@@ -77,6 +77,7 @@ class StimulationAspect {
 		this.timestamps.start = sharedTiming.stamps.start;
 		this.timestamps.recentRaf = null;
 		this.running = true;
+		this.delayLock = null;
 
 		this.frameAlreadySkippedOnce = false;
 		this.iterateAspectNames((name) => {
@@ -167,9 +168,18 @@ class StimulationAspect {
 		return p;
 	}
 	calculateRatio(options) {
-		const startDelay = options.start + options.delay;
+		let delay = options.delay;
+		if (this.delayLock !== null) {
+			delay = this.delayLock;
+		}
+		const startDelay = options.start + delay;
 		const diff = options.later - startDelay;
 		const ratioCompleted = diff / options.duration;
+		if (this.progress.ratioCompleted > 0 && this.progress.ratioCompleted < 1 && this.delayLock === null) {
+			this.delayLock = delay;
+		}
+
+
 		return ratioCompleted;
 	}
 	isAtBeginning(reverse) {
@@ -192,7 +202,7 @@ class StimulationAspect {
 				if (this.running) {
 					const duration = this.lookupSetting('duration');
 					const reverse = !!this.lookupSetting('reverse');
-					const cumulativeDelay = this.delayImmune ? 0 : this.getCumulativeDelay();
+
 					if (reset) {
 						Object.assign(this.progress, this.getProgressDefault(reverse));
 					}
@@ -205,7 +215,6 @@ class StimulationAspect {
 							this.previouslyReversed !== reverse &&
 							this.frameAlreadySkippedOnce
 						);
-
 						this.previouslyReversed = reverse;
 
 						if (reset || (
@@ -217,11 +226,13 @@ class StimulationAspect {
 						}
 						this.frameAlreadySkippedOnce = true;
 
+						const cumulativeDelay = this.getCumulativeDelay();
+						const delayForRatioConsideration = this.delayImmune ? 0 : cumulativeDelay;
 
 						let ratioCompleted = this.calculateRatio({
 							start: this.timestamps.start,
 							later: this.timestamps.recentRaf,
-							delay: cumulativeDelay,
+							delay: delayForRatioConsideration,
 							duration,
 						});
 
@@ -229,11 +240,15 @@ class StimulationAspect {
 							this.delayImmune = true;
 							const timeRemaining = (1 - ratioCompleted) * duration;
 							const d = timeRemaining - (this.timestamps.recentRaf - (this.timestamps.start));
-							this.timestamps.start -= d;
+							let delayAdjustment = 0;
+							if (this.delayLock) {
+								delayAdjustment = cumulativeDelay;
+							}
+							this.timestamps.start -= d + delayAdjustment;
 							ratioCompleted = this.calculateRatio({
 								start: this.timestamps.start,
 								later: this.timestamps.recentRaf,
-								delay: cumulativeDelay,
+								delay: delayForRatioConsideration,
 								duration,
 							});
 						}
@@ -263,6 +278,7 @@ class StimulationAspect {
 							this.currentLoopCount++;
 							updatedProgress.durationAchieved = false;
 							this.stillLooping = true;
+							this.delayLock = null;
 						}
 						Object.assign(this.progress, updatedProgress);
 
@@ -319,6 +335,10 @@ class StimulationAspect {
 				adjustment = (1 - this.progress.ratioCompleted) * duration;
 			}
 
+			if (this.delayLock) {
+				adjustment += this.delayLock;
+			}
+			// console.log(this.delayLock);
 			this.timestamps.start = sharedTiming.stamps.start - adjustment;
 			this.timestamps.recentRaf = null;
 			this.running = true;

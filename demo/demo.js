@@ -17,7 +17,7 @@ ready(() => {
 	let once = false;
 	const stimulation = stimulate({
 		duration: demoDuration,
-		// delay: 0,
+		delay: 1000,
 		// loop: true,
 		delayLoop: true,
 		// skipZeroFrame: false,
@@ -53,6 +53,18 @@ ready(() => {
 				xy: freshCoords,
 			});
 
+			if (this.progress.ratioCompleted > 0.6 && !this.settings.reverse) {
+				this.updateSettings({
+					reverse: true,
+				});
+			}
+
+			if (this.progress.ratioCompleted < 0.3 && this.settings.reverse) {
+				this.updateSettings({
+					reverse: false,
+				});
+			}
+
 			// setupEl({
 			// 	el: ball.el,
 			// 	xy: freshCoords,
@@ -66,13 +78,13 @@ ready(() => {
 			// });
 		},
 		onComplete() {
-			if (!once) {
-				this.updateSettings({
-					reverse: true,
-				});
-				this.resetAll();
-			}
-			once = true;
+			// if (!once) {
+			// 	this.updateSettings({
+			// 		reverse: true,
+			// 	});
+			// 	this.resetAll();
+			// }
+			// once = true;
 		},
 	});
 
