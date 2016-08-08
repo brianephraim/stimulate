@@ -1,7 +1,8 @@
 import './stylesheet.css';
 import './file.scss';
 import stimulate, { easings } from '../src/index';
-import { setupEl, demoCoords, ready, buildDemo, demoDuration } from './util';
+import buildDemoUI from './buildDemoUI';
+import { setupEl, demoCoords, ready, demoDuration } from './util';
 
 const spring = easings.spring();
 
@@ -13,13 +14,13 @@ ready(() => {
 			xy: demoCoords.start,
 		}
 	);
-
+	let once = false;
 	const stimulation = stimulate({
 		duration: demoDuration,
-		// delay: 500,
+		// delay: 0,
 		// loop: true,
 		delayLoop: true,
-		skipZeroFrame: false,
+		// skipZeroFrame: false,
 		usePersistedSettings: true,
 		aspects: {
 			x: {
@@ -27,7 +28,7 @@ ready(() => {
 				to: demoCoords.end.x,
 			},
 			y: {
-				// easing: spring,
+				easing: spring,
 				from: demoCoords.start.y,
 				to: demoCoords.end.y,
 				// delayAddsParentDelay: true,
@@ -44,14 +45,14 @@ ready(() => {
 			},
 		},
 		frame() {
-			console.log(this.progress.ratioCompleted);
 			const freshCoords = {
-				x: this.aspectAt('x'),
-				y: this.aspectAt('y'),
+				x: this.progressAt('x'),
+				y: this.progressAt('y'),
 			};
 			ball.update({
 				xy: freshCoords,
 			});
+
 			// setupEl({
 			// 	el: ball.el,
 			// 	xy: freshCoords,
@@ -64,9 +65,18 @@ ready(() => {
 			// 	appendTo: container,
 			// });
 		},
+		onComplete() {
+			if (!once) {
+				this.updateSettings({
+					reverse: true,
+				});
+				this.resetAll();
+			}
+			once = true;
+		},
 	});
 
-	buildDemo(ball, stimulation);
+	buildDemoUI(ball, stimulation);
 });
 
 export default null;

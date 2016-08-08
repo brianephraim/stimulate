@@ -1,54 +1,4 @@
-import raf, { cancel as caf } from 'raf';
-
-class SharedTiming {
-	constructor() {
-		this.running = {
-			count: 0,
-			limit: 0,
-		};
-		this.stamps = {
-			start: null,
-			raf: null,
-		};
-		this.rafIdRegistry = {};
-	}
-	makeStamp(stamp, reset) {
-		if (!this.stamps[stamp] || reset) {
-			this.stamps[stamp] = Date.now();
-		}
-		return this.stamps[stamp];
-	}
-	raf(cb) {
-		if (!this.running.count) {
-			this.running.count = 1;
-		} else {
-			this.running.count++;
-		}
-		const rafId = raf(() => {
-			delete this.rafIdRegistry[rafId];
-			this.stamps.start = null;
-			if (!this.running.limit) {
-				this.running.limit = this.running.count;
-				this.makeStamp('raf', true);
-				this.running.count = 0;
-			}
-			this.running.limit--;
-			cb();
-		});
-		this.rafIdRegistry[rafId] = true;
-		return rafId;
-	}
-	caf(rafId) {
-		if (rafId && this.rafIdRegistry[rafId]) {
-			caf(rafId);
-			this.stamps.start = null;
-			this.running.count--;
-			delete this.rafIdRegistry[rafId];
-		}
-	}
-}
-const sharedTiming = new SharedTiming();
-// window.a = sharedTiming;
+import sharedTiming from './sharedTiming';
 
 class StimulationAspect {
 	constructor(options, debug = 'root', parent) {
@@ -121,10 +71,11 @@ class StimulationAspect {
 		this.nextRafId = null;
 		this.timestamps = {};
 
+
 		sharedTiming.makeStamp('start');
 
 		this.timestamps.start = sharedTiming.stamps.start;
-
+		this.timestamps.recentRaf = null;
 		this.running = true;
 
 		this.frameAlreadySkippedOnce = false;
@@ -180,7 +131,7 @@ class StimulationAspect {
 	getTween(from, to, ratioCompleted) {
 		return from + (ratioCompleted * (to - from));
 	}
-	assignProgress(ratioCompleted, reverse) {
+	calculateProgress(ratioCompleted, reverse) {
 		const settings = this.settings;
 		let ratioLimit = 1;
 		let withinLimit = ratioCompleted < ratioLimit;
@@ -189,8 +140,6 @@ class StimulationAspect {
 		if (reverse) {
 			ratioLimit = 0;
 			withinLimit = ratioCompleted > ratioLimit;
-			// from = settings.to;
-			// to = settings.from;
 		}
 		const p = {};
 		p.ratioCompleted = ratioCompleted;
@@ -209,6 +158,10 @@ class StimulationAspect {
 			p.easedRatioCompleted = ratioLimit;
 			p.tweened = to;
 			p.easedTweened = to;
+			if (reverse) {
+				p.tweened = from;
+				p.easedTweened = from;
+			}
 			p.durationAchieved = true;
 		}
 		return p;
@@ -244,11 +197,15 @@ class StimulationAspect {
 						Object.assign(this.progress, this.getProgressDefault(reverse));
 					}
 					let updatedProgress;
-					if (typeof this.timestamps.recentRaf !== 'undefined') {
+					if (this.timestamps.recentRaf) {
 						if (typeof this.previouslyReversed === 'undefined') {
 							this.previouslyReversed = reverse;
 						}
-						const changedDirections = this.previouslyReversed !== reverse;
+						const changedDirections = (
+							this.previouslyReversed !== reverse &&
+							this.frameAlreadySkippedOnce
+						);
+
 						this.previouslyReversed = reverse;
 
 						if (reset || (
@@ -285,8 +242,7 @@ class StimulationAspect {
 							ratioCompleted = 1 - ratioCompleted;
 						}
 
-						updatedProgress = this.assignProgress(ratioCompleted, reverse);
-
+						updatedProgress = this.calculateProgress(ratioCompleted, reverse);
 						this.stillLooping = false;
 						const loop = this.lookupSetting('loop');
 
@@ -321,15 +277,12 @@ class StimulationAspect {
 					}
 					this.timestamps.recentRaf = sharedTiming.stamps.raf;
 
-					if (this.running) {
-						if (!this.progress.durationAchieved) {
-							this.recurse(this.stillLooping);
-						} else {
-							this.running = false;
-
-							if (this.settings.onComplete) {
-								this.settings.onComplete.apply(this, [this.progress]);
-							}
+					if (!this.progress.durationAchieved) {
+						this.recurse(this.stillLooping);
+					} else {
+						this.running = false;
+						if (this.settings.onComplete) {
+							this.settings.onComplete.apply(this, [this.progress]);
 						}
 					}
 				}
@@ -355,6 +308,30 @@ class StimulationAspect {
 			}
 		});
 	}
+	resume() {
+		if (!this.running) {
+			sharedTiming.makeStamp('start');
+			const duration = this.lookupSetting('duration');
+			const reverse = this.lookupSetting('reverse');
+
+			let adjustment = (this.progress.ratioCompleted * duration);
+			if (reverse) {
+				adjustment = (1 - this.progress.ratioCompleted) * duration;
+			}
+
+			this.timestamps.start = sharedTiming.stamps.start - adjustment;
+			this.timestamps.recentRaf = null;
+			this.running = true;
+
+			this.frameAlreadySkippedOnce = false;
+
+			this.iterateAspectNames((name) => {
+				this.aspects[name].resume();
+			});
+
+			this.recurse();
+		}
+	}
 	birthAspect(name, settings) {
 		if (this.aspects[name]) {
 			this.aspects[name].stop();
@@ -363,7 +340,7 @@ class StimulationAspect {
 			...settings,
 		}, name, this);
 	}
-	aspectAt(path) {
+	progressAt(path) {
 		const pathSplit = path.split('.');
 		let lastItem = pathSplit[pathSplit.length - 1];
 		if (typeof this.progress[lastItem] === 'undefined') {
@@ -381,10 +358,24 @@ class StimulationAspect {
 					}
 				});
 			} catch (e) {
-				throw new Error('Error: You specified an invalid aspect path for .aspectAt().');
+				throw new Error('Error: You specified an invalid aspect path for .progressAt().');
 			}
 		} else {
 			place = place.progress[lastItem];
+		}
+		return place;
+	}
+	aspectAt(path) {
+		const pathSplit = path.split('.');
+		let place = this.aspectTree;
+		if (path) {
+			try {
+				pathSplit.forEach((name) => {
+					place = place.aspects[name];
+				});
+			} catch (e) {
+				throw new Error('Error: You specified an invalid aspect path for .aspectAt().');
+			}
 		}
 		return place;
 	}
@@ -399,5 +390,5 @@ function sharedTimingRaf(...args) {
 function sharedTimingCaf(...args) {
 	return sharedTiming.caf(...args);
 }
-export { stimulate, sharedTimingRaf as raf, sharedTimingCaf as caf };
+export { stimulate, StimulationAspect, sharedTimingRaf as raf, sharedTimingCaf as caf };
 export default stimulate;

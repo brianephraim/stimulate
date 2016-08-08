@@ -267,12 +267,13 @@ describe('Given an instance returned by a call to my library', () => {
 			expect(countA).to.be.lessThan(countB);
 		});
 
-		it('aspectAt');
+		it('progressAt');
 		it('aspect frame can update progress argument and affect root frame progress');
 		it('aspect frame can return new progress progress object that updates its this.progress');
 		it('loop');
 		it('delayLoop');
 		it('resetAll');
+		it('reverse');
 	});
 
 
@@ -487,6 +488,29 @@ describe('Given an instance returned by a call to my library', () => {
 			expect(sequence[sequence.length - 1]).to.be.equal(3);
 			expect(sequence[sequence.length - 2]).to.be.equal(2);
 			expect(sequence[sequence.length - 3]).to.be.equal(1);
+		});
+	});
+
+	describe('ends on appropriate ratio', () => {
+		let stimulation;
+		let stimulationReverse;
+		before((done) => {
+			stimulation = stimulate({
+				duration: 200,
+			});
+			stimulationReverse = stimulate({
+				reverse: true,
+				duration: 210,
+				onComplete() {
+					done();
+				},
+			});
+		});
+		it('non-reverse ends on one', () => {
+			expect(stimulation.progress.ratioCompleted).to.be.equal(1);
+		});
+		it('reverse ends on zero', () => {
+			expect(stimulationReverse.progress.ratioCompleted).to.be.equal(0);
 		});
 	});
 });
