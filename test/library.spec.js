@@ -19,7 +19,7 @@ while (c < 1000) {
 }
 const processingTimeBenchmarkEnd = Date.now();
 const processingTimeBenchmark = processingTimeBenchmarkEnd - processingTimeBenchmarkStart;
-describe('Given an instance returned by a call to my library', () => {
+describe('Using this library... ', () => {
 	const runScenario = (done, extraSettings = {}) => {
 		const output = {
 			counter: 0,
@@ -88,7 +88,7 @@ describe('Given an instance returned by a call to my library', () => {
 		return output;
 	};
 
-	describe('When I need to increment over time', () => {
+	describe('Increment over time, so ', () => {
 		let r;
 		before((done) => {
 			r = runScenario(done);
@@ -110,10 +110,10 @@ describe('Given an instance returned by a call to my library', () => {
 		it('its stop method ends incrementation,', () => {
 			expect(r.counterAtTimeOfStop).to.be.equal(r.counter);
 		});
-		it('its stop method calls the settings onStop,', () => {
+		it('its stop method calls the settings onStop callback,', () => {
 			expect(r.stopped).to.be.equal(1);
 		});
-		it('its stop method does not call the settings onComplete,', () => {
+		it('its stop method does not call the settings onComplete callback,', () => {
 			expect(r.completed).to.be.equal(0);
 		});
 		it('its progress object is the same identity in various places its exposed,', () => {
@@ -124,7 +124,7 @@ describe('Given an instance returned by a call to my library', () => {
 		});
 	});
 
-	describe('When I need to increment over a specified duration', () => {
+	describe('Increment over a duration, so ', () => {
 		let r;
 		let aspectFrameCalled = false;
 		const settings = {
@@ -169,30 +169,39 @@ describe('Given an instance returned by a call to my library', () => {
 		it('easing eases', () => {
 			expect(r.midProgressSnapshot.ratioCompleted).to.not.equal(r.midProgressSnapshot.easedRatioCompleted);
 		});
-
 		it('aspect frame callbacks work', () => {
 			expect(aspectFrameCalled).to.be.equal(true);
 		});
 	});
 
-	describe('When I need to control the initial frame behavior', () => {
-		let s1;
-		let s2;
+	describe('Control the initial frame behavior, so ', () => {
+		let skipsTrue;
+		let skipsDefault;
+		let skipsFalse;
+		let valWhenDefault = null;
 		let valWhenTrue = null;
 		let valWhenFalse = null;
 		before((done) => {
-			s1 = stimulate({
-				skipZeroFrame: true,
+			skipsDefault = stimulate({
 				frame() {
-					valWhenTrue = s1.progress.ratioCompleted;
+					valWhenDefault = skipsDefault.progress.ratioCompleted;
 					this.stop();
 				},
 			});
-			s2 = stimulate({
-				skipZeroFrame: false,
-				duration: 1234,
+			skipsTrue = stimulate({
+				skipZeroFrame: true,
 				frame() {
-					valWhenFalse = s2.progress.ratioCompleted;
+					valWhenTrue = skipsTrue.progress.ratioCompleted;
+					this.stop();
+				},
+			});
+			skipsFalse = stimulate({
+				skipZeroFrame: false,
+				aspects: {
+					nested: {},
+				},
+				frame() {
+					valWhenFalse = skipsFalse.progress.ratioCompleted;
 					this.stop();
 					setTimeout(() => {
 						done();
@@ -201,12 +210,96 @@ describe('Given an instance returned by a call to my library', () => {
 			});
 		});
 		it('the first frame progress.ratioCompleted of a stimulation with a settings of skipZeroFrame:true is greater than 0 ', () => {
-			expect(s1.progress.ratioCompleted).to.be.greaterThan(0);
+			expect(skipsTrue.progress.ratioCompleted).to.be.greaterThan(0);
 			expect(valWhenTrue).to.be.greaterThan(0);
 		});
 		it('the first frame progress.ratioCompleted of a stimulation with a settings of skipZeroFrame:false is 0 ', () => {
-			expect(s2.progress.ratioCompleted).to.be.equal(0);
+			expect(skipsFalse.progress.ratioCompleted).to.be.equal(0);
 			expect(valWhenFalse).to.be.equal(0);
+		});
+		it('skipZeroFrame: true is the default', () => {
+			expect(valWhenDefault).to.be.equal(valWhenTrue);
+		});
+		it('aspects inherit skipZeroFrame setting from parent', () => {
+			expect(skipsFalse.progress.ratioCompleted).to.be.equal(skipsFalse.aspects.nested.progress.ratioCompleted);
+		});
+	});
+
+	describe('Adjacent and nested stimulate calls are in sync, so ', () => {
+		let skips1;
+		let skips2;
+		let noSkips1;
+		let noSkips2;
+		let skipsInitialSynced = null;
+		let skipsLaterSynced = null;
+		let noSkipsInitialSynced = null;
+		let noSkipsLaterSynced = null;
+		before((done) => {
+			skips1 = stimulate({
+				skipZeroFrame: true,
+				duration: 200,
+				frame() {
+				},
+				aspects: {
+					nested: {
+						skipZeroFrame: true,
+					},
+				},
+			});
+			skips2 = stimulate({
+				skipZeroFrame: true,
+				duration: 200,
+				frame() {
+					if (skipsInitialSynced === null) {
+						skipsInitialSynced = skips1.progress.ratioCompleted === skips2.progress.ratioCompleted;
+						skipsInitialSynced = skipsInitialSynced && (skips2.progress.ratioCompleted === skips1.aspects.nested.progress.ratioCompleted);
+					}
+					if (skips2.progress.ratioCompleted > 0.5 && skipsLaterSynced === null) {
+						skipsLaterSynced = skips1.progress.ratioCompleted === skips2.progress.ratioCompleted;
+						skipsLaterSynced = skipsLaterSynced && (skips2.progress.ratioCompleted === skips1.aspects.nested.progress.ratioCompleted);
+					}
+				},
+			});
+			noSkips1 = stimulate({
+				skipZeroFrame: false,
+				duration: 200,
+				frame() {
+				},
+				aspects: {
+					nested: {
+						skipZeroFrame: false,
+					},
+				},
+			});
+			noSkips2 = stimulate({
+				skipZeroFrame: false,
+				duration: 200,
+				frame() {
+					if (noSkipsInitialSynced === null) {
+						noSkipsInitialSynced = noSkips1.progress.ratioCompleted === noSkips2.progress.ratioCompleted;
+						noSkipsInitialSynced = noSkipsInitialSynced && (noSkips2.progress.ratioCompleted === noSkips1.aspects.nested.progress.ratioCompleted);
+					}
+					if (noSkips2.progress.ratioCompleted > 0.5 && noSkipsLaterSynced === null) {
+						noSkipsLaterSynced = noSkips1.progress.ratioCompleted === noSkips2.progress.ratioCompleted;
+						noSkipsLaterSynced = noSkipsLaterSynced && (noSkips2.progress.ratioCompleted === noSkips1.aspects.nested.progress.ratioCompleted);
+					}
+				},
+				onComplete() {
+					done();
+				},
+			});
+		});
+		it('when skipping zero frame, initial frames are in sync ', () => {
+			expect(skipsInitialSynced).to.be.equal(true);
+		});
+		it('when skipping zero frame, later frames are in sync ', () => {
+			expect(skipsLaterSynced).to.be.equal(true);
+		});
+		it('when not skipping zero frame, initial frames are in sync ', () => {
+			expect(noSkipsInitialSynced).to.be.equal(true);
+		});
+		it('when not skipping zero frame, later frames are in sync ', () => {
+			expect(noSkipsLaterSynced).to.be.equal(true);
 		});
 	});
 
