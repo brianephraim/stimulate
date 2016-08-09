@@ -13,7 +13,7 @@ const expect = chai.expect;
 const processingTimeBenchmarkStart = Date.now();
 const processesDummy = [];
 let c = 0;
-while (c < 100000) {
+while (c < 1000) {
 	processesDummy.push({});
 	c++;
 }
