@@ -19,7 +19,6 @@ class StimulationAspect {
 			delayLoop: false,
 			loop: false,
 			skipZeroFrame: true,
-			aspectTree: this,
 			endless: false,
 			reverse: false,
 			usePersistedSettings: false,

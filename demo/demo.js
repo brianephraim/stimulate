@@ -19,8 +19,8 @@ ready(() => {
 	const stimulation = stimulate({
 		duration: demoDuration,
 		delay: 1000,
-		// loop: true,
-		delayLoop: true,
+		loop: true,
+		// delayLoop: true,
 		// skipZeroFrame: false,
 		usePersistedSettings: true,
 		aspects: {
@@ -46,6 +46,7 @@ ready(() => {
 			},
 		},
 		frame() {
+			console.log(this.progress.ratioCompleted);
 			const freshCoords = {
 				x: this.progressAt('x'),
 				y: this.progressAt('y'),

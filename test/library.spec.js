@@ -178,8 +178,12 @@ describe('Using this library... ', () => {
 		let skipsTrue;
 		let skipsDefault;
 		let skipsFalse;
+		let skipsTrueReverse;
+		let skipsFalseReverse;
 		let valWhenDefault = null;
 		let valWhenTrue = null;
+		let valWhenTrueReverse = null;
+		let valWhenFalseReverse = null;
 		let valWhenFalse = null;
 		before((done) => {
 			skipsDefault = stimulate({
@@ -192,6 +196,23 @@ describe('Using this library... ', () => {
 				skipZeroFrame: true,
 				frame() {
 					valWhenTrue = skipsTrue.progress.ratioCompleted;
+					this.stop();
+				},
+			});
+			skipsTrueReverse = stimulate({
+				skipZeroFrame: true,
+				reverse: true,
+				frame() {
+					valWhenTrueReverse = skipsTrueReverse.progress.ratioCompleted;
+					this.stop();
+				},
+			});
+
+			skipsFalseReverse = stimulate({
+				skipZeroFrame: false,
+				reverse: true,
+				frame() {
+					valWhenFalseReverse = skipsFalseReverse.progress.ratioCompleted;
 					this.stop();
 				},
 			});
@@ -209,13 +230,28 @@ describe('Using this library... ', () => {
 				},
 			});
 		});
-		it('the first frame progress.ratioCompleted of a stimulation with a settings of skipZeroFrame:true is greater than 0 ', () => {
+		it('value cached in frame just before stop to match instance.progress value', () => {
+			expect(skipsDefault.progress.ratioCompleted).to.be.equal(valWhenDefault);
+			expect(skipsTrue.progress.ratioCompleted).to.be.equal(valWhenTrue);
+			expect(skipsTrueReverse.progress.ratioCompleted).to.be.equal(valWhenTrueReverse);
+			expect(skipsFalse.progress.ratioCompleted).to.be.equal(valWhenFalse);
+			expect(skipsFalseReverse.progress.ratioCompleted).to.be.equal(valWhenFalseReverse);
+		});
+		it('the first frame progress.ratioCompleted of a stimulation with a settings of skipZeroFrame:true is greater than 0 and less than 1 and less than .5', () => {
 			expect(skipsTrue.progress.ratioCompleted).to.be.greaterThan(0);
-			expect(valWhenTrue).to.be.greaterThan(0);
+			expect(skipsTrue.progress.ratioCompleted).to.be.lessThan(1);
+			expect(skipsTrue.progress.ratioCompleted).to.be.lessThan(0.5);
 		});
 		it('the first frame progress.ratioCompleted of a stimulation with a settings of skipZeroFrame:false is 0 ', () => {
 			expect(skipsFalse.progress.ratioCompleted).to.be.equal(0);
-			expect(valWhenFalse).to.be.equal(0);
+		});
+		it('the first frame progress.ratioCompleted of a stimulation with a settings of skipZeroFrame:true and reverse:true is less than 1 and greater than 0 and greater than .5 ', () => {
+			expect(skipsTrueReverse.progress.ratioCompleted).to.be.greaterThan(0);
+			expect(skipsTrueReverse.progress.ratioCompleted).to.be.greaterThan(0.5);
+			expect(skipsTrueReverse.progress.ratioCompleted).to.be.lessThan(1);
+		});
+		it('the first frame progress.ratioCompleted of a stimulation with a settings of skipZeroFrame:false and reverse:true is 1', () => {
+			expect(skipsFalseReverse.progress.ratioCompleted).to.be.equal(1);
 		});
 		it('skipZeroFrame: true is the default', () => {
 			expect(valWhenDefault).to.be.equal(valWhenTrue);
@@ -303,73 +339,6 @@ describe('Using this library... ', () => {
 		});
 	});
 
-	describe('When I need to delay the first frame', () => {
-		const order = [];
-		const stimulationTimestamps = [];
-		let timestampDif = Infinity;
-		let countA = 0;
-		let countB = 0;
-		before((done) => {
-			stimulate({
-				delay: 200,
-				frame() {
-					stimulationTimestamps.push(Date.now());
-					order.push('stimulation1');
-					this.stop();
-				},
-				aspects: {
-					a: {
-						chainedStop: false,
-						frame() {
-							countA++;
-							stimulationTimestamps.push(Date.now());
-							order.push('stimulation2');
-							this.stop();
-						},
-					},
-					b: {
-						delay: 100,
-						frame() {
-							countB++;
-						},
-					},
-				},
-			});
-			setTimeout(() => {
-				order.push('timeout1');
-			}, 100);
-			setTimeout(() => {
-				order.push('timeout2');
-				timestampDif = Math.abs(stimulationTimestamps[0] - stimulationTimestamps[1]);
-				done();
-			}, 250);
-		});
-
-		it('the delay setting property works ', () => {
-			expect(order[0]).to.be.equal('timeout1');
-			expect(order[1]).to.contain('stimulation');
-		});
-		it('aspects inherit delay', () => {
-			expect(order[0]).to.be.equal('timeout1');
-			expect(order[1]).to.contain('stimulation');
-			expect(order[2]).to.contain('stimulation');
-			expect(order[3]).to.be.equal('timeout2');
-			expect(timestampDif).to.be.lessThan(10);
-		});
-		it('aspects can have delays shorter than parents\'', () => {
-			expect(countA).to.be.lessThan(countB);
-		});
-
-		it('progressAt');
-		it('aspect frame can update progress argument and affect root frame progress');
-		it('aspect frame can return new progress progress object that updates its this.progress');
-		it('loop');
-		it('delayLoop');
-		it('resetAll');
-		it('reverse');
-	});
-
-
 	describe('When I need to stop incrementing', () => {
 		const counter = {
 			progress: 0,
@@ -440,7 +409,7 @@ describe('Using this library... ', () => {
 		});
 	});
 
-	describe('When I need to delay the initial incrementation', () => {
+	describe('Delay the initial incrementation, so ', () => {
 		const counter = {
 			progress: 0,
 			betweenStartAndRootDelay: 100,
@@ -584,16 +553,27 @@ describe('Using this library... ', () => {
 		});
 	});
 
-	describe('ends on appropriate ratio', () => {
+	describe('Ends on appropriate ratio, even when reversed, so', () => {
 		let stimulation;
 		let stimulationReverse;
+		let firstFrame = null;
+		let firstFrameReversed = null;
+		let lastFrameRepeated = null;
+		let lastFrameReversedRepeated = null;
+
 		before((done) => {
 			stimulation = stimulate({
+				frame() {
+					// if
+				},
 				duration: 200,
 			});
 			stimulationReverse = stimulate({
 				reverse: true,
 				duration: 210,
+				frame() {
+					// console.log(this.progress.ratioCompleted)
+				},
 				onComplete() {
 					done();
 				},
@@ -606,4 +586,109 @@ describe('Using this library... ', () => {
 			expect(stimulationReverse.progress.ratioCompleted).to.be.equal(0);
 		});
 	});
+
+	describe('progressAt is a shortcut for nested aspect progress, so ', () => {
+		let stimulation;
+		before((done) => {
+			stimulation = stimulate({
+				duration: 200,
+				aspects: {
+					a: {
+						aspects: {
+							b: {},
+						},
+					},
+				},
+				frame() {
+					if (this.progress.ratioCompleted > 0.2) {
+						this.stop();
+						done();
+					}
+				},
+			});
+		});
+
+		it('longhand traversal produces same result as progressAt', () => {
+			expect(stimulation.aspects.a.aspects.b.progress.ratioCompleted).to.be.equal(stimulation.progressAt('a.b.ratioCompleted'));
+		});
+		it('progressAt will return easedTweened by default', () => {
+			expect(stimulation.aspects.a.aspects.b.progress.easedTweened).to.be.equal(stimulation.progressAt('a.b'));
+		});
+	});
+
+	describe('loop it, so ', () => {
+		let loop2Count = 0;
+		let loopHasDelayCount = 0;
+		before((done) => {
+			stimulate({
+				skipZeroFrame: false,
+				duration: 100,
+				loop: 2,
+				aspects: {
+					a: {
+						aspects: {
+							b: {},
+						},
+					},
+				},
+				frame() {
+					if (this.progress.ratioCompleted === 0) {
+						loop2Count++;
+					}
+				},
+			});
+
+			const loopHasDelay = stimulate({
+				skipZeroFrame: false,
+				delayLoop: true,
+				delay: 10,
+				duration: 300,
+				loop: true,
+				usePersistedSettings: true,
+				aspects: {
+					a: {
+						aspects: {
+							b: {},
+						},
+					},
+				},
+				frame() {
+					console.log('DDDD',this.progress.ratioCompleted);
+					if (this.progress.ratioCompleted === 0) {
+						loopHasDelayCount++;
+					}
+				},
+			});
+
+			setTimeout(() => {
+				done();
+				loopHasDelay.stop();
+			}, 650);
+		});
+
+		it('loop:2 loops twice', () => {
+			expect(loop2Count).to.be.equal(2);
+		});
+
+		// it('delay affects first loop', () => {
+		// 	expect(loopHasDelayCount).to.be.equal(2);
+		// });
+
+		// it('delay affects all loops with delayLoop:true setting', () => {
+		// 	expect(loopHasDelayCount).to.be.equal(2);
+		// });
+
+
+
+	});
+
+
+
+
+	it('aspect frame can update progress argument and affect root frame progress');
+	it('aspect frame can return new progress progress object that updates its this.progress');
+	it('loop');
+	it('delayLoop');
+	it('resetAll');
+	it('reverse');
 });
