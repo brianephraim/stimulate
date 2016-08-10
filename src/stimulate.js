@@ -1,3 +1,5 @@
+/* eslint no-inner-declarations:0 */
+
 import sharedTiming from './sharedTiming';
 
 class StimulationAspect {
@@ -71,7 +73,6 @@ class StimulationAspect {
 
 		this.running = true;
 
-		this.frameAlreadySkippedOnce = false;
 		this.iterateAspectNames((name) => {
 			if (!resetAll) {
 				this.aspects[name] = new StimulationAspect({
@@ -81,8 +82,8 @@ class StimulationAspect {
 				this.aspects[name].init(true);
 			}
 		});
-
-		this.recurse();
+		const skipZeroFrame = this.lookupSetting('skipZeroFrame');
+		this.recurse(!skipZeroFrame);
 	}
 	getCumulativeDelay() {
 		let total = this.lookupSetting('delay');
@@ -186,123 +187,133 @@ class StimulationAspect {
 		}
 		return withinRatioBounds;
 	}
-	determineIfDirectionChanged(reverse) {
-		if (typeof this.previouslyReversed === 'undefined') {
-			this.previouslyReversed = reverse;
-		}
-		const changedDirections = (
-			this.previouslyReversed !== reverse &&
-			this.frameAlreadySkippedOnce
-		);
-		this.previouslyReversed = reverse;
-		return changedDirections;
-	}
+
 	calculateRatio(options) {
 		const startDelay = options.start + options.delay;
 		const diff = options.later - startDelay;
 		const ratioCompleted = diff / options.duration;
 		return ratioCompleted;
 	}
+	determineIfDirectionChanged(reverse) {
+		if (typeof this.previouslyReversed === 'undefined') {
+			this.previouslyReversed = reverse;
+		}
+		const changedDirections = (
+			this.previouslyReversed !== reverse
+		);
+		this.previouslyReversed = reverse;
+		return changedDirections;
+	}
 	recurse(reset) {
+
 		if (this.running) {
 			this.nextRafId = sharedTiming.raf(() => {
+
 				if (this.running) {
+
 					const duration = this.lookupSetting('duration');
 					const reverse = !!this.lookupSetting('reverse');
 
 					if (reset) {
 						Object.assign(this.progress, this.getProgressDefault(reverse));
 					}
-					if (this.timestamps.recentRaf) {
-						const changedDirections = this.determineIfDirectionChanged(reverse);
-						if (reset || (
-							this.isAtBeginning(reverse) &&
-							!this.frameAlreadySkippedOnce &&
-							!this.lookupSetting('skipZeroFrame')
-						)) {
-							this.timestamps.start = this.timestamps.recentRaf;
-						}
-						this.frameAlreadySkippedOnce = true;
+					this.timestamps.recentRaf = sharedTiming.stamps.raf;
+					const changedDirections = this.determineIfDirectionChanged(reverse);
+					if (reset) {
+						this.timestamps.start = this.timestamps.recentRaf;
+					}
 
-						let delay = this.delayImmune ? 0 : this.getCumulativeDelay();
+					let delay = this.delayImmune ? 0 : this.getCumulativeDelay();
 
-						if (this.delayLock !== null) {
-							delay = this.delayLock;
-						}
+					if (this.delayLock !== null) {
+						delay = this.delayLock;
+					}
 
-						let ratioCompleted = this.calculateRatio({
-							start: this.timestamps.start,
-							later: this.timestamps.recentRaf,
-							delay,
-							duration,
-						});
+					let ratioCompleted = this.calculateRatio({
+						start: this.timestamps.start,
+						later: this.timestamps.recentRaf,
+						delay,
+						duration,
+					});
 
-						if (
-							ratioCompleted > 0 &&
-							ratioCompleted < 1 &&
-							this.delayLock === null
-						) {
-							this.delayLock = delay;
-						}
-
-						if (changedDirections) {
-							this.delayImmune = true;
-
-							let reverseAdjustedRatioCompleted = this.progress.ratioCompleted;
-							if (reverse) {
-								reverseAdjustedRatioCompleted = 1 - this.progress.ratioCompleted;
-							}
-							const diff = reverseAdjustedRatioCompleted * duration;
-							const startDelay = this.timestamps.recentRaf - diff;
-							this.timestamps.start = startDelay - delay;
-
+					if (
+						ratioCompleted > 0 &&
+						ratioCompleted < 1 &&
+						this.delayLock === null
+					) {
+						this.delayLock = delay;
+						if (!this.lookupSetting('skipZeroFrame') && delay) {
+							this.timestamps.start = this.timestamps.recentRaf - delay;
+							// Object.assign(this.progress, this.getProgressDefault(reverse));
+							// console.log('a',ratioCompleted, this.debug);
 							ratioCompleted = this.calculateRatio({
 								start: this.timestamps.start,
 								later: this.timestamps.recentRaf,
 								delay,
 								duration,
 							});
-						}
-
-						if (reverse) {
-							ratioCompleted = 1 - ratioCompleted;
-						}
-
-						const updatedProgress = this.calculateProgress(ratioCompleted, reverse);
-						Object.assign(this.progress, updatedProgress);
-						this.stillLooping = false;
-						const loop = this.lookupSetting('loop');
-
-						if (this.progress.durationAchieved) {
-							this.delayImmune = false;
-						}
-
-						if (
-							this.progress.durationAchieved &&
-							(
-								loop === true ||
-								(
-									loop &&
-									this.currentLoopCount < loop
-								)
-							)
-						) {
-							this.currentLoopCount++;
-							this.progress.durationAchieved = false;
-							this.stillLooping = true;
-							this.delayLock = null;
-						}
-
-						if (
-							this.settings.frame && (
-								this.isWithinBounds(reverse) ||
-								(this.isAtBeginning(reverse) && this.frameAlreadySkippedOnce)
-							)
-						) {
-							this.frame();
+							// console.log('ratioCompleted',ratioCompleted, this.debug)
 						}
 					}
-					this.timestamps.recentRaf = sharedTiming.stamps.raf;
+
+					if (changedDirections) {
+						this.delayImmune = true;
+
+						let reverseAdjustedRatioCompleted = this.progress.ratioCompleted;
+						if (reverse) {
+							reverseAdjustedRatioCompleted = 1 - this.progress.ratioCompleted;
+						}
+						const diff = reverseAdjustedRatioCompleted * duration;
+						const startDelay = this.timestamps.recentRaf - diff;
+						this.timestamps.start = startDelay - delay;
+
+						ratioCompleted = this.calculateRatio({
+							start: this.timestamps.start,
+							later: this.timestamps.recentRaf,
+							delay,
+							duration,
+						});
+					}
+
+					if (reverse) {
+						ratioCompleted = 1 - ratioCompleted;
+					}
+
+					const updatedProgress = this.calculateProgress(ratioCompleted, reverse);
+					Object.assign(this.progress, updatedProgress);
+					this.stillLooping = false;
+					const loop = this.lookupSetting('loop');
+
+					if (this.progress.durationAchieved) {
+						this.delayImmune = false;
+					}
+
+					if (
+						this.progress.durationAchieved &&
+						(
+							loop === true ||
+							(
+								loop &&
+								this.currentLoopCount < loop
+							)
+						)
+					) {
+						this.currentLoopCount++;
+						this.progress.durationAchieved = false;
+						this.stillLooping = true;
+						this.delayLock = null;
+					}
+					// console.log('resetresetresetreset',reset,this.isWithinBounds(reverse),(this.isAtBeginning(reverse)))
+					if (
+						this.settings.frame && (
+							this.isWithinBounds(reverse) ||
+							(this.isAtBeginning(reverse))
+						)
+					) {
+						this.frame();
+					}
+
+				
 
 					if (!this.progress.durationAchieved) {
 						this.recurse(this.stillLooping);
@@ -352,7 +363,6 @@ class StimulationAspect {
 			this.timestamps.recentRaf = null;
 			this.running = true;
 
-			this.frameAlreadySkippedOnce = false;
 
 			this.iterateAspectNames((name) => {
 				this.aspects[name].resume();

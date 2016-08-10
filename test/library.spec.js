@@ -1,4 +1,5 @@
 /* eslint max-len:0 */
+/* eslint camelcase:0 */
 
 import chai from 'chai';
 import stimulate from '../src/index';
@@ -300,6 +301,7 @@ describe('Using this library... ', () => {
 				skipZeroFrame: false,
 				duration: 200,
 				frame() {
+					// console.log('f');
 				},
 				aspects: {
 					nested: {
@@ -311,6 +313,7 @@ describe('Using this library... ', () => {
 				skipZeroFrame: false,
 				duration: 200,
 				frame() {
+					// console.log('f');
 					if (noSkipsInitialSynced === null) {
 						noSkipsInitialSynced = noSkips1.progress.ratioCompleted === noSkips2.progress.ratioCompleted;
 						noSkipsInitialSynced = noSkipsInitialSynced && (noSkips2.progress.ratioCompleted === noSkips1.aspects.nested.progress.ratioCompleted);
@@ -324,6 +327,10 @@ describe('Using this library... ', () => {
 					done();
 				},
 			});
+			// setTimeout(() => {
+			// 	console.log("noSkips2",noSkips2);
+			// 	done();
+			// }, 250);
 		});
 		it('when skipping zero frame, initial frames are in sync ', () => {
 			expect(skipsInitialSynced).to.be.equal(true);
@@ -571,9 +578,8 @@ describe('Using this library... ', () => {
 			stimulationReverse = stimulate({
 				reverse: true,
 				duration: 210,
-				frame() {
-					// console.log(this.progress.ratioCompleted)
-				},
+				// frame() {
+				// },
 				onComplete() {
 					done();
 				},
@@ -616,7 +622,7 @@ describe('Using this library... ', () => {
 		});
 	});
 
-	describe('loop it, so ', () => {
+	/*describe('loop it, so ', () => {
 		let loop2Count = 0;
 		let loopHasDelayCount = 0;
 		before((done) => {
@@ -653,7 +659,7 @@ describe('Using this library... ', () => {
 					},
 				},
 				frame() {
-					console.log('DDDD',this.progress.ratioCompleted);
+					// console.log('DDDD',this.progress.ratioCompleted);
 					if (this.progress.ratioCompleted === 0) {
 						loopHasDelayCount++;
 					}
@@ -677,18 +683,93 @@ describe('Using this library... ', () => {
 		// it('delay affects all loops with delayLoop:true setting', () => {
 		// 	expect(loopHasDelayCount).to.be.equal(2);
 		// });
-
-
-
-	});
-
-
-
-
+	});*/
 	it('aspect frame can update progress argument and affect root frame progress');
 	it('aspect frame can return new progress progress object that updates its this.progress');
 	it('loop');
 	it('delayLoop');
 	it('resetAll');
 	it('reverse');
+
+	describe.only('asdfasdf', () => {
+		let noDelay_skipZeroFrameTrue_noLoop;
+
+		let noDelay_skipZeroFrameTrue_loop;
+
+		let delay_skipZeroFrameTrue_noLoop;
+
+		let noDelay_skipZeroFrameFalse_noLoop;
+		
+		let delay_skipZeroFrameFalse_noLoop;
+
+		class Test {
+			constructor(s) {
+				this.frameCount = 0;
+				this.zeroCount = 0;
+				this.oneCount = 0;
+				this.s = s;
+				this.s.duration = 200;
+				this.s.frame = (progress) => {
+					this.frameCount++;
+					if (progress.ratioCompleted === 0) {
+						this.zeroCount++;
+					}
+					if (progress.ratioCompleted === 1) {
+						this.oneCount++;
+					}
+				};
+				this.stimulate();
+			}
+			stimulate() {
+				return stimulate(this.s);
+			}
+		}
+
+		before((done) => {
+			noDelay_skipZeroFrameTrue_noLoop = new Test({
+				skipZeroFrame: true,
+			});
+
+			noDelay_skipZeroFrameTrue_loop = new Test({
+				skipZeroFrame: true,
+				loop: 2,
+			});
+
+			delay_skipZeroFrameTrue_noLoop = new Test({
+				skipZeroFrame: true,
+				delay: 10,
+			});
+
+			noDelay_skipZeroFrameFalse_noLoop = new Test({
+				skipZeroFrame: false,
+			});
+
+			delay_skipZeroFrameFalse_noLoop = new Test({
+				skipZeroFrame: false,
+				delay: 10,
+			});
+
+			setTimeout(() => {
+				done();
+			}, 1000);
+		});
+
+
+		it('asdf', () => {
+			expect(noDelay_skipZeroFrameTrue_noLoop.zeroCount).to.be.equal(0);
+			expect(noDelay_skipZeroFrameTrue_noLoop.oneCount).to.be.equal(1);
+
+			expect(noDelay_skipZeroFrameTrue_loop.zeroCount).to.be.equal(0);
+			expect(noDelay_skipZeroFrameTrue_loop.oneCount).to.be.equal(1);
+
+			expect(delay_skipZeroFrameTrue_noLoop.zeroCount).to.be.equal(0);
+			expect(delay_skipZeroFrameTrue_noLoop.oneCount).to.be.equal(1);
+
+			expect(noDelay_skipZeroFrameFalse_noLoop.zeroCount).to.be.equal(1);
+			expect(noDelay_skipZeroFrameFalse_noLoop.oneCount).to.be.equal(1);
+
+			expect(delay_skipZeroFrameFalse_noLoop.zeroCount).to.be.equal(1);
+			expect(delay_skipZeroFrameFalse_noLoop.oneCount).to.be.equal(1);
+		});
+	});
 });

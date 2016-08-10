@@ -17,8 +17,8 @@ ready(() => {
 	);
 	let once = false;
 	const stimulation = stimulate({
-		duration: demoDuration,
-		delay: 1000,
+		duration: 1000,
+		// delay: 1000,
 		loop: true,
 		// delayLoop: true,
 		// skipZeroFrame: false,
@@ -36,8 +36,8 @@ ready(() => {
 				// delay: 10,
 				aspects: {
 					asdf: {
-						delayAddsParentDelay: true,
-						delay: 10,
+						// delayAddsParentDelay: true,
+						// delay: 10,
 						frame() {
 							// console.log(this.getCumulativeDelay());
 						},
