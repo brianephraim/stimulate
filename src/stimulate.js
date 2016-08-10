@@ -18,7 +18,7 @@ class StimulationAspect {
 		this.inheritableDefaults = {
 			duration: 1000,
 			delay: 0,
-			delayLoop: false,
+			delayEveryLoop: false,
 			loop: false,
 			skipZeroFrame: true,
 			endless: false,
@@ -186,6 +186,9 @@ class StimulationAspect {
 				p.tweened = this.getTween(from, to, p.ratioCompleted);
 				p.easedTweened = this.getTween(from, to, p.easedRatioCompleted);
 				p.overlapLoop = true;
+				if (this.settings.test) {
+					console.log('SDFSDFSDFSDFSDFSD',p.ratioCompleted);
+				}
 			} else {
 				p.ratioCompleted = ratioLimit;
 				p.easedRatioCompleted = ratioLimit;
@@ -239,10 +242,10 @@ class StimulationAspect {
 
 					const duration = this.lookupSetting('duration');
 					const reverse = !!this.lookupSetting('reverse');
-
 					if (reset) {
 						Object.assign(this.progress, this.getProgressDefault(reverse));
 					}
+
 					this.timestamps.recentRaf = sharedTiming.stamps.raf;
 					const changedDirections = this.determineIfDirectionChanged(reverse);
 					if (reset) {
@@ -261,14 +264,16 @@ class StimulationAspect {
 						delay,
 						duration,
 					});
-
+					if (this.settings.test) {
+						console.log('y',this.progress.ratioCompleted, ratioCompleted);
+					}
 					if (
 						ratioCompleted > 0 &&
 						ratioCompleted < 1 &&
 						this.delayLock === null
 					) {
 						this.delayLock = delay;
-						if (!this.lookupSetting('skipZeroFrame') && delay) {
+						if (!this.lookupSetting('skipZeroFrame') && delay && (this.currentLoopCount <= 1)) {
 							this.timestamps.start = this.timestamps.recentRaf - delay;
 							// Object.assign(this.progress, this.getProgressDefault(reverse));
 							// console.log('a',ratioCompleted, this.debug);

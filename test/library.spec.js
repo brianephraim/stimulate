@@ -646,7 +646,7 @@ describe('Using this library... ', () => {
 
 			const loopHasDelay = stimulate({
 				skipZeroFrame: false,
-				delayLoop: true,
+				delayEveryLoop: true,
 				delay: 10,
 				duration: 300,
 				loop: true,
@@ -680,38 +680,46 @@ describe('Using this library... ', () => {
 		// 	expect(loopHasDelayCount).to.be.equal(2);
 		// });
 
-		// it('delay affects all loops with delayLoop:true setting', () => {
+		// it('delay affects all loops with delayEveryLoop:true setting', () => {
 		// 	expect(loopHasDelayCount).to.be.equal(2);
 		// });
 	});*/
 	it('aspect frame can update progress argument and affect root frame progress');
 	it('aspect frame can return new progress progress object that updates its this.progress');
 	it('loop');
-	it('delayLoop');
+	it('delayEveryLoop');
 	it('resetAll');
 	it('reverse');
 
 	describe.only('asdfasdf', () => {
-		let noDelay_skipZeroFrameTrue_noLoop;
+		// let noDelay_skipZeroFrameTrue_noLoop;
 
-		let noDelay_skipZeroFrameTrue_loop;
+		// let noDelay_skipZeroFrameTrue_loop;
 
-		let delay_skipZeroFrameTrue_noLoop;
+		// let delay_skipZeroFrameTrue_noLoop;
 
-		let noDelay_skipZeroFrameFalse_noLoop;
-		
-		let delay_skipZeroFrameFalse_noLoop;
+		// let delay_skipZeroFrameTrue_loop;
+
+		// let noDelay_skipZeroFrameFalse_noLoop;
+
+		// let noDelay_skipZeroFrameFalse_loop;
+
+		// let delay_skipZeroFrameFalse_noLoop;
+
+		// let delay_skipZeroFrameFalse_loop;
 
 		class Test {
-			constructor(s) {
+			constructor(settings, itDescription) {
 				this.frameCount = 0;
 				this.zeroCount = 0;
 				this.oneCount = 0;
-				this.s = s;
-				this.s.duration = 211;
+				this.s = {
+					duration: 211,
+					...settings,
+				};
 				this.s.frame = (progress) => {
-					if (s.frameExtra) {
-						s.frameExtra(progress);
+					if (this.s.frameExtra) {
+						this.s.frameExtra(progress, itDescription);
 					}
 					this.frameCount++;
 					if (progress.ratioCompleted === 0) {
@@ -727,73 +735,218 @@ describe('Using this library... ', () => {
 				return stimulate(this.s);
 			}
 		}
-
-		before((done) => {
-			noDelay_skipZeroFrameTrue_noLoop = new Test({
+		let last = 0;
+		let additional = 0;
+		const possibilities = [
+			{
 				skipZeroFrame: true,
-			});
-
-			let last = 0;
-			let additional = 0;
-			noDelay_skipZeroFrameTrue_loop = new Test({
-				frameExtra(progress) {
-					
-					if (progress.ratioCompleted < last) {
-						additional = 1;
-					}
-					let diff = (progress.ratioCompleted + additional) - last;
-					// if (diff < 0) {
-					// 	diff = (1 + progress.ratioCompleted) - last;
-					// 	last = (1 + progress.ratioCompleted);
-					// } else {
-					last = progress.ratioCompleted + additional;
-					// }
-					console.log(diff, last, progress.ratioCompleted);
-					
-				},
+				expectZeroCount: 0,
+				expectOneCount: 1,
+			},
+			{
 				skipZeroFrame: true,
+				expectZeroCount: 0,
+				expectOneCount: 1,
 				loop: 2,
-			});
-
-			delay_skipZeroFrameTrue_noLoop = new Test({
+			},
+			{
 				skipZeroFrame: true,
-				delay: 10,
-			});
-
-			noDelay_skipZeroFrameFalse_noLoop = new Test({
+				expectZeroCount: 0,
+				expectOneCount: 1,
+				delay: 217,
+			},
+			{
+				skipZeroFrame: true,
+				expectZeroCount: 0,
+				expectOneCount: 1,
+				delay: 217,
+				loop: 2,
+			},
+			{
 				skipZeroFrame: false,
-			});
-
-			delay_skipZeroFrameFalse_noLoop = new Test({
+				expectZeroCount: 1,
+				expectOneCount: 1,
+			},
+			{
 				skipZeroFrame: false,
-				delay: 10,
+				loop: 2,
+				expectZeroCount: 1,
+				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: false,
+				delay: 217,
+				expectZeroCount: 1,
+				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: false,
+				delay: 217,
+				loop: 2,
+				test: true,
+				expectZeroCount: 1,
+				expectOneCount: 1,
+				frameExtra(progress, itDescription) {
+					if ('_skipZeroFrame_delay_loop_test_frameExtra' === itDescription) {
+						if (progress.ratioCompleted < last) {
+							additional = 1;
+						}
+						const diff = (progress.ratioCompleted + additional) - last;
+						// if (diff < 0) {
+						// 	diff = (1 + progress.ratioCompleted) - last;
+						// 	last = (1 + progress.ratioCompleted);
+						// } else {
+						last = progress.ratioCompleted + additional;
+						// }
+						console.log('++', diff, last, progress.ratioCompleted, itDescription);
+					}
+				},
+			},
+		];
+		const allTests = [];
+		possibilities.forEach((possibility) => {
+			const x = ({
+				...possibility,
+				reverse: true,
+				expectZeroCount: possibility.expectOneCount,
+				expectOneCount: possibility.expectZeroCount,
+			});
+			possibilities.push(x);
+		});
+
+
+		possibilities.forEach((possibility) => {
+			let itDescription = '';
+			Object.keys(possibility).forEach((key) => {
+				if (key.indexOf('expect') === -1 && key !== 'frameExtra' && key !== 'test') {
+					itDescription = `${itDescription}_${key}:${possibility[key]}`;
+				}
+			});
+			allTests.push({
+				itDescription,
+				callTest: () => { return new Test(possibility, itDescription);},
+				expectOneCount: possibility.expectOneCount,
+				expectZeroCount: possibility.expectZeroCount,
+			});
+		});
+		before((done) => {
+			allTests.forEach((test) => {
+				const t = test;
+				t.itTest = test.callTest();
 			});
 
 			setTimeout(() => {
 				done();
+				last = 0;
+				additional = 0;
 			}, 1000);
+
+			// noDelay_skipZeroFrameTrue_noLoop = new Test({
+			// 	skipZeroFrame: true,
+			// });
+
+
+			// noDelay_skipZeroFrameTrue_loop = new Test({
+			// 	skipZeroFrame: true,
+			// 	loop: 2,
+			// });
+
+			// delay_skipZeroFrameTrue_noLoop = new Test({
+			// 	skipZeroFrame: true,
+			// 	delay: 217,
+			// 	// duration: 500,
+			// 	// frameExtra(progress) {
+			// 	// 	console.log('a');
+			// 	// },
+			// });
+
+			// delay_skipZeroFrameTrue_loop = new Test({
+			// 	skipZeroFrame: true,
+			// 	delay: 217,
+			// 	loop: 2,
+			// });
+
+			// noDelay_skipZeroFrameFalse_noLoop = new Test({
+			// 	skipZeroFrame: false,
+			// });
+
+			// noDelay_skipZeroFrameFalse_loop = new Test({
+			// 	skipZeroFrame: false,
+			// 	loop: 2,
+			// });
+
+			// delay_skipZeroFrameFalse_noLoop = new Test({
+			// 	skipZeroFrame: false,
+			// 	delay: 217,
+			// });
+
+			// delay_skipZeroFrameFalse_loop = new Test({
+			// 	skipZeroFrame: false,
+			// 	delay: 217,
+			// 	loop: 2,
+			// 	test: true,
+			// 	frameExtra(progress) {
+			// 		if (progress.ratioCompleted < last) {
+			// 			additional = 1;
+			// 		}
+			// 		const diff = (progress.ratioCompleted + additional) - last;
+			// 		// if (diff < 0) {
+			// 		// 	diff = (1 + progress.ratioCompleted) - last;
+			// 		// 	last = (1 + progress.ratioCompleted);
+			// 		// } else {
+			// 		last = progress.ratioCompleted + additional;
+			// 		// }
+			// 		console.log('++', diff, last, progress.ratioCompleted);
+			// 	},
+			// });
+
+			// setTimeout(() => {
+			// 	done();
+			// }, 1000);
+		});
+		allTests.forEach((test) => {
+			it(test.itDescription, () => {
+				expect(test.itTest.zeroCount).to.be.equal(test.expectZeroCount);
+				expect(test.itTest.oneCount).to.be.equal(test.expectOneCount);
+			});
 		});
 
 
-		it('noDelay_skipZeroFrameTrue_noLoop', () => {
-			expect(noDelay_skipZeroFrameTrue_noLoop.zeroCount).to.be.equal(0);
-			expect(noDelay_skipZeroFrameTrue_noLoop.oneCount).to.be.equal(1);
-		});
-		it('noDelay_skipZeroFrameTrue_loop', () => {
-			expect(noDelay_skipZeroFrameTrue_loop.zeroCount).to.be.equal(0);
-			expect(noDelay_skipZeroFrameTrue_loop.oneCount).to.be.equal(1);
-		});
-		it('delay_skipZeroFrameTrue_noLoop', () => {
-			expect(delay_skipZeroFrameTrue_noLoop.zeroCount).to.be.equal(0);
-			expect(delay_skipZeroFrameTrue_noLoop.oneCount).to.be.equal(1);
-		});
-		it('noDelay_skipZeroFrameFalse_noLoop', () => {
-			expect(noDelay_skipZeroFrameFalse_noLoop.zeroCount).to.be.equal(1);
-			expect(noDelay_skipZeroFrameFalse_noLoop.oneCount).to.be.equal(1);
-		});
-		it('delay_skipZeroFrameFalse_noLoop', () => {
-			expect(delay_skipZeroFrameFalse_noLoop.zeroCount).to.be.equal(1);
-			expect(delay_skipZeroFrameFalse_noLoop.oneCount).to.be.equal(1);
-		});
+		// it('noDelay_skipZeroFrameTrue_noLoop', () => {
+		// 	expect(noDelay_skipZeroFrameTrue_noLoop.zeroCount).to.be.equal(0);
+		// 	expect(noDelay_skipZeroFrameTrue_noLoop.oneCount).to.be.equal(1);
+		// });
+		// it('noDelay_skipZeroFrameTrue_loop', () => {
+		// 	expect(noDelay_skipZeroFrameTrue_loop.zeroCount).to.be.equal(0);
+		// 	expect(noDelay_skipZeroFrameTrue_loop.oneCount).to.be.equal(1);
+		// });
+
+		// it('delay_skipZeroFrameTrue_noLoop', () => {
+		// 	expect(delay_skipZeroFrameTrue_noLoop.zeroCount).to.be.equal(0);
+		// 	expect(delay_skipZeroFrameTrue_noLoop.oneCount).to.be.equal(1);
+		// });
+		// it('delay_skipZeroFrameTrue_loop', () => {
+		// 	expect(delay_skipZeroFrameTrue_loop.zeroCount).to.be.equal(0);
+		// 	expect(delay_skipZeroFrameTrue_loop.oneCount).to.be.equal(1);
+		// });
+
+		// it('noDelay_skipZeroFrameFalse_noLoop', () => {
+		// 	expect(noDelay_skipZeroFrameFalse_noLoop.zeroCount).to.be.equal(1);
+		// 	expect(noDelay_skipZeroFrameFalse_noLoop.oneCount).to.be.equal(1);
+		// });
+		// it('noDelay_skipZeroFrameFalse_loop', () => {
+		// 	expect(noDelay_skipZeroFrameFalse_loop.zeroCount).to.be.equal(1);
+		// 	expect(noDelay_skipZeroFrameFalse_loop.oneCount).to.be.equal(1);
+		// });
+
+
+		// it('delay_skipZeroFrameFalse_noLoop', () => {
+		// 	expect(delay_skipZeroFrameFalse_noLoop.zeroCount).to.be.equal(1);
+		// 	expect(delay_skipZeroFrameFalse_noLoop.oneCount).to.be.equal(1);
+		// });
+		// it('delay_skipZeroFrameFalse_loop', () => {
+		// 	expect(delay_skipZeroFrameFalse_loop.zeroCount).to.be.equal(1);
+		// 	expect(delay_skipZeroFrameFalse_loop.oneCount).to.be.equal(1);
+		// });
 	});
 });
