@@ -708,8 +708,11 @@ describe('Using this library... ', () => {
 				this.zeroCount = 0;
 				this.oneCount = 0;
 				this.s = s;
-				this.s.duration = 200;
+				this.s.duration = 211;
 				this.s.frame = (progress) => {
+					if (s.frameExtra) {
+						s.frameExtra(progress);
+					}
 					this.frameCount++;
 					if (progress.ratioCompleted === 0) {
 						this.zeroCount++;
@@ -730,7 +733,24 @@ describe('Using this library... ', () => {
 				skipZeroFrame: true,
 			});
 
+			let last = 0;
+			let additional = 0;
 			noDelay_skipZeroFrameTrue_loop = new Test({
+				frameExtra(progress) {
+					
+					if (progress.ratioCompleted < last) {
+						additional = 1;
+					}
+					let diff = (progress.ratioCompleted + additional) - last;
+					// if (diff < 0) {
+					// 	diff = (1 + progress.ratioCompleted) - last;
+					// 	last = (1 + progress.ratioCompleted);
+					// } else {
+					last = progress.ratioCompleted + additional;
+					// }
+					console.log(diff, last, progress.ratioCompleted);
+					
+				},
 				skipZeroFrame: true,
 				loop: 2,
 			});
@@ -755,19 +775,23 @@ describe('Using this library... ', () => {
 		});
 
 
-		it('asdf', () => {
+		it('noDelay_skipZeroFrameTrue_noLoop', () => {
 			expect(noDelay_skipZeroFrameTrue_noLoop.zeroCount).to.be.equal(0);
 			expect(noDelay_skipZeroFrameTrue_noLoop.oneCount).to.be.equal(1);
-
+		});
+		it('noDelay_skipZeroFrameTrue_loop', () => {
 			expect(noDelay_skipZeroFrameTrue_loop.zeroCount).to.be.equal(0);
 			expect(noDelay_skipZeroFrameTrue_loop.oneCount).to.be.equal(1);
-
+		});
+		it('delay_skipZeroFrameTrue_noLoop', () => {
 			expect(delay_skipZeroFrameTrue_noLoop.zeroCount).to.be.equal(0);
 			expect(delay_skipZeroFrameTrue_noLoop.oneCount).to.be.equal(1);
-
+		});
+		it('noDelay_skipZeroFrameFalse_noLoop', () => {
 			expect(noDelay_skipZeroFrameFalse_noLoop.zeroCount).to.be.equal(1);
 			expect(noDelay_skipZeroFrameFalse_noLoop.oneCount).to.be.equal(1);
-
+		});
+		it('delay_skipZeroFrameFalse_noLoop', () => {
 			expect(delay_skipZeroFrameFalse_noLoop.zeroCount).to.be.equal(1);
 			expect(delay_skipZeroFrameFalse_noLoop.oneCount).to.be.equal(1);
 		});

@@ -138,13 +138,24 @@ class StimulationAspect {
 	getTween(from, to, ratioCompleted) {
 		return from + (ratioCompleted * (to - from));
 	}
+	needsAnotherLoop(loop) {
+		return (
+			loop === true ||
+			(
+				loop &&
+				this.currentLoopCount < loop
+			)
+		);
+	}
 	calculateProgress(ratioCompleted, reverse) {
 		const settings = this.settings;
 		let ratioLimit = 1;
 		let withinLimit = ratioCompleted < ratioLimit;
 		const from = settings.from;
 		const to = settings.to;
+		let loopCompensator = -1;
 		if (reverse) {
+			loopCompensator = 1;
 			ratioLimit = 0;
 			withinLimit = ratioCompleted > ratioLimit;
 		}
@@ -161,13 +172,29 @@ class StimulationAspect {
 			p.easedTweened = this.getTween(from, to, p.easedRatioCompleted);
 			p.durationAchieved = false;
 		} else {
-			p.ratioCompleted = ratioLimit;
-			p.easedRatioCompleted = ratioLimit;
-			p.tweened = to;
-			p.easedTweened = to;
-			if (reverse) {
-				p.tweened = from;
-				p.easedTweened = from;
+			const loop = this.lookupSetting('loop');
+			if (this.needsAnotherLoop(loop)) {
+				p.ratioCompleted = loopCompensator + ratioCompleted;
+				// const outOfBoundsAmount = reverse ? ratioCompleted : p.ratioCompleted;
+				// const durationCompensation = outOfBoundsAmount * duration;
+				this.timestamps.start = this.timestamps.start + (duration);
+				if (settings.easing) {
+					p.easedRatioCompleted = settings.easing(p.ratioCompleted);
+				} else {
+					p.easedRatioCompleted = p.ratioCompleted;
+				}
+				p.tweened = this.getTween(from, to, p.ratioCompleted);
+				p.easedTweened = this.getTween(from, to, p.easedRatioCompleted);
+				p.overlapLoop = true;
+			} else {
+				p.ratioCompleted = ratioLimit;
+				p.easedRatioCompleted = ratioLimit;
+				p.tweened = to;
+				p.easedTweened = to;
+				if (reverse) {
+					p.tweened = from;
+					p.easedTweened = from;
+				}
 			}
 			p.durationAchieved = true;
 		}
@@ -205,7 +232,6 @@ class StimulationAspect {
 		return changedDirections;
 	}
 	recurse(reset) {
-
 		if (this.running) {
 			this.nextRafId = sharedTiming.raf(() => {
 
@@ -280,8 +306,10 @@ class StimulationAspect {
 					}
 
 					const updatedProgress = this.calculateProgress(ratioCompleted, reverse);
+					const overlapLoop = updatedProgress.overlapLoop;
+					delete updatedProgress.overlapLoop;
 					Object.assign(this.progress, updatedProgress);
-					this.stillLooping = false;
+					let stillLooping = false;
 					const loop = this.lookupSetting('loop');
 
 					if (this.progress.durationAchieved) {
@@ -291,19 +319,15 @@ class StimulationAspect {
 					if (
 						this.progress.durationAchieved &&
 						(
-							loop === true ||
-							(
-								loop &&
-								this.currentLoopCount < loop
-							)
+							this.needsAnotherLoop(loop)
 						)
 					) {
 						this.currentLoopCount++;
 						this.progress.durationAchieved = false;
-						this.stillLooping = true;
+						stillLooping = true && !overlapLoop;
 						this.delayLock = null;
 					}
-					// console.log('resetresetresetreset',reset,this.isWithinBounds(reverse),(this.isAtBeginning(reverse)))
+
 					if (
 						this.settings.frame && (
 							this.isWithinBounds(reverse) ||
@@ -313,10 +337,8 @@ class StimulationAspect {
 						this.frame();
 					}
 
-				
-
 					if (!this.progress.durationAchieved) {
-						this.recurse(this.stillLooping);
+						this.recurse(stillLooping);
 					} else {
 						this.running = false;
 						if (this.settings.onComplete) {
