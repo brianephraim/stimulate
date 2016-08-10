@@ -173,7 +173,8 @@ class StimulationAspect {
 			p.durationAchieved = false;
 		} else {
 			const loop = this.lookupSetting('loop');
-			if (this.needsAnotherLoop(loop)) {
+			const delayEveryLoop = this.lookupSetting('delayEveryLoop');
+			if (this.needsAnotherLoop(loop) && !delayEveryLoop) {
 				p.ratioCompleted = loopCompensator + ratioCompleted;
 				// const outOfBoundsAmount = reverse ? ratioCompleted : p.ratioCompleted;
 				// const durationCompensation = outOfBoundsAmount * duration;
@@ -187,7 +188,7 @@ class StimulationAspect {
 				p.easedTweened = this.getTween(from, to, p.easedRatioCompleted);
 				p.overlapLoop = true;
 				if (this.settings.test) {
-					console.log('SDFSDFSDFSDFSDFSD',p.ratioCompleted);
+					console.log('SDFSDFSDFSDFSDFSD', p.ratioCompleted);
 				}
 			} else {
 				p.ratioCompleted = ratioLimit;
@@ -235,16 +236,18 @@ class StimulationAspect {
 		return changedDirections;
 	}
 	recurse(reset) {
+		
 		if (this.running) {
 			this.nextRafId = sharedTiming.raf(() => {
 
 				if (this.running) {
-
 					const duration = this.lookupSetting('duration');
 					const reverse = !!this.lookupSetting('reverse');
 					if (reset) {
 						Object.assign(this.progress, this.getProgressDefault(reverse));
 					}
+
+					
 
 					this.timestamps.recentRaf = sharedTiming.stamps.raf;
 					const changedDirections = this.determineIfDirectionChanged(reverse);
@@ -273,7 +276,15 @@ class StimulationAspect {
 						this.delayLock === null
 					) {
 						this.delayLock = delay;
-						if (!this.lookupSetting('skipZeroFrame') && delay && (this.currentLoopCount <= 1)) {
+
+						if (this.debug === 'root'){
+							console.log("xxxxx",this.progress.ratioCompleted);
+						}
+
+						if (
+							(!this.lookupSetting('skipZeroFrame') && delay && this.currentLoopCount <= 1) ||
+							(delay && this.lookupSetting('delayEveryLoop') && this.currentLoopCount > 1)
+						) {
 							this.timestamps.start = this.timestamps.recentRaf - delay;
 							// Object.assign(this.progress, this.getProgressDefault(reverse));
 							// console.log('a',ratioCompleted, this.debug);
@@ -343,6 +354,9 @@ class StimulationAspect {
 					}
 
 					if (!this.progress.durationAchieved) {
+						if(stillLooping){
+							console.log('stillLooping')
+						}
 						this.recurse(stillLooping);
 					} else {
 						this.running = false;
