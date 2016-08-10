@@ -265,7 +265,7 @@ class StimulationAspect {
 						duration,
 					});
 					if (this.settings.test) {
-						console.log('y',this.progress.ratioCompleted, ratioCompleted);
+						console.log('y', this.progress.ratioCompleted, ratioCompleted);
 					}
 					if (
 						ratioCompleted > 0 &&

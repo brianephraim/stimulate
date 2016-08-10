@@ -18,9 +18,9 @@ ready(() => {
 	let once = false;
 	const stimulation = stimulate({
 		duration: 1000,
-		delay: 2000,
+		delay: 1000,
 		loop: true,
-		// delayEveryLoop: true,
+		delayEveryLoop: true,
 		// skipZeroFrame: false,
 		usePersistedSettings: true,
 		aspects: {

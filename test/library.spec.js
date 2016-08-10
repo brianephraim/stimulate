@@ -757,37 +757,21 @@ describe('Using this library... ', () => {
 			},
 			{
 				skipZeroFrame: true,
+				delay: 217,
+				loop: 2,
 				expectZeroCount: 0,
 				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: true,
 				delay: 217,
 				loop: 2,
-			},
-			{
-				skipZeroFrame: false,
+				delayEveryLoop: true,
 				expectZeroCount: 1,
-				expectOneCount: 1,
-			},
-			{
-				skipZeroFrame: false,
-				loop: 2,
-				expectZeroCount: 1,
-				expectOneCount: 1,
-			},
-			{
-				skipZeroFrame: false,
-				delay: 217,
-				expectZeroCount: 1,
-				expectOneCount: 1,
-			},
-			{
-				skipZeroFrame: false,
-				delay: 217,
-				loop: 2,
+				expectOneCount: 2,
 				test: true,
-				expectZeroCount: 1,
-				expectOneCount: 1,
 				frameExtra(progress, itDescription) {
-					if (itDescription === '_skipZeroFrame_delay_loop_test_frameExtra') {
+					if (itDescription === '_skipZeroFrame:true_delay:217_loop:2_delayEveryLoop:true') {
 						if (progress.ratioCompleted < last) {
 							additional = 1;
 						}
@@ -796,6 +780,30 @@ describe('Using this library... ', () => {
 						console.log('++', diff, last, progress.ratioCompleted, itDescription);
 					}
 				},
+			},
+			{
+				skipZeroFrame: false,
+				expectZeroCount: 1,
+				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: false,
+				loop: 2,
+				expectZeroCount: 1,
+				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: false,
+				delay: 217,
+				expectZeroCount: 1,
+				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: false,
+				delay: 217,
+				loop: 2,
+				expectZeroCount: 1,
+				expectOneCount: 1,
 			},
 		];
 		const allTests = [];
