@@ -188,7 +188,7 @@ class StimulationAspect {
 				p.easedTweened = this.getTween(from, to, p.easedRatioCompleted);
 				p.overlapLoop = true;
 				if (this.settings.test) {
-					console.log('SDFSDFSDFSDFSDFSD', p.ratioCompleted);
+					// console.log('SDFSDFSDFSDFSDFSD', p.ratioCompleted);
 				}
 			} else {
 				p.ratioCompleted = ratioLimit;
@@ -268,7 +268,7 @@ class StimulationAspect {
 						duration,
 					});
 					if (this.settings.test) {
-						console.log('y', this.progress.ratioCompleted, ratioCompleted);
+						// console.log('y', this.progress.ratioCompleted, ratioCompleted);
 					}
 					if (
 						ratioCompleted > 0 &&
@@ -277,9 +277,9 @@ class StimulationAspect {
 					) {
 						this.delayLock = delay;
 
-						if (this.debug === 'root'){
-							console.log("xxxxx",this.progress.ratioCompleted);
-						}
+						// if (this.debug === 'root'){
+						// 	console.log("xxxxx",this.progress.ratioCompleted);
+						// }
 
 						if (
 							(!this.lookupSetting('skipZeroFrame') && delay && this.currentLoopCount <= 1) ||
@@ -355,7 +355,7 @@ class StimulationAspect {
 
 					if (!this.progress.durationAchieved) {
 						if(stillLooping){
-							console.log('stillLooping')
+							// console.log('stillLooping')
 						}
 						this.recurse(stillLooping);
 					} else {

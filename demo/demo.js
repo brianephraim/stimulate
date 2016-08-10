@@ -21,7 +21,7 @@ ready(() => {
 		delay: 1000,
 		loop: 2,
 		delayEveryLoop: true,
-		// skipZeroFrame: false,
+		skipZeroFrame: false,
 		usePersistedSettings: true,
 		aspects: {
 			x: {
