@@ -787,17 +787,12 @@ describe('Using this library... ', () => {
 				expectZeroCount: 1,
 				expectOneCount: 1,
 				frameExtra(progress, itDescription) {
-					if ('_skipZeroFrame_delay_loop_test_frameExtra' === itDescription) {
+					if (itDescription === '_skipZeroFrame_delay_loop_test_frameExtra') {
 						if (progress.ratioCompleted < last) {
 							additional = 1;
 						}
 						const diff = (progress.ratioCompleted + additional) - last;
-						// if (diff < 0) {
-						// 	diff = (1 + progress.ratioCompleted) - last;
-						// 	last = (1 + progress.ratioCompleted);
-						// } else {
 						last = progress.ratioCompleted + additional;
-						// }
 						console.log('++', diff, last, progress.ratioCompleted, itDescription);
 					}
 				},
@@ -824,7 +819,9 @@ describe('Using this library... ', () => {
 			});
 			allTests.push({
 				itDescription,
-				callTest: () => { return new Test(possibility, itDescription);},
+				callTest: () => {
+					return new Test(possibility, itDescription);
+				},
 				expectOneCount: possibility.expectOneCount,
 				expectZeroCount: possibility.expectZeroCount,
 			});
