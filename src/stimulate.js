@@ -128,38 +128,9 @@ class StimulationAspect {
 			easedTweened: this.settings.from,
 		};
 	}
-	frame() {
-		const progressChanges = this.settings.frame.apply(this, [this.progress]);
-		Object.assign(this.progress, progressChanges);
-	}
 	getTween(from, to, ratioCompleted) {
 		return from + (ratioCompleted * (to - from));
 	}
-	needsAnotherLoop(loop) {
-		return (
-			loop === true ||
-			(
-				loop &&
-				this.currentLoopCount < loop
-			)
-		);
-	}
-				
-	isAtBeginning(reverse) {
-		let atBeginning = this.progress.ratioCompleted === 0;
-		if (reverse) {
-			atBeginning = this.progress.ratioCompleted === 1;
-		}
-		return atBeginning;
-	}
-	isWithinBounds(reverse) {
-		let withinRatioBounds = this.progress.ratioCompleted > 0;
-		if (reverse) {
-			withinRatioBounds = this.progress.ratioCompleted < 1;
-		}
-		return withinRatioBounds;
-	}
-
 	calculateRatio(options) {
 		const startDelay = options.start + options.delay;
 		const diff = options.later - startDelay;
@@ -175,10 +146,10 @@ class StimulationAspect {
 						this.timestamps.start = this.timestamps.recentRaf;
 					}
 
-
 					const reverse = !!this.lookupSetting('reverse');
-
+					const reverseIsNegativeOne = reverse ? -1 : 1;
 					const changedDirections = this.previousReverseSetting !== reverse;
+
 					this.previousReverseSetting = reverse;
 
 					if (resetProgress) {
@@ -222,7 +193,14 @@ class StimulationAspect {
 					}
 
 					if (changedDirections) {
-						this.delayImmune = true;
+						if (this.lastDelaySettingWhileDelaying === null) {
+							this.currentLoopCount--;
+							this.progress.ratioCompleted = (-reverseIsNegativeOne * (
+								1 + (
+									(-reverseIsNegativeOne * this.progress.ratioCompleted) + (delay / duration)
+								)
+							));
+						}
 
 						let reverseAdjustedRatioCompleted = this.progress.ratioCompleted;
 						if (reverse) {
@@ -250,9 +228,8 @@ class StimulationAspect {
 					let withinLimit = ratioCompleted < ratioLimit;
 					const from = this.settings.from;
 					const to = this.settings.to;
-					let loopCompensator = -1;
+
 					if (reverse) {
-						loopCompensator = 1;
 						ratioLimit = 0;
 						withinLimit = ratioCompleted > ratioLimit;
 					}
@@ -271,9 +248,11 @@ class StimulationAspect {
 						p.tweened = this.getTween(from, to, p.ratioCompleted);
 						p.easedTweened = this.getTween(from, to, p.easedRatioCompleted);
 					} else {
-						const needsAnotherLoop = this.needsAnotherLoop(loop);
+						const needsAnotherLoop = (
+							loop === true || (loop && this.currentLoopCount < loop)
+						);
 						if (needsAnotherLoop && !delayEveryLoop) {
-							p.ratioCompleted = loopCompensator + ratioCompleted;
+							p.ratioCompleted = -reverseIsNegativeOne + ratioCompleted;
 							this.timestamps.start = this.timestamps.start + (duration);
 							if (this.settings.easing) {
 								p.easedRatioCompleted = this.settings.easing(p.ratioCompleted);
@@ -293,13 +272,13 @@ class StimulationAspect {
 								p.easedTweened = from;
 							}
 						}
-						durationAchieved = true;
-						this.delayImmune = false;
+
 						if (needsAnotherLoop) {
 							this.currentLoopCount++;
-							durationAchieved = false;
 							stillLooping = true && !overlapLoop;
 							this.lastDelaySettingWhileDelaying = null;
+						} else {
+							durationAchieved = true;
 						}
 					}
 
@@ -309,7 +288,8 @@ class StimulationAspect {
 					}
 
 					if (this.settings.frame && withinRatioBounds) {
-						this.frame();
+						const progressChanges = this.settings.frame.apply(this, [this.progress]);
+						Object.assign(this.progress, progressChanges);
 					}
 
 					if (!durationAchieved) {

@@ -17,9 +17,9 @@ ready(() => {
 	);
 	let once = false;
 	const stimulation = stimulate({
-		// reverse:true,
+		reverse:true,
 		duration: 1000,
-		delay: 1000,
+		delay: 3000,
 		loop: 2,
 		delayEveryLoop: true,
 		// skipZeroFrame: false,
@@ -47,7 +47,7 @@ ready(() => {
 			},
 		},
 		frame() {
-			console.log(this.progress.ratioCompleted);
+			// console.log(this.progress.ratioCompleted);
 			const freshCoords = {
 				x: this.progressAt('x'),
 				y: this.progressAt('y'),
