@@ -50,6 +50,7 @@ class StimulationAspect {
 		}
 
 		const reverse = !!this.lookupSetting('reverse');
+		this.previouslyReversed = reverse;
 		const progressDefaults = this.getProgressDefault(reverse);
 		if (!this.progress) {
 			this.progress = progressDefaults;
@@ -148,7 +149,6 @@ class StimulationAspect {
 		);
 	}
 	calculateProgress(ratioCompleted, reverse) {
-		console.log('DEMO AS IT IS RIGHT NOW, go to end, reverse,reset,,.... why no repeap... then reset again and it does repeat?')
 		const settings = this.settings;
 		let ratioLimit = 1;
 		let withinLimit = ratioCompleted < ratioLimit;
@@ -222,9 +222,6 @@ class StimulationAspect {
 		return ratioCompleted;
 	}
 	determineIfDirectionChanged(reverse) {
-		if (typeof this.previouslyReversed === 'undefined') {
-			this.previouslyReversed = reverse;
-		}
 		const changedDirections = (
 			this.previouslyReversed !== reverse
 		);
@@ -232,10 +229,8 @@ class StimulationAspect {
 		return changedDirections;
 	}
 	recurse(reset) {
-		
 		if (this.running) {
 			this.nextRafId = sharedTiming.raf(() => {
-
 				if (this.running) {
 					const duration = this.lookupSetting('duration');
 					const reverse = !!this.lookupSetting('reverse');
@@ -261,34 +256,23 @@ class StimulationAspect {
 						delay,
 						duration,
 					});
-					// if (this.settings.test) {
-						// console.log('y', this.progress.ratioCompleted, ratioCompleted);
-					// }
 					if (
 						ratioCompleted > 0 &&
 						ratioCompleted < 1 &&
 						this.delayLock === null
 					) {
 						this.delayLock = delay;
-
-						// if (this.debug === 'root'){
-						// 	console.log("xxxxx",this.progress.ratioCompleted);
-						// }
-
 						if (
 							(!this.lookupSetting('skipZeroFrame') && delay && this.currentLoopCount <= 1) ||
 							(delay && this.lookupSetting('delayEveryLoop') && this.currentLoopCount > 1)
 						) {
 							this.timestamps.start = this.timestamps.recentRaf - delay;
-							// Object.assign(this.progress, this.getProgressDefault(reverse));
-							// console.log('a',ratioCompleted, this.debug);
 							ratioCompleted = this.calculateRatio({
 								start: this.timestamps.start,
 								later: this.timestamps.recentRaf,
 								delay,
 								duration,
 							});
-							// console.log('ratioCompleted',ratioCompleted, this.debug)
 						}
 					}
 
@@ -348,9 +332,6 @@ class StimulationAspect {
 					}
 
 					if (!this.progress.durationAchieved) {
-						if(stillLooping){
-							// console.log('stillLooping')
-						}
 						this.recurse(stillLooping);
 					} else {
 						this.running = false;
