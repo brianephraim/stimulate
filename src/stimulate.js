@@ -148,6 +148,7 @@ class StimulationAspect {
 		);
 	}
 	calculateProgress(ratioCompleted, reverse) {
+		console.log('DEMO AS IT IS RIGHT NOW, go to end, reverse,reset,,.... why no repeap... then reset again and it does repeat?')
 		const settings = this.settings;
 		let ratioLimit = 1;
 		let withinLimit = ratioCompleted < ratioLimit;
@@ -176,8 +177,6 @@ class StimulationAspect {
 			const delayEveryLoop = this.lookupSetting('delayEveryLoop');
 			if (this.needsAnotherLoop(loop) && !delayEveryLoop) {
 				p.ratioCompleted = loopCompensator + ratioCompleted;
-				// const outOfBoundsAmount = reverse ? ratioCompleted : p.ratioCompleted;
-				// const durationCompensation = outOfBoundsAmount * duration;
 				this.timestamps.start = this.timestamps.start + (duration);
 				if (settings.easing) {
 					p.easedRatioCompleted = settings.easing(p.ratioCompleted);
@@ -187,9 +186,6 @@ class StimulationAspect {
 				p.tweened = this.getTween(from, to, p.ratioCompleted);
 				p.easedTweened = this.getTween(from, to, p.easedRatioCompleted);
 				p.overlapLoop = true;
-				if (this.settings.test) {
-					// console.log('SDFSDFSDFSDFSDFSD', p.ratioCompleted);
-				}
 			} else {
 				p.ratioCompleted = ratioLimit;
 				p.easedRatioCompleted = ratioLimit;
@@ -247,8 +243,6 @@ class StimulationAspect {
 						Object.assign(this.progress, this.getProgressDefault(reverse));
 					}
 
-					
-
 					this.timestamps.recentRaf = sharedTiming.stamps.raf;
 					const changedDirections = this.determineIfDirectionChanged(reverse);
 					if (reset) {
@@ -267,9 +261,9 @@ class StimulationAspect {
 						delay,
 						duration,
 					});
-					if (this.settings.test) {
+					// if (this.settings.test) {
 						// console.log('y', this.progress.ratioCompleted, ratioCompleted);
-					}
+					// }
 					if (
 						ratioCompleted > 0 &&
 						ratioCompleted < 1 &&
