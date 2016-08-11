@@ -54,7 +54,6 @@ ready(() => {
 			},
 		},
 		frame() {
-			console.log(this.progress.aspects);
 			// console.log(this.progress.ratioCompleted);
 			const freshCoords = {
 				x: this.progressAt('x'),
