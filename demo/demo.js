@@ -4,6 +4,9 @@ import stimulate, { easings } from '../src/index';
 import buildDemoUI from './buildDemoUI';
 import { setupEl, demoCoords, ready } from './util';
 import { demoDuration  } from './cssJsSharedConstants.json';
+import eases from 'eases';
+
+console.log(eases);
 
 const spring = easings.spring();
 
@@ -17,15 +20,19 @@ ready(() => {
 	);
 	let once = false;
 	const stimulation = stimulate({
-		reverse:true,
+		// reverse:true,
 		duration: 1000,
-		delay: 3000,
-		loop: 2,
-		delayEveryLoop: true,
+		// delay: 1000,
+		// loop: 2,
+		// delayEveryLoop: true,
 		// skipZeroFrame: false,
 		usePersistedSettings: true,
+		from: 5,
+		to: 95,
+		easing: eases.sineOut,
 		aspects: {
 			x: {
+				easing: eases.sineOut,
 				from: demoCoords.start.x,
 				to: demoCoords.end.x,
 			},
@@ -47,6 +54,7 @@ ready(() => {
 			},
 		},
 		frame() {
+			console.log(this.progress.aspects);
 			// console.log(this.progress.ratioCompleted);
 			const freshCoords = {
 				x: this.progressAt('x'),

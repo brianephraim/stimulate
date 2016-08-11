@@ -53,11 +53,10 @@ class StimulationAspect {
 		const progressDefaults = this.getProgressDefault(reverse);
 		if (!this.progress) {
 			this.progress = progressDefaults;
+			this.progress.aspects = {};
 		} else {
 			Object.assign(this.progress, progressDefaults);
 		}
-
-		this.progress.aspects = {};
 
 		this.currentLoopCount = 1;
 		this.lastDelaySettingWhileDelaying = null;
@@ -75,6 +74,7 @@ class StimulationAspect {
 				this.aspects[name] = new StimulationAspect({
 					...this.settings.aspects[name],
 				}, name, this);
+				this.progress.aspects[name] = this.aspects[name].progress;
 			} else {
 				this.aspects[name].init(true);
 			}
