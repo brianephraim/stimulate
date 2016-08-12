@@ -1,6 +1,7 @@
 import './stylesheet.css';
 import './file.scss';
 import stimulate, { easings } from '../src/index';
+// import stimulate, { easings } from '../dist/stimulate.min';
 import buildDemoUI from './buildDemoUI';
 import { setupEl, demoCoords, ready } from './util';
 import { demoDuration  } from './cssJsSharedConstants.json';

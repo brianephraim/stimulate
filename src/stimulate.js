@@ -352,9 +352,8 @@ class StimulationAspect {
 			});
 
 			this.recurse();
-
-			return this;
 		}
+		return this;
 	}
 	birthAspect(name, settings) {
 		if (this.aspects[name]) {
