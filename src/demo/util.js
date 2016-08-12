@@ -1,4 +1,4 @@
-import { demoHeight, demoWidth, ballDiameter, demoDuration } from './cssJsSharedConstants.json';
+import { demoHeight, demoWidth, ballDiameter } from './cssJsSharedConstants.json';
 import prefixer from 'react-prefixer';
 
 

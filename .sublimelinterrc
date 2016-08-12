@@ -2,7 +2,7 @@
     "linters": {
         "eslint": {
             "excludes": [
-            	"**/src/easings.js",
+            	"**/src/library/easings.js",
                 "**/node_modules/**",
                 "**/vendor/**"
             ]

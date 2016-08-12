@@ -8,29 +8,31 @@ const env = argv.mode;
 const libraryName = packageJson.name;
 
 const plugins = [];
-let outputFile;
+const outputFiles = {};
 const entry = {};
 
 if (env === 'build') {
 	plugins.push(new webpack.optimize.UglifyJsPlugin({ minimize: true }));
-	outputFile = `${libraryName}.min.js`;
+	outputFiles.library = `dist/${libraryName}.min.js`;
+	outputFiles.demo = 'demo/index.js';
 } else {
-	entry['demo/index.js'] = './demo/demo.js';
-	outputFile = `${libraryName}.js`;
+	outputFiles.demo = 'src/demo/demo.js';
+	outputFiles.library = `${libraryName}.js`;
 }
 // Why am I using an array below?
 // because for dev:
 //  Error: a dependency to an entry point is not allowed
 // Workaround:
 //  https://github.com/webpack/webpack/issues/300
-entry[outputFile] = [`${__dirname}/src/index.js`];
+entry[outputFiles.library] = [`${__dirname}/src/library/index.js`];
+entry[outputFiles.demo] = [`${__dirname}/src/demo/demo.js`];
 
 
 const config = {
 	entry,
 	devtool: 'source-map',
 	output: {
-		path: `${__dirname}/dist`,
+		path: `${__dirname}`,
 		filename: '[name]',
 		library: libraryName,
 		libraryTarget: 'umd',
@@ -81,7 +83,7 @@ const config = {
 		importer: jsonImporter,
 	},
 	resolve: {
-		root: path.resolve('./src'),
+		root: path.resolve('./src/library'),
 		extensions: ['', '.js'],
 	},
 	plugins,

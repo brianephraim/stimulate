@@ -1,4 +1,4 @@
-import { demoHeight, demoWidth, ballDiameter,demoDuration } from './cssJsSharedConstants.json';
+import { demoHeight, demoWidth, ballDiameter, demoDuration } from './cssJsSharedConstants.json';
 import { setupEl, demoCoords } from './util';
 const duration = demoDuration;
 export const buildDemoUI = (ball, stimulation) => {

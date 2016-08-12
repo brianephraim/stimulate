@@ -2,8 +2,8 @@
 /* eslint camelcase:0 */
 
 import chai from 'chai';
-import stimulate from '../src/index';
-// import { raf, caf } from '../src/stimulate';
+import stimulate from '../src/library/index';
+// import { raf, caf } from '../src/library/stimulate';
 import { it, describe, before } from 'mocha';
 
 chai.expect();

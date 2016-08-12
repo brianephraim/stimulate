@@ -1,13 +1,12 @@
 import './stylesheet.css';
 import './file.scss';
-import stimulate, { easings } from '../src/index';
+import stimulate, { easings } from '../library/index';
 // import stimulate, { easings } from '../dist/stimulate.min';
 import buildDemoUI from './buildDemoUI';
 import { setupEl, demoCoords, ready } from './util';
-import { demoDuration  } from './cssJsSharedConstants.json';
 import eases from 'eases';
 
-console.log(eases);
+// console.log(eases);
 
 const spring = easings.spring();
 
@@ -19,7 +18,7 @@ ready(() => {
 			xy: demoCoords.start,
 		}
 	);
-	let once = false;
+	// let once = false;
 	const stimulation = stimulate({
 		// reverse:true,
 		duration: 1000,
