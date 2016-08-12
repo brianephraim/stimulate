@@ -94,6 +94,8 @@ class StimulationAspect {
 			Object.assign(this.persistedSettings, changeDict);
 		}
 		Object.assign(this.settings, changeDict);
+
+		return this;
 	}
 	lookupSetting(settingsName) {
 		if (
@@ -307,6 +309,8 @@ class StimulationAspect {
 	resetAll() {
 		this.stop(true);
 		this.init(true);
+
+		return this;
 	}
 	stop(skipCallback) {
 		this.running = false;
@@ -322,6 +326,8 @@ class StimulationAspect {
 				this.aspects[name].stop(skipCallback);
 			}
 		});
+
+		return this;
 	}
 	resume() {
 		if (!this.running) {
@@ -346,6 +352,8 @@ class StimulationAspect {
 			});
 
 			this.recurse();
+
+			return this;
 		}
 	}
 	birthAspect(name, settings) {
@@ -355,6 +363,8 @@ class StimulationAspect {
 		this.aspects[name] = new StimulationAspect({
 			...settings,
 		}, name, this);
+
+		return this.aspects[name];
 	}
 	progressAt(path) {
 		const pathSplit = path.split('.');

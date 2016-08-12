@@ -23,24 +23,14 @@ Stimulate helps you create animations with the following features:
 - changing from and to (even mid animation)
 
 ## Basics
-Stimulate lets you increment over time.  Use it with any DOM manipulation framework to create animations by updating the css for each frame.  Behind the scenes, framing is controlled via requestAnimationFrame when available in the browser, falling back to setTimeout when not available.  Stimulate has other performance optimizations, such as accurate progress reporting regardless of browser-performance-restricted framerate inconsistency, and frame-call batching over multiple Stimulate instances. More on these later.
+Stimulate increments over time for animations.  Use it in conjunction with any performant DOM manipulation system (vanilla javascript, jQuery, React, Angular).  
 
-Stimulate does not use CSS3 transitions or CSS3 animate.  CSS3 transitions/animate have their place, but they have certain deficiencies (slow element rendering, inefficient stopping, laggy initiation, limited easing capabilities, inefficient progress reporting, difficult onComplete callback handling).  CSS vs JS animation has been debated before.  Use the google to decide for yourself what's right for your project.
+Animation is achieved by showing a rapid sucession of frames.  Stimulate's frame triggering is controlled through javascript: with window.requestAnimationFrame when it's available in the browser, and a recursive setTimeout method when it's not.  Stimulate  performance optimizations, such as accurate progress reporting regardless of browser-performance-restricted framerate inconsistency, frame-call batching and progress report syncing over simultaneous Stimulate instances, and initial frame customizability.  More depth on those later.
 
-Here are some basic examples in vanilla js, jQuery, and React, each of which moves an element to the right 95px at a consistent rate.
+Stimulate does not use CSS3 transitions or @keyframes.  CSS3 methods have their place, but they have certain deficiencies (slow element rendering, inefficient stopping, laggy initiation, limited easing capabilities, inefficient progress reporting, difficult onComplete callback handling).  You can find CSS vs JS animation debates by googling.
 
-### vanilla js
-```
-var elFoo = getElementById('foo');
-stimulate({
-	from: 5,
-	to: 100,
-    duration: 1000,
-	frame: function(progress){
-		elFoo.style.transform = 'translate3d(' + progress.tweened + 'px 0 0)';
-	}
-});
-```
+Here are some basic examples of using Stimulate in vanilla js, jQuery, and React, each of which moves an element to the right from 5px to 100px at a consistent rate over one second.
+
 
 ### jQuery
 ```
@@ -53,6 +43,19 @@ stimulate({
 		$elFoo.css({
 		    transform: 'translate3d(' + progress.tweened + 'px 0 0)'
         });
+	}
+});
+```
+
+### vanilla js
+```
+var elFoo = getElementById('foo');
+stimulate({
+	from: 5,
+	to: 100,
+    duration: 1000,
+	frame: function(progress){
+		elFoo.style.transform = 'translate3d(' + progress.tweened + 'px 0 0)';
 	}
 });
 ```
@@ -105,11 +108,14 @@ stimulate(
     }
 );
 ```
+
 This will increment from 5 to 100 over 1 second (1000 milliseconds).
 
 Each frame (as controlled by requestAnimationFrame) will call the `frame` callback.
 
 See in the `frame` callback setting, the `progress` argument...
+
+For the sake of simplicity, the remaining examples in the documentation will use jQuery.
 
 ### The progress object
 `progress` is an object that is passed into the `frame` callback.  This is its structure:
@@ -139,6 +145,8 @@ This is like `progress.tweened`, but instead of progressing linearly from `from`
 ##### progress.aspects
 Stimulate lets you nest instances in an `aspects` setting object (more on this later).  `progress.aspects` lets you access the progress of nested descendants.  Here's an example:
 ```
+
+var $foo = $('.foo'); // make sure you cache your selectors
 stimulate({
 	from:10,
     to:20,
@@ -159,20 +167,22 @@ stimulate({
         }
     },
     frame: function(progress){
-    	translateXY(someEl,{
-        	x: progress.easedTweened,
-            y: progress.aspects.someChild_Y.easedTweened
+        var x = progress.easedTweened;
+        var y = progress.aspects.someChild_Y.easedTweened;
+        };
+        $foo.css({
+		    transform: 'translate3d(' + x + 'px ' + y + 'px 0)'
         });
     }
 });
 ```
 
-#### Accessibility of the progress object
+#### Accessibility and persistence of the progress object
 As we've seen, the progress object is accessible as an argument of the `frame` setting handler.  But it's accessible in other ways.  There are other callbacks for `onComplete` and `onStop`, all of which have `progress` as their first argument.
 
 Progress is also a property on the object that calling `stimulate` returns.  That's right, stimulate returns an object -- an instance of the StimulateAspect class.  More on this later.  
 
-Also, you should be aware that the `progress` object is never destroyed and recreated for updates.  The `progress` identity persists -- only its properties get updated.  So consider the following:
+Also, you should be aware that the `progress` object is never destroyed and recreated for updates.  The `progress` identity persists -- only its properties get updated.  Follow `truth` below to see how various `progress` references match eachother:
 
 ```
 var truth = true;
@@ -209,9 +219,43 @@ setTimeout(function(){
 ```
 
 
+### StimulationAspect instances
+Calling `stimulate({/*settings*/})` creates an instance of a class called `StimulationAspect`, and returns it.  That returned object can be assigned to a variable and it has methods ready to be called.
 
+See how this is used in the example below, where StimulationAspect is controlled by a button, that when clicked, stops the animation, reverses it, display the current ratioCompleted in an element, waits a half a second and resumes:
 
+```
+var myStimulation = stimulate({
+	from: 5,
+    to: 100,
+    duration:1000,
+    easing: spring,
+    frame: function(){
+    	$foo.css('top',this.progress.easedTweened+'px')
+    };
+});
+var reversed = false;
+$button.on('click', function(){
+	myStimulation.stop().updateSettings({
+    	reverse: !!reversed
+    });;
+    $meter.text(myStimulation.progress.ratioCompleted);
+    setTimeout(function(){
+    	myStimulation.resume();
+    }, 500)
+});
 
+```
+
+Notice that some methods like `stop` are chainable.  There will be more detail on various StimulationAspect methods later.
+
+#### Nesting StimulationAspects
+StimulationAspect instances have a child StimulationAspect.  Parent and child have the following relationship:
+##### certain settings are inherited by the child
+- calling certain methods in the parent trigger the same method in the child
+- 
+- zxcv
+instances that can inherit their parents' settings and have certain methods called 
 
 
 
