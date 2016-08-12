@@ -1,0 +1,2 @@
+body{background:#eee}.ball{width:20px;height:20px;background:blue;border-radius:10px;position:absolute;z-index:2;top:0;left:0}.ball--ghost{background:#add8e6;z-index:1}.demo{border:2px solid #000;width:600px;position:relative}.demo label{padding-left:20px;margin-bottom:1em}.demo button,.demo label{height:2em}.demo input{height:1em}.demo button,.demo input,.demo label{display:inline-block;height:40px;vertical-align:top;font-size:16px;line-height:2em}.stage{border-bottom:2px solid #000;height:400px;width:600px;position:relative}
+/*# sourceMappingURL=index.css.map*/

@@ -1,5 +1,6 @@
 import webpack from 'webpack';
 import jsonImporter from 'node-sass-json-importer';
+import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import path from 'path';
 // env comes from package.json's scipts item property mode arguments
 import { argv } from 'yargs';
@@ -7,17 +8,23 @@ import packageJson from './package.json';
 const env = argv.mode;
 const libraryName = packageJson.name;
 
-const plugins = [];
+const plugins = [new ExtractTextPlugin('[name].css')];
 const outputFiles = {};
 const entry = {};
-
 if (env === 'build') {
 	plugins.push(new webpack.optimize.UglifyJsPlugin({ minimize: true }));
-	outputFiles.library = `dist/${libraryName}.min.js`;
-	outputFiles.demo = 'demo/index.js';
+	outputFiles.library = `dist/${libraryName}.min`;
+	outputFiles.demo = 'demo/index';
 } else {
-	outputFiles.demo = 'src/demo/demo.js';
-	outputFiles.library = `${libraryName}.js`;
+	outputFiles.demo = 'src/demo/demo';
+	outputFiles.library = `${libraryName}`;
+}
+
+function conditionalExtractTextLoader(usePlugin, argArray) {
+	if (usePlugin) {
+		return { loader: ExtractTextPlugin.extract(...argArray) };
+	}
+	return { loaders: argArray };
 }
 // Why am I using an array below?
 // because for dev:
@@ -33,7 +40,7 @@ const config = {
 	devtool: 'source-map',
 	output: {
 		path: `${__dirname}`,
-		filename: '[name]',
+		filename: '[name].js',
 		library: libraryName,
 		libraryTarget: 'umd',
 		umdNamedDefine: true,
@@ -61,11 +68,23 @@ const config = {
 			},
 			{
 				test: /\.css$/,
-				loader: 'style-loader!css-loader',
+				...conditionalExtractTextLoader(env === 'build', [
+					'style-loader',
+					'css-loader',
+				]),
+				// loader: ExtractTextPlugin.extract("style-loader", "css-loader"),
+				// loaders: ['style-loader','css-loader'],
+				// loader: 'style-loader!css-loader',
 			},
 			{
 				test: /\.scss$/,
-				loaders: ['style', 'css?sourceMap', 'sass?sourceMap'],
+				// ...conditionalExtractTextLoader(['style', 'css?sourceMap', 'sass?sourceMap'], env === 'build'),
+				...conditionalExtractTextLoader(env === 'build', [
+					'style-loader',
+					'css-loader?sourceMap!sass-loader?sourceMap',
+				]),
+				// loader: ExtractTextPlugin.extract("style-loader", "css-loader!sass-loader"),
+				// loaders: ['style', 'css?sourceMap', 'sass?sourceMap'],
 			},
 			{
 				test: /\.json$/,
