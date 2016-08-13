@@ -1,39 +1,72 @@
 import webpack from 'webpack';
 import jsonImporter from 'node-sass-json-importer';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
 // env comes from package.json's scipts item property mode arguments
 import { argv } from 'yargs';
 import packageJson from './package.json';
-const env = argv.mode;
+
 const libraryName = packageJson.name;
 
-const plugins = [new ExtractTextPlugin('[name].css')];
-const outputFiles = {};
-const entry = {};
-if (env === 'build') {
-	plugins.push(new webpack.optimize.UglifyJsPlugin({ minimize: true }));
-	outputFiles.library = `dist/${libraryName}.min`;
-	outputFiles.demo = 'demo/index';
-} else {
-	outputFiles.demo = 'src/demo/demo';
-	outputFiles.library = `${libraryName}`;
+const plugins = [];
+const pluginRegistry = {};
+function registerPlugin(name, plugin) {
+	if (!pluginRegistry[name]) {
+		plugins.push(plugin);
+		pluginRegistry[name] = true;
+		return true;
+	}
+	return false;
 }
 
 function conditionalExtractTextLoader(usePlugin, argArray) {
 	if (usePlugin) {
+		registerPlugin('ExtractTextPlugin', new ExtractTextPlugin('[name].css'));
 		return { loader: ExtractTextPlugin.extract(...argArray) };
 	}
 	return { loaders: argArray };
+}
+
+const env = argv.env;
+
+const entry = {};
+const entryFiles = {
+	library: `${__dirname}/src/library/index.js`,
+	demo: `${__dirname}/src/demo/demo.js`,
+};
+const outputFiles = {};
+if (env === 'build') {
+	outputFiles.library = `dist/${libraryName}.min`;
+	outputFiles.demo = 'demo/index';
+} else if (env === 'watch') {
+	outputFiles.demo = 'src/demo/demo';
+	outputFiles.library = `${libraryName}`;
 }
 // Why am I using an array below?
 // because for dev:
 //  Error: a dependency to an entry point is not allowed
 // Workaround:
 //  https://github.com/webpack/webpack/issues/300
-entry[outputFiles.library] = [`${__dirname}/src/library/index.js`];
-entry[outputFiles.demo] = [`${__dirname}/src/demo/demo.js`];
+entry[outputFiles.library] = [entryFiles.library];
+entry[outputFiles.demo] = [entryFiles.demo];
 
+
+if (env === 'build') {
+	registerPlugin('UglifyJsPlugin', new webpack.optimize.UglifyJsPlugin({ minimize: true }));
+	registerPlugin('ejstest-HtmlWebpackPlugin', new HtmlWebpackPlugin({
+		filename: './demo/ejstest.html',
+		template: '!!ejs!src/demo/test.ejs',
+		title: 'afasdfasdfasd',
+		foo: 'bar',
+		// favicon: 'src/images/favicon.ico',
+		// inject: true,
+	}));
+}
+registerPlugin('demo-HtmlWebpackPlugin', new HtmlWebpackPlugin({
+	chunks: [outputFiles.demo],
+	filename: './demo/index.html',
+}));
 
 const config = {
 	entry,
@@ -44,12 +77,12 @@ const config = {
 		library: libraryName,
 		libraryTarget: 'umd',
 		umdNamedDefine: true,
-		publicPath: '/assets/',
+		// publicPath: '/assets/',
 	},
 	module: {
 		loaders: [
 			{
-				// test: /(\.jsx|\.js)$/,
+				test: /(\.jsx|\.js)$/,
 				loader: 'babel',
 				exclude: /(node_modules|bower_components)/,
 				query: {
@@ -72,13 +105,11 @@ const config = {
 					'style-loader',
 					'css-loader',
 				]),
-				// loader: ExtractTextPlugin.extract("style-loader", "css-loader"),
 				// loaders: ['style-loader','css-loader'],
 				// loader: 'style-loader!css-loader',
 			},
 			{
 				test: /\.scss$/,
-				// ...conditionalExtractTextLoader(['style', 'css?sourceMap', 'sass?sourceMap'], env === 'build'),
 				...conditionalExtractTextLoader(env === 'build', [
 					'style-loader',
 					'css-loader?sourceMap!sass-loader?sourceMap',

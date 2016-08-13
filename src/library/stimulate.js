@@ -1,7 +1,7 @@
 /* eslint no-inner-declarations:0 */
 
 import sharedTiming from './sharedTiming';
-
+console.log("SDF");
 class StimulationAspect {
 	constructor(options, debug = 'root', parent) {
 		this.parent = parent;

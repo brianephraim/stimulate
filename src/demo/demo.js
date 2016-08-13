@@ -6,8 +6,6 @@ import buildDemoUI from './buildDemoUI';
 import { setupEl, demoCoords, ready } from './util';
 import eases from 'eases';
 
-// console.log(eases);
-
 const spring = easings.spring();
 
 ready(() => {
