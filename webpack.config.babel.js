@@ -54,19 +54,25 @@ entry[outputFiles.demo] = [entryFiles.demo];
 
 if (env === 'build') {
 	registerPlugin('UglifyJsPlugin', new webpack.optimize.UglifyJsPlugin({ minimize: true }));
+	plugins.push(new webpack.ProvidePlugin({
+        _: "lodash"
+    }))
 	registerPlugin('ejstest-HtmlWebpackPlugin', new HtmlWebpackPlugin({
 		filename: './demo/ejstest.html',
-		template: '!!ejs!src/demo/test.ejs',
+		template: 'src/demo/test.ejs',
 		title: 'afasdfasdfasd',
 		foo: 'bar',
 		// favicon: 'src/images/favicon.ico',
 		// inject: true,
 	}));
+
 }
 registerPlugin('demo-HtmlWebpackPlugin', new HtmlWebpackPlugin({
 	chunks: [outputFiles.demo],
 	filename: './demo/index.html',
 }));
+
+
 
 const config = {
 	entry,
@@ -121,6 +127,10 @@ const config = {
 				test: /\.json$/,
 				loaders: ['json'],
 			},
+			{
+	            test: /\.ejs$/,
+	            loader: "ejs-compiled"
+	        },
 			// {
 			//   test: /(\.jsx|\.js)$/,
 			//   loader: "eslint-loader",

@@ -41,7 +41,7 @@
     "chai": "^3.5.0",
     "css-loader": "^0.23.1",
     "eases": "^1.0.8",
-    "ejs-loader": "^0.3.0",
+    "ejs-compiled-loader": "^2.1.1",
     "eslint": "^2.9.0",
     "eslint-config-airbnb": "^9.0.1",
     "eslint-loader": "^1.5.0",
