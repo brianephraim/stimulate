@@ -4,10 +4,12 @@ const duration = demoDuration;
 export const buildDemoUI = (ball, stimulation) => {
 	const coords = demoCoords;
 	let reverse = false;
+	const demoEl = document.getElementById('demo');
+
 	setupEl({
 		className: 'demo',
 		tag: 'div',
-		appendTo: document.body,
+		appendTo: !!demoEl ? demoEl : document.body,
 		children: [
 			{
 				tag: 'div',

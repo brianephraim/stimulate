@@ -49,5 +49,12 @@ class SharedTiming {
 }
 const sharedTiming = new SharedTiming();
 
-export { sharedTiming };
+function sharedTimingRaf(...args) {
+	return sharedTiming.raf(...args);
+}
+function sharedTimingCaf(...args) {
+	return sharedTiming.caf(...args);
+}
+
+export { sharedTiming, sharedTimingRaf as raf, sharedTimingCaf as caf };
 export default sharedTiming;

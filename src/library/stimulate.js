@@ -1,7 +1,6 @@
 /* eslint no-inner-declarations:0 */
 
 import sharedTiming from './sharedTiming';
-console.log("SDF");
 class StimulationAspect {
 	constructor(options, debug = 'root', parent) {
 		this.parent = parent;
@@ -409,11 +408,5 @@ class StimulationAspect {
 const stimulate = (...args) => {
 	return new StimulationAspect(...args);
 };
-function sharedTimingRaf(...args) {
-	return sharedTiming.raf(...args);
-}
-function sharedTimingCaf(...args) {
-	return sharedTiming.caf(...args);
-}
-export { stimulate, StimulationAspect, sharedTimingRaf as raf, sharedTimingCaf as caf };
+export { stimulate, StimulationAspect };
 export default stimulate;

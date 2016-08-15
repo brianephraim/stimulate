@@ -36,14 +36,14 @@ Here are some basic examples of using Stimulate in vanilla js, jQuery, and React
 ```
 var $elFoo = $('#foo');
 stimulate({
-	from: 5,
-	to: 100,
+    from: 5,
+    to: 100,
     duration: 1000,
-	frame: function(progress){
-		$elFoo.css({
-		    transform: 'translate3d(' + progress.tweened + 'px 0 0)'
+    frame: function(progress){
+        $elFoo.css({
+            transform: 'translate3d(' + progress.tweened + 'px 0 0)'
         });
-	}
+    }
 });
 ```
 
@@ -51,12 +51,12 @@ stimulate({
 ```
 var elFoo = getElementById('foo');
 stimulate({
-	from: 5,
-	to: 100,
+    from: 5,
+    to: 100,
     duration: 1000,
-	frame: function(progress){
-		elFoo.style.transform = 'translate3d(' + progress.tweened + 'px 0 0)';
-	}
+    frame: function(progress){
+        elFoo.style.transform = 'translate3d(' + progress.tweened + 'px 0 0)';
+    }
 });
 ```
 
@@ -70,14 +70,14 @@ var Component = React.createClass({
     },
     componentDidMount: function() {
         stimulate({
-        	from: 5,
-        	to: 100,
+            from: 5,
+            to: 100,
             duration: 1000,
-        	frame: function(progress){
-        	    this.setState({
-        	        xPosition: progress.tweened
-        	   });
-        	}
+            frame: function(progress){
+                this.setState({
+                    xPosition: progress.tweened
+               });
+            }
         });
     },
     render: function () {
@@ -95,14 +95,14 @@ In the examples above, see the basic structure of the stimulate call
 ```
 //call to the library
 stimulate(
-	//settings
+    //settings
     {
-    	from:5,
+        from:5,
         to: 100,
         duration: 1000,
         easing: sineOut,
         frame: function(progress) {
-        	//affect the DOM
+            //affect the DOM
             styleAnElement(someEl,progress.tweened);
         }
     }
@@ -121,11 +121,11 @@ For the sake of simplicity, the remaining examples in the documentation will use
 `progress` is an object that is passed into the `frame` callback.  This is its structure:
 ```
 {
-	ratioCompleted :0.767,
+    ratioCompleted :0.767,
     easedRatioCompleted: 0.9337679395350391,
-	tweened: 74.03,
-	easedTweened: 89.03911455815351,
-	aspects:{}
+    tweened: 74.03,
+    easedTweened: 89.03911455815351,
+    aspects:{}
 }
 ```
 #### The properties in the progress object
@@ -148,18 +148,18 @@ Stimulate lets you nest instances in an `aspects` setting object (more on this l
 
 var $foo = $('.foo'); // make sure you cache your selectors
 stimulate({
-	from:10,
+    from:10,
     to:20,
     duration: 1000,
     easing: circOut,
     aspects: {
-    	someChild_Y: {
-        	from: -142,
+        someChild_Y: {
+            from: -142,
             to: 345,
             duration: 642,
             easing: sineOut,
             frame: function(progress){
-            	// This CB is here if you need it
+                // This CB is here if you need it
                 // but this instance's progress
                 // is accessible in its parent progress.aspects
                 // see below.
@@ -171,7 +171,7 @@ stimulate({
         var y = progress.aspects.someChild_Y.easedTweened;
         };
         $foo.css({
-		    transform: 'translate3d(' + x + 'px ' + y + 'px 0)'
+            transform: 'translate3d(' + x + 'px ' + y + 'px 0)'
         });
     }
 });
@@ -189,22 +189,22 @@ var truth = true;
 var mainProgress;
 var aspectProgress;
 var myStimulation = stimulate({
-	from: 5,
+    from: 5,
     to: 10,
     duration: 1000,
     aspects: {
-    	foo:{
+        foo:{
             from: 12,
             to: 423,
             duration:243,
-        	frame: function(progress){
-				truth = truth && progress === this.progress;
+            frame: function(progress){
+                truth = truth && progress === this.progress;
                 aspectProgress = progress;
-        	}
-    	}
+            }
+        }
     },
     frame: function(progress){
-    	truth = truth && progress === this.progress;
+        truth = truth && progress === this.progress;
         truth = truth && myStimulation.progress === progress;
         truth = truth && progress.aspects.foo === aspectProgress;
         mainProgress = progress;
@@ -212,7 +212,7 @@ var myStimulation = stimulate({
     }
 });
 setTimeout(function(){
-	truth = truth && mainProgress === myStimulation.progress;
+    truth = truth && mainProgress === myStimulation.progress;
     console.log(truth === true); //true
 },100);
 
@@ -226,22 +226,22 @@ See how this is used in the example below, where StimulationAspect is controlled
 
 ```
 var myStimulation = stimulate({
-	from: 5,
+    from: 5,
     to: 100,
     duration:1000,
     easing: spring,
     frame: function(){
-    	$foo.css('top',this.progress.easedTweened+'px')
+        $foo.css('top',this.progress.easedTweened+'px')
     };
 });
 var reversed = false;
 $button.on('click', function(){
-	myStimulation.stop().updateSettings({
-    	reverse: !!reversed
+    myStimulation.stop().updateSettings({
+        reverse: !!reversed
     });;
     $meter.text(myStimulation.progress.ratioCompleted);
     setTimeout(function(){
-    	myStimulation.resume();
+        myStimulation.resume();
     }, 500)
 });
 
@@ -252,16 +252,9 @@ Notice that some methods like `stop` are chainable.  There will be more detail o
 #### Nesting StimulationAspects
 StimulationAspect instances have a child StimulationAspect.  Parent and child have the following relationship:
 ##### certain settings are inherited by the child
-- calling certain methods in the parent trigger the same method in the child
-- 
-- zxcv
-instances that can inherit their parents' settings and have certain methods called 
-
-
-
-
-
-
+##### certain methods called on the parent get called on the child automatically
+##### the parent's `progress` object has references to child `progress` objects in the `aspects` property
+##### 
 
 
 

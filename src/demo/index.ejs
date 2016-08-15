@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta charset="UTF-8">
+		<title><%= htmlWebpackPlugin.options.title %></title>
+	</head>
+	<body>
+		<% include ./demo.ejs %>
+		<div class="readme markdownCompiled">
+			<%- require('../../README.md') %>
+		</div>
+	</body>
+</html>

@@ -1,4 +1,5 @@
-import stimulate, { raf } from './stimulate';
+import stimulate from './stimulate';
 import easings from './easings';
-export { raf, stimulate, easings };
+import { sharedTiming, raf, caf } from './sharedTiming';
+export { stimulate, easings, sharedTiming, raf, caf };
 export default stimulate;

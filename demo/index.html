@@ -1,9 +1,158 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Webpack App</title>
-  <link href="../demo/index.css" rel="stylesheet"></head>
-  <body>
-  <script type="text/javascript" src="../demo/index.js"></script></body>
+	<head>
+	<meta charset="UTF-8">
+		<title>afasdfasdfasd</title>
+	<link href="../demo/index.css" rel="stylesheet"></head>
+	<body>
+		<div id="demo"></div>
+		<div class="readme markdownCompiled">
+			<h1 id=stimulate>stimulate</h1> <p>javascript animation utility</p> <p><code>npm install stimulate</code></p> <p><code>import stimulate from &#39;stimulate&#39;;</code></p> <h2 id=overview>Overview</h2> <p>Stimulate helps you create animations with the following features:</p> <ul> <li>stopping</li> <li>resuming</li> <li>resetting</li> <li>looping</li> <li>delaying</li> <li>easing</li> <li>reporting progress</li> <li>handling onComplete callbacks</li> <li>achieving high frame rates</li> <li>integrating with various frameworks</li> <li>syncing and managing multiple instances</li> <li>reversing (even mid animation)</li> <li>changing speed (even mid animation)</li> <li>changing from and to (even mid animation)</li> </ul> <h2 id=basics>Basics</h2> <p>Stimulate increments over time for animations. Use it in conjunction with any performant DOM manipulation system (vanilla javascript, jQuery, React, Angular). </p> <p>Animation is achieved by showing a rapid sucession of frames. Stimulate&#39;s frame triggering is controlled through javascript: with window.requestAnimationFrame when it&#39;s available in the browser, and a recursive setTimeout method when it&#39;s not. Stimulate performance optimizations, such as accurate progress reporting regardless of browser-performance-restricted framerate inconsistency, frame-call batching and progress report syncing over simultaneous Stimulate instances, and initial frame customizability. More depth on those later.</p> <p>Stimulate does not use CSS3 transitions or @keyframes. CSS3 methods have their place, but they have certain deficiencies (slow element rendering, inefficient stopping, laggy initiation, limited easing capabilities, inefficient progress reporting, difficult onComplete callback handling). You can find CSS vs JS animation debates by googling.</p> <p>Here are some basic examples of using Stimulate in vanilla js, jQuery, and React, each of which moves an element to the right from 5px to 100px at a consistent rate over one second.</p> <h3 id=jquery>jQuery</h3> <pre><code>var $elFoo = $(&#39;#foo&#39;);
+stimulate({
+    from: 5,
+    to: 100,
+    duration: 1000,
+    frame: function(progress){
+        $elFoo.css({
+            transform: &#39;translate3d(&#39; + progress.tweened + &#39;px 0 0)&#39;
+        });
+    }
+});
+</code></pre><h3 id=vanilla-js>vanilla js</h3> <pre><code>var elFoo = getElementById(&#39;foo&#39;);
+stimulate({
+    from: 5,
+    to: 100,
+    duration: 1000,
+    frame: function(progress){
+        elFoo.style.transform = &#39;translate3d(&#39; + progress.tweened + &#39;px 0 0)&#39;;
+    }
+});
+</code></pre><h3 id=react>React</h3> <pre><code>var Component = React.createClass({
+    getInitialState: function () {
+        return {
+            xPosition: 5
+        };
+    },
+    componentDidMount: function() {
+        stimulate({
+            from: 5,
+            to: 100,
+            duration: 1000,
+            frame: function(progress){
+                this.setState({
+                    xPosition: progress.tweened
+               });
+            }
+        });
+    },
+    render: function () {
+        var style = {
+            transform: &#39;translate3d(&#39; + this.state.xPosition + &#39;px 0 0)&#39;
+        };
+        return &lt;div style={style}&gt;Hello&lt;/div&gt;;
+    }
+});
+</code></pre><h2 id=in-depth>In depth</h2> <p>In the examples above, see the basic structure of the stimulate call</p> <pre><code>//call to the library
+stimulate(
+    //settings
+    {
+        from:5,
+        to: 100,
+        duration: 1000,
+        easing: sineOut,
+        frame: function(progress) {
+            //affect the DOM
+            styleAnElement(someEl,progress.tweened);
+        }
+    }
+);
+</code></pre><p>This will increment from 5 to 100 over 1 second (1000 milliseconds).</p> <p>Each frame (as controlled by requestAnimationFrame) will call the <code>frame</code> callback.</p> <p>See in the <code>frame</code> callback setting, the <code>progress</code> argument...</p> <p>For the sake of simplicity, the remaining examples in the documentation will use jQuery.</p> <h3 id=the-progress-object>The progress object</h3> <p><code>progress</code> is an object that is passed into the <code>frame</code> callback. This is its structure:</p> <pre><code>{
+    ratioCompleted :0.767,
+    easedRatioCompleted: 0.9337679395350391,
+    tweened: 74.03,
+    easedTweened: 89.03911455815351,
+    aspects:{}
+}
+</code></pre><h4 id=the-properties-in-the-progress-object>The properties in the progress object</h4> <h5 id=progress-ratiocompleted>progress.ratioCompleted</h5> <p>This is an incrementation from 0 to 1. It ignores the <code>from</code>, <code>to</code>, and <code>easing</code> properties. With a duration of 1000ms, exactly half way through the animation, <code>progress.ratioCompleted</code> will be 0.5.</p> <h5 id=progress-easedratiocompleted>progress.easedRatioCompleted</h5> <p>If an <code>easing</code> function setting was specified, <code>progress.easedRatioCompleted</code> is the product of applying <code>progress.ratioCompleted</code> value to it. If there is no easing setting, it&#39;s value is the same as <code>progress.ratioCompleted</code>.</p> <h5 id=progress-tweened>progress.tweened</h5> <p>This is the value between the <code>settings.from</code> and <code>settings.to</code> according to this point in time relative to the duration, without easing. So if <code>from: 10</code>, <code>to: 20</code> and <code>duration: 1000</code>, after 300 milliseconds, <code>progress.tweened</code> is 13. After 500 milliseconds, it&#39;s 15. It&#39;s a linear progression.</p> <h5 id=progress-easedtweened>progress.easedTweened</h5> <p>This is like <code>progress.tweened</code>, but instead of progressing linearly from <code>from</code> to <code>to</code>, it uses the <code>easing</code> setting to determine its position. If no easing setting exists, its value matches <code>progress.tweened</code>. This is the the most useful property in the <code>progress</code> object for typical animation applications. This is how you get bouncy movements.</p> <h5 id=progress-aspects>progress.aspects</h5> <p>Stimulate lets you nest instances in an <code>aspects</code> setting object (more on this later). <code>progress.aspects</code> lets you access the progress of nested descendants. Here&#39;s an example:</p> <pre><code>
+var $foo = $(&#39;.foo&#39;); // make sure you cache your selectors
+stimulate({
+    from:10,
+    to:20,
+    duration: 1000,
+    easing: circOut,
+    aspects: {
+        someChild_Y: {
+            from: -142,
+            to: 345,
+            duration: 642,
+            easing: sineOut,
+            frame: function(progress){
+                // This CB is here if you need it
+                // but this instance&#39;s progress
+                // is accessible in its parent progress.aspects
+                // see below.
+            }
+        }
+    },
+    frame: function(progress){
+        var x = progress.easedTweened;
+        var y = progress.aspects.someChild_Y.easedTweened;
+        };
+        $foo.css({
+            transform: &#39;translate3d(&#39; + x + &#39;px &#39; + y + &#39;px 0)&#39;
+        });
+    }
+});
+</code></pre><h4 id=accessibility-and-persistence-of-the-progress-object>Accessibility and persistence of the progress object</h4> <p>As we&#39;ve seen, the progress object is accessible as an argument of the <code>frame</code> setting handler. But it&#39;s accessible in other ways. There are other callbacks for <code>onComplete</code> and <code>onStop</code>, all of which have <code>progress</code> as their first argument.</p> <p>Progress is also a property on the object that calling <code>stimulate</code> returns. That&#39;s right, stimulate returns an object -- an instance of the StimulateAspect class. More on this later. </p> <p>Also, you should be aware that the <code>progress</code> object is never destroyed and recreated for updates. The <code>progress</code> identity persists -- only its properties get updated. Follow <code>truth</code> below to see how various <code>progress</code> references match eachother:</p> <pre><code>var truth = true;
+var mainProgress;
+var aspectProgress;
+var myStimulation = stimulate({
+    from: 5,
+    to: 10,
+    duration: 1000,
+    aspects: {
+        foo:{
+            from: 12,
+            to: 423,
+            duration:243,
+            frame: function(progress){
+                truth = truth &amp;&amp; progress === this.progress;
+                aspectProgress = progress;
+            }
+        }
+    },
+    frame: function(progress){
+        truth = truth &amp;&amp; progress === this.progress;
+        truth = truth &amp;&amp; myStimulation.progress === progress;
+        truth = truth &amp;&amp; progress.aspects.foo === aspectProgress;
+        mainProgress = progress;
+
+    }
+});
+setTimeout(function(){
+    truth = truth &amp;&amp; mainProgress === myStimulation.progress;
+    console.log(truth === true); //true
+},100);
+</code></pre><h3 id=stimulationaspect-instances>StimulationAspect instances</h3> <p>Calling <code>stimulate({/*settings*/})</code> creates an instance of a class called <code>StimulationAspect</code>, and returns it. That returned object can be assigned to a variable and it has methods ready to be called.</p> <p>See how this is used in the example below, where StimulationAspect is controlled by a button, that when clicked, stops the animation, reverses it, display the current ratioCompleted in an element, waits a half a second and resumes:</p> <pre><code>var myStimulation = stimulate({
+    from: 5,
+    to: 100,
+    duration:1000,
+    easing: spring,
+    frame: function(){
+        $foo.css(&#39;top&#39;,this.progress.easedTweened+&#39;px&#39;)
+    };
+});
+var reversed = false;
+$button.on(&#39;click&#39;, function(){
+    myStimulation.stop().updateSettings({
+        reverse: !!reversed
+    });;
+    $meter.text(myStimulation.progress.ratioCompleted);
+    setTimeout(function(){
+        myStimulation.resume();
+    }, 500)
+});
+</code></pre><p>Notice that some methods like <code>stop</code> are chainable. There will be more detail on various StimulationAspect methods later.</p> <h4 id=nesting-stimulationaspects>Nesting StimulationAspects</h4> <p>StimulationAspect instances have a child StimulationAspect. Parent and child have the following relationship:</p> <h5 id=certain-settings-are-inherited-by-the-child>certain settings are inherited by the child</h5> <h5 id=certain-methods-called-on-the-parent-get-called-on-the-child-automatically>certain methods called on the parent get called on the child automatically</h5> <h5 id=the-parent-s-progress-object-has-references-to-child-progress-objects-in-the-aspects-property>the parent&#39;s <code>progress</code> object has references to child <code>progress</code> objects in the <code>aspects</code> property</h5> <p>##### </p> <hr>
+		</div>
+	<script type="text/javascript" src="../demo/index.js"></script></body>
 </html>

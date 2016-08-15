@@ -2,6 +2,7 @@ import webpack from 'webpack';
 import jsonImporter from 'node-sass-json-importer';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+
 import path from 'path';
 // env comes from package.json's scipts item property mode arguments
 import { argv } from 'yargs';
@@ -20,7 +21,7 @@ function registerPlugin(name, plugin) {
 	return false;
 }
 
-function conditionalExtractTextLoader(usePlugin, argArray) {
+function conditionalExtractTextLoaderCss(usePlugin, argArray) {
 	if (usePlugin) {
 		registerPlugin('ExtractTextPlugin', new ExtractTextPlugin('[name].css'));
 		return { loader: ExtractTextPlugin.extract(...argArray) };
@@ -51,28 +52,20 @@ if (env === 'build') {
 entry[outputFiles.library] = [entryFiles.library];
 entry[outputFiles.demo] = [entryFiles.demo];
 
-
 if (env === 'build') {
 	registerPlugin('UglifyJsPlugin', new webpack.optimize.UglifyJsPlugin({ minimize: true }));
-	plugins.push(new webpack.ProvidePlugin({
-        _: "lodash"
-    }))
 	registerPlugin('ejstest-HtmlWebpackPlugin', new HtmlWebpackPlugin({
-		filename: './demo/ejstest.html',
-		template: 'src/demo/test.ejs',
+		chunks: [outputFiles.demo],
+		filename: './demo/index.html',
+		template: 'src/demo/index.ejs',
 		title: 'afasdfasdfasd',
-		foo: 'bar',
-		// favicon: 'src/images/favicon.ico',
-		// inject: true,
 	}));
-
+} else {
+	registerPlugin('demo-HtmlWebpackPlugin', new HtmlWebpackPlugin({
+		chunks: [outputFiles.demo],
+		filename: './demo/index.html',
+	}));
 }
-registerPlugin('demo-HtmlWebpackPlugin', new HtmlWebpackPlugin({
-	chunks: [outputFiles.demo],
-	filename: './demo/index.html',
-}));
-
-
 
 const config = {
 	entry,
@@ -107,7 +100,7 @@ const config = {
 			},
 			{
 				test: /\.css$/,
-				...conditionalExtractTextLoader(env === 'build', [
+				...conditionalExtractTextLoaderCss(env === 'build', [
 					'style-loader',
 					'css-loader',
 				]),
@@ -116,7 +109,7 @@ const config = {
 			},
 			{
 				test: /\.scss$/,
-				...conditionalExtractTextLoader(env === 'build', [
+				...conditionalExtractTextLoaderCss(env === 'build', [
 					'style-loader',
 					'css-loader?sourceMap!sass-loader?sourceMap',
 				]),
@@ -128,9 +121,13 @@ const config = {
 				loaders: ['json'],
 			},
 			{
-	            test: /\.ejs$/,
-	            loader: "ejs-compiled"
-	        },
+				test: /\.ejs$/,
+				loader: 'ejs-compiled',
+			},
+			{
+				test: /\.md/,
+				loaders: ['html', 'markdown'],
+			},
 			// {
 			//   test: /(\.jsx|\.js)$/,
 			//   loader: "eslint-loader",
@@ -139,7 +136,6 @@ const config = {
 		],
 	},
 	sassLoader: {
-		data: '$asdf: 5px;',
 		importer: jsonImporter,
 	},
 	resolve: {
