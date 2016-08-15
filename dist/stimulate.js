@@ -117,6 +117,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
+	console.log('qqqqqqqqqqq');
+	
 	var StimulationAspect = function () {
 		function StimulationAspect(options) {
 			var debug = arguments.length <= 1 || arguments[1] === undefined ? 'root' : arguments[1];

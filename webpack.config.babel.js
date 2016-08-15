@@ -8,6 +8,13 @@ import path from 'path';
 import { argv } from 'yargs';
 import packageJson from './package.json';
 
+import StringReplacePlugin from 'string-replace-webpack-plugin';
+
+let username = null;
+if (packageJson.repository && packageJson.repository.url) {
+	username = packageJson.repository.url.replace('://').split('/')[1];
+}
+
 const libraryName = packageJson.name;
 
 const plugins = [];
@@ -65,12 +72,22 @@ if (env === 'build') {
 		template: 'src/demo/index.ejs',
 		title: 'afasdfasdfasd',
 	}));
+	registerPlugin('ejstestxx-HtmlWebpackPlugin', new HtmlWebpackPlugin({
+		chunks: [outputFiles.demo],
+		filename: './index.html',
+		template: 'src/demo/index.ejs',
+		title: 'afasdfasdfasd',
+		username,
+		libraryName,
+
+	}));
 } else {
 	registerPlugin('demo-HtmlWebpackPlugin', new HtmlWebpackPlugin({
 		chunks: [outputFiles.demo],
 		filename: './demo/index.html',
 	}));
 }
+plugins.push(new StringReplacePlugin())
 
 const config = {
 	entry,
@@ -133,6 +150,19 @@ const config = {
 				test: /\.md/,
 				loaders: ['html', 'markdown'],
 			},
+			{ 
+            test: /\.js|\.html|\.ejs$/,
+            loader: StringReplacePlugin.replace({
+                replacements: [
+                    {
+                        pattern: /LIBRARYNAME/g,
+                        replacement: function (match, p1, offset, string) {
+                        	console.log('zxcvzxcv');
+                            return 'qqqqqqqqqqq';
+                        }
+                    }
+                ]})
+            },
 			// {
 			//   test: /(\.jsx|\.js)$/,
 			//   loader: "eslint-loader",

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 	<head>
@@ -5,6 +6,62 @@
 		<title>afasdfasdfasd</title>
 	<link href="../demo/index.css" rel="stylesheet"></head>
 	<body>
+		qqqqqqqqqqq qqqqqqqqqqq
+		<a
+	class="github-button"
+	href="https://github.com/"
+	data-count-href="//followers"
+	data-count-api="/users/#followers"
+	data-count-aria-label="# followers on GitHub"
+	aria-label="Follow @ on GitHub">
+	Follow @
+</a>
+<a
+	class="github-button"
+	href="https://github.com//"
+	data-icon="octicon-eye"
+	data-count-href="///watchers"
+	data-count-api="/repos//#subscribers_count"
+	data-count-aria-label="# watchers on GitHub"
+	aria-label="Watch / on GitHub">
+	Watch
+</a>
+<a
+	class="github-button"
+	href="https://github.com//"
+	data-icon="octicon-star"
+	data-count-href="///stargazers"
+	data-count-api="/repos//#stargazers_count"
+	data-count-aria-label="# stargazers on GitHub"
+	aria-label="Star / on GitHub">
+	Star
+</a>
+<a
+	class="github-button"
+	href="https://github.com///fork"
+	data-icon="octicon-repo-forked"
+	data-count-href="///network"
+	data-count-api="/repos//#forks_count"
+	data-count-aria-label="# forks on GitHub"
+	aria-label="Fork / on GitHub">
+	Fork
+</a>
+<a
+	class="github-button"
+	href="https://github.com///issues"
+	data-icon="octicon-issue-opened"
+	data-count-api="/repos//#open_issues_count"
+	data-count-aria-label="# issues on GitHub"
+	aria-label="Issue / on GitHub">
+	Issue
+</a>
+<a
+	class="github-button"
+	href="https://github.com///archive/master/dist.zip"
+	data-icon="octicon-cloud-download"
+	aria-label="Download / on GitHub">
+	Download
+</a>
 		<div id="demo"></div>
 		<div class="readme markdownCompiled">
 			<h1 id=stimulate>stimulate</h1> <p>javascript animation utility</p> <p><code>npm install stimulate</code></p> <p><code>import stimulate from &#39;stimulate&#39;;</code></p> <h2 id=overview>Overview</h2> <p>Stimulate helps you create animations with the following features:</p> <ul> <li>stopping</li> <li>resuming</li> <li>resetting</li> <li>looping</li> <li>delaying</li> <li>easing</li> <li>reporting progress</li> <li>handling onComplete callbacks</li> <li>achieving high frame rates</li> <li>integrating with various frameworks</li> <li>syncing and managing multiple instances</li> <li>reversing (even mid animation)</li> <li>changing speed (even mid animation)</li> <li>changing from and to (even mid animation)</li> </ul> <h2 id=basics>Basics</h2> <p>Stimulate increments over time for animations. Use it in conjunction with any performant DOM manipulation system (vanilla javascript, jQuery, React, Angular). </p> <p>Animation is achieved by showing a rapid sucession of frames. Stimulate&#39;s frame triggering is controlled through javascript: with window.requestAnimationFrame when it&#39;s available in the browser, and a recursive setTimeout method when it&#39;s not. Stimulate performance optimizations, such as accurate progress reporting regardless of browser-performance-restricted framerate inconsistency, frame-call batching and progress report syncing over simultaneous Stimulate instances, and initial frame customizability. More depth on those later.</p> <p>Stimulate does not use CSS3 transitions or @keyframes. CSS3 methods have their place, but they have certain deficiencies (slow element rendering, inefficient stopping, laggy initiation, limited easing capabilities, inefficient progress reporting, difficult onComplete callback handling). You can find CSS vs JS animation debates by googling.</p> <p>Here are some basic examples of using Stimulate in vanilla js, jQuery, and React, each of which moves an element to the right from 5px to 100px at a consistent rate over one second.</p> <h3 id=jquery>jQuery</h3> <pre><code>var $elFoo = $(&#39;#foo&#39;);
@@ -154,5 +211,6 @@ $button.on(&#39;click&#39;, function(){
 });
 </code></pre><p>Notice that some methods like <code>stop</code> are chainable. There will be more detail on various StimulationAspect methods later.</p> <h4 id=nesting-stimulationaspects>Nesting StimulationAspects</h4> <p>StimulationAspect instances have a child StimulationAspect. Parent and child have the following relationship:</p> <h5 id=certain-settings-are-inherited-by-the-child>certain settings are inherited by the child</h5> <h5 id=certain-methods-called-on-the-parent-get-called-on-the-child-automatically>certain methods called on the parent get called on the child automatically</h5> <h5 id=the-parent-s-progress-object-has-references-to-child-progress-objects-in-the-aspects-property>the parent&#39;s <code>progress</code> object has references to child <code>progress</code> objects in the <code>aspects</code> property</h5> <p>##### </p> <hr>
 		</div>
+		<script async defer src="https://buttons.github.io/buttons.js"></script>
 	<script type="text/javascript" src="../demo/index.js"></script></body>
 </html>

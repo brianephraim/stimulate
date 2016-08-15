@@ -108,8 +108,7 @@
 	      };
 	    }(),
 	        o = n(10),
-	        u = s(o),
-	        l = function () {
+	        u = s(o);console.log("qqqqqqqqqqq");var l = function () {
 	      function t(e) {
 	        var n = arguments.length <= 1 || void 0 === arguments[1] ? "root" : arguments[1],
 	            s = arguments[2];i(this, t), this.parent = s, this.debug = n, this.options = e, this.init();

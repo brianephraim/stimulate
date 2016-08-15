@@ -1,0 +1,55 @@
+<a
+	class="github-button"
+	href="https://github.com/<%= username %>"
+	data-count-href="/<%= username %>/followers"
+	data-count-api="/users/<%= username %>#followers"
+	data-count-aria-label="# followers on GitHub"
+	aria-label="Follow @<%= username %> on GitHub">
+	Follow @<%= username %>
+</a>
+<a
+	class="github-button"
+	href="https://github.com/<%= username %>/<%= libraryName %>"
+	data-icon="octicon-eye"
+	data-count-href="/<%= username %>/<%= libraryName %>/watchers"
+	data-count-api="/repos/<%= username %>/<%= libraryName %>#subscribers_count"
+	data-count-aria-label="# watchers on GitHub"
+	aria-label="Watch <%= username %>/<%= libraryName %> on GitHub">
+	Watch
+</a>
+<a
+	class="github-button"
+	href="https://github.com/<%= username %>/<%= libraryName %>"
+	data-icon="octicon-star"
+	data-count-href="/<%= username %>/<%= libraryName %>/stargazers"
+	data-count-api="/repos/<%= username %>/<%= libraryName %>#stargazers_count"
+	data-count-aria-label="# stargazers on GitHub"
+	aria-label="Star <%= username %>/<%= libraryName %> on GitHub">
+	Star
+</a>
+<a
+	class="github-button"
+	href="https://github.com/<%= username %>/<%= libraryName %>/fork"
+	data-icon="octicon-repo-forked"
+	data-count-href="/<%= username %>/<%= libraryName %>/network"
+	data-count-api="/repos/<%= username %>/<%= libraryName %>#forks_count"
+	data-count-aria-label="# forks on GitHub"
+	aria-label="Fork <%= username %>/<%= libraryName %> on GitHub">
+	Fork
+</a>
+<a
+	class="github-button"
+	href="https://github.com/<%= username %>/<%= libraryName %>/issues"
+	data-icon="octicon-issue-opened"
+	data-count-api="/repos/<%= username %>/<%= libraryName %>#open_issues_count"
+	data-count-aria-label="# issues on GitHub"
+	aria-label="Issue <%= username %>/<%= libraryName %> on GitHub">
+	Issue
+</a>
+<a
+	class="github-button"
+	href="https://github.com/<%= username %>/<%= libraryName %>/archive/master/dist.zip"
+	data-icon="octicon-cloud-download"
+	aria-label="Download <%= username %>/<%= libraryName %> on GitHub">
+	Download
+</a>
