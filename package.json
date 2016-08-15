@@ -2,7 +2,11 @@
   "name": "stimulate",
   "version": "0.0.8",
   "description": "animation utility",
-  "main": "dist/stimulate.min.js",
+  "main": "dist/stimulate.js",
+  "files": [
+		"dist",
+		"src/library"
+	],
   "scripts": {
     "build": "webpack --env=build && npm run commonjs2-import-example && npm run es2015-import-example",
     "dev": "webpack --progress --colors --watch --env=dev",

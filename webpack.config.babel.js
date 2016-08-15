@@ -38,7 +38,8 @@ const entryFiles = {
 };
 const outputFiles = {};
 if (env === 'build') {
-	outputFiles.library = `dist/${libraryName}.min`;
+	outputFiles.library = `dist/${libraryName}`;
+	outputFiles.libraryMin = `dist/${libraryName}.min`;
 	outputFiles.demo = 'demo/index';
 } else if (env === 'watch') {
 	outputFiles.demo = 'src/demo/demo';
@@ -50,10 +51,14 @@ if (env === 'build') {
 // Workaround:
 //  https://github.com/webpack/webpack/issues/300
 entry[outputFiles.library] = [entryFiles.library];
+entry[outputFiles.libraryMin] = [entryFiles.library];
 entry[outputFiles.demo] = [entryFiles.demo];
 
 if (env === 'build') {
-	registerPlugin('UglifyJsPlugin', new webpack.optimize.UglifyJsPlugin({ minimize: true }));
+	registerPlugin('UglifyJsPlugin', new webpack.optimize.UglifyJsPlugin({
+		include: /\.min\.js$/,
+		minimize: true,
+	}));
 	registerPlugin('ejstest-HtmlWebpackPlugin', new HtmlWebpackPlugin({
 		chunks: [outputFiles.demo],
 		filename: './demo/index.html',
