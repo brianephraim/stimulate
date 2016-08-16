@@ -93,7 +93,7 @@ moveModify(['src/import-examples/**/!(webpack.config).*', 'src/tonicExample.js']
 	return filePath.replace('src/', './');
 },
 (content) => {
-	return content.replace(/LIBRARYNAME/g, 'stimulate');
+	return content.replace(/LIBRARYNAME/g, libraryName);
 });
 
 if (env === 'build') {
@@ -193,7 +193,7 @@ const config = {
                         pattern: /LIBRARYNAME/g,
                         replacement: function (match, p1, offset, string) {
                         	console.log('zxcvzxcv');
-                            return 'qqqqqqqqqqq';
+                            return libraryName;
                         }
                     }
                 ]})

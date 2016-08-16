@@ -1,7 +1,7 @@
 import './stylesheet.css';
 import './file.scss';
-import stimulate, { easings } from '../library/index';
-// import stimulate, { easings } from '../dist/stimulate.min';
+import LIBRARYNAME, { easings } from '../library/index';
+// import LIBRARYNAME, { easings } from '../dist/LIBRARYNAME.min';
 import buildDemoUI from './buildDemoUI';
 import { setupEl, demoCoords, ready } from './util';
 import eases from 'eases';
@@ -17,7 +17,7 @@ ready(() => {
 		}
 	);
 	// let once = false;
-	const stimulation = stimulate({
+	const stimulation = LIBRARYNAME({
 		// reverse:true,
 		duration: 1000,
 		// delay: 1000,

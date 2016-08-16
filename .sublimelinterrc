@@ -3,7 +3,8 @@
         "eslint": {
             "excludes": [
             	"**/import-examples/**",
-            	"**/src/library/easings.js",
+                "**/src/tonicExample.js",
+                "**/src/library/easings.js",
                 "**/node_modules/**",
                 "**/vendor/**"
             ]

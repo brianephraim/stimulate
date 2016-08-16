@@ -1,12 +1,12 @@
 requirejs.config({
     paths: {
-        "stimulate": "../../dist/stimulate.min"
+        "LIBRARYNAME": "../../dist/LIBRARYNAME.min"
     }
 });
 
-require(['stimulate'], function(stimulateLib) {
-	var stimulate = stimulateLib.stimulate;
-	stimulate({
+require(['LIBRARYNAME'], function(LIBRARYNAMELib) {
+	var LIBRARYNAME = LIBRARYNAMELib.LIBRARYNAME;
+	LIBRARYNAME({
 		duration: 1000,
 		frame: function(){
 			console.log(this.progress.ratioCompleted)
