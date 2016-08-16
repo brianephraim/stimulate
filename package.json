@@ -10,7 +10,8 @@
   "scripts": {
     "build": "webpack --env=build && npm run commonjs2-import-example && npm run es2015-import-example",
     "dev": "webpack --progress --colors --watch --env=dev",
-    "test": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js",
+    "test": "mocha --compilers js:babel-core/register --colors ./test/*.spec.js",
+    "testwatch": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js",
     "watch": "webpack-dev-server --progress --colors --env=watch  && echo 'http://localhost:8080/webpack-dev-server/'",
     "commonjs2-import-example": "browserify ./import-examples/commonjs2/index.js -o ./import-examples/commonjs2/index-compiled.js -d",
     "es2015-import-example": "webpack --config ./src/import-examples/es2015/webpack.config.babel.js"
