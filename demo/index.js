@@ -122,7 +122,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					// delayAddsParentDelay: true,
 					// delay: 10,
 					aspects: {
-						qqqqqqqqqqq: {
+						asdf: {
 							// delayAddsParentDelay: true,
 							// delay: 10,
 							frame: function frame() {
@@ -268,8 +268,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	console.log('qqqqqqqqqqq');
 	
 	var StimulationAspect = function () {
 		function StimulationAspect(options) {

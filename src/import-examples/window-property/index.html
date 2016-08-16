@@ -1,0 +1,16 @@
+	<!DOCTYPE html>
+	<html>
+		<body>
+			<p>see the console for effect</p>
+			<script type="text/javascript" src="./dist/stimulate.min.js"></script>
+			<script>
+				stimulate.stimulate({
+					duration: 1000,
+					frame: function(){
+						console.log(this.progress.ratioCompleted);
+					}
+				})
+			</script>
+		</body>
+	</html>
+	

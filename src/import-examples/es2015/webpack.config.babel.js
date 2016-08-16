@@ -1,9 +1,10 @@
+const dirName = __dirname.replace('/src/import-examples/', /import-examples/);
 const config = {
 	entry:{
-		'index-compiled': `${__dirname}/index.js`,
+		'index-compiled': `${dirName}/index.js`,
 	},
 	output: {
-		path: `${__dirname}`,
+		path: `${dirName}`,
 		filename: '[name].js',
 	},
 	module: {

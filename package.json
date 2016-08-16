@@ -13,7 +13,7 @@
     "test": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js",
     "watch": "webpack-dev-server --progress --colors --env=watch  && echo 'http://localhost:8080/webpack-dev-server/'",
     "commonjs2-import-example": "browserify ./import-examples/commonjs2/index.js -o ./import-examples/commonjs2/index-compiled.js -d",
-    "es2015-import-example": "webpack --config ./import-examples/es2015/webpack.config.babel.js"
+    "es2015-import-example": "webpack --config ./src/import-examples/es2015/webpack.config.babel.js"
   },
   "repository": {
     "type": "git",
@@ -57,6 +57,7 @@
     "eslint-plugin-jsx-a11y": "^1.2.1",
     "eslint-plugin-react": "^5.2.2",
     "extract-text-webpack-plugin": "^1.0.1",
+    "fs-extra": "^0.30.0",
     "html-loader": "^0.4.3",
     "html-webpack-plugin": "^2.22.0",
     "json-loader": "^0.5.4",

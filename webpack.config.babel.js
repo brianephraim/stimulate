@@ -2,6 +2,7 @@ import webpack from 'webpack';
 import jsonImporter from 'node-sass-json-importer';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+var glob = require("glob");
 
 import path from 'path';
 // env comes from package.json's scipts item property mode arguments
@@ -60,6 +61,40 @@ if (env === 'build') {
 entry[outputFiles.library] = [entryFiles.library];
 entry[outputFiles.libraryMin] = [entryFiles.library];
 entry[outputFiles.demo] = [entryFiles.demo];
+
+import fs from 'fs-extra';
+function moveModify(source, modifyPath, modifyContent) {
+	let sources = [];
+	if (typeof source === 'object') {
+		sources = source;
+	} else {
+		sources.push(source);
+	}
+	let toCopy = [];
+	sources.forEach((pattern) => {
+		toCopy = [
+			...toCopy,
+			...glob.sync(pattern),
+		];
+	});
+	toCopy.forEach((filePath) => {
+		let filePathOut = filePath;
+		if (modifyPath) {
+			filePathOut = modifyPath(filePath);
+		}
+		let content = fs.readFileSync(filePath, 'utf8');
+		if (modifyContent) {
+			content = modifyContent(content, filePath, filePathOut);
+		}
+		fs.outputFileSync(filePathOut, content);
+	});
+}
+moveModify(['src/import-examples/**/!(webpack.config).*', 'src/tonicExample.js'], (filePath) => {
+	return filePath.replace('src/', './');
+},
+(content) => {
+	return content.replace(/LIBRARYNAME/g, 'stimulate');
+});
 
 if (env === 'build') {
 	registerPlugin('UglifyJsPlugin', new webpack.optimize.UglifyJsPlugin({
