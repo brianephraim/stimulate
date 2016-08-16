@@ -17,7 +17,8 @@
     "es2015-import-example": "webpack --config ./src/import-examples/es2015/webpack.config.babel.js",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "cover": "babel-node ./node_modules/.bin/babel-istanbul cover ./node_modules/.bin/_mocha  --report lcovonly -- test/library.spec.js",
-    "localcover": "source .env && npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "coversend": "source .env && npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "coverread": "babel-node ./node_modules/.bin/babel-istanbul cover ./node_modules/.bin/_mocha -- test/library.spec.js"
   },
   "repository": {
     "type": "git",
