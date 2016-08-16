@@ -16,8 +16,8 @@
     "commonjs2-import-example": "browserify ./import-examples/commonjs2/index.js -o ./import-examples/commonjs2/index-compiled.js -d",
     "es2015-import-example": "webpack --config ./src/import-examples/es2015/webpack.config.babel.js",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "cover": "babel-node ./node_modules/.bin/babel-istanbul cover ./node_modules/.bin/_mocha  --report lcovonly -- test/library.spec.js  && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
-    "localcover": "source .env && npm run cover"
+    "cover": "babel-node ./node_modules/.bin/babel-istanbul cover ./node_modules/.bin/_mocha  --report lcovonly -- test/library.spec.js",
+    "localcover": "source .env && npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "repository": {
     "type": "git",
