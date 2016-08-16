@@ -2,7 +2,9 @@ import webpack from 'webpack';
 import jsonImporter from 'node-sass-json-importer';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-var glob = require("glob");
+
+import glob from 'glob';
+import fs from 'fs-extra';
 
 import path from 'path';
 // env comes from package.json's scipts item property mode arguments
@@ -62,7 +64,7 @@ entry[outputFiles.library] = [entryFiles.library];
 entry[outputFiles.libraryMin] = [entryFiles.library];
 entry[outputFiles.demo] = [entryFiles.demo];
 
-import fs from 'fs-extra';
+
 function moveModify(source, modifyPath, modifyContent) {
 	let sources = [];
 	if (typeof source === 'object') {
@@ -89,40 +91,41 @@ function moveModify(source, modifyPath, modifyContent) {
 		fs.outputFileSync(filePathOut, content);
 	});
 }
-moveModify(['src/import-examples/**/!(webpack.config).*', 'src/tonicExample.js'], (filePath) => {
-	return filePath.replace('src/', './');
-},
-(content) => {
-	return content.replace(/LIBRARYNAME/g, libraryName);
-});
 
 if (env === 'build') {
+	moveModify(['src/import-examples/**/!(webpack.config).*', 'src/tonicExample.js'], (filePath) => {
+		return filePath.replace('src/', './');
+	},
+	(content) => {
+		return content.replace(/LIBRARYNAME/g, libraryName);
+	});
+
 	registerPlugin('UglifyJsPlugin', new webpack.optimize.UglifyJsPlugin({
 		include: /\.min\.js$/,
 		minimize: true,
 	}));
-	registerPlugin('ejstest-HtmlWebpackPlugin', new HtmlWebpackPlugin({
+	const indexHtmlSettings = {
 		chunks: [outputFiles.demo],
-		filename: './demo/index.html',
-		template: 'src/demo/index.ejs',
-		title: 'afasdfasdfasd',
-	}));
-	registerPlugin('ejstestxx-HtmlWebpackPlugin', new HtmlWebpackPlugin({
-		chunks: [outputFiles.demo],
-		filename: './index.html',
 		template: 'src/demo/index.ejs',
 		title: 'afasdfasdfasd',
 		username,
 		libraryName,
-
+	};
+	registerPlugin('demoIndex-HtmlWebpackPlugin', new HtmlWebpackPlugin({
+		filename: './demo/index.html',
+		...indexHtmlSettings,
 	}));
+	registerPlugin('rootIndex-HtmlWebpackPlugin', new HtmlWebpackPlugin({
+		filename: './index.html',
+		...indexHtmlSettings,
+	}));
+	registerPlugin('StringReplacePlugin', new StringReplacePlugin());
 } else {
-	registerPlugin('demo-HtmlWebpackPlugin', new HtmlWebpackPlugin({
+	registerPlugin('demoDevIndex-HtmlWebpackPlugin', new HtmlWebpackPlugin({
 		chunks: [outputFiles.demo],
 		filename: './demo/index.html',
 	}));
 }
-plugins.push(new StringReplacePlugin())
 
 const config = {
 	entry,
@@ -147,7 +150,7 @@ const config = {
 				},
 			},
 			{
-				test: /\.js$/,
+				test: /(\.jsx|\.js)$/,
 				loader: 'eslint-loader',
 				exclude: /node_modules/,
 				query: {
@@ -185,24 +188,17 @@ const config = {
 				test: /\.md/,
 				loaders: ['html', 'markdown'],
 			},
-			{ 
-            test: /\.js|\.html|\.ejs$/,
-            loader: StringReplacePlugin.replace({
-                replacements: [
-                    {
-                        pattern: /LIBRARYNAME/g,
-                        replacement: function (match, p1, offset, string) {
-                        	console.log('zxcvzxcv');
-                            return libraryName;
-                        }
-                    }
-                ]})
-            },
-			// {
-			//   test: /(\.jsx|\.js)$/,
-			//   loader: "eslint-loader",
-			//   exclude: /node_modules/
-			// }
+			{
+				test: /\.js|\.html|\.ejs$/,
+				loader: StringReplacePlugin.replace({
+					replacements: [{
+						pattern: /LIBRARYNAME/g,
+						replacement(/* match, p1, offset, string */) {
+							return libraryName;
+						},
+					}],
+				}),
+			},
 		],
 	},
 	sassLoader: {
