@@ -79,7 +79,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _stimulate2 = _interopRequireDefault(_stimulate);
 	
-	var _easings = __webpack_require__(14);
+	var _easings = __webpack_require__(12);
 	
 	var _easings2 = _interopRequireDefault(_easings);
 	
@@ -190,6 +190,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				_sharedTiming2.default.makeStamp('start');
 				this.timestamps.start = _sharedTiming2.default.stamps.start;
 				this.timestamps.recentRaf = null;
+	
+				this.frameCount = 0;
 	
 				this.iterateAspectNames(function (name) {
 					if (!resetAll) {
@@ -308,6 +310,7 @@ return /******/ (function(modules) { // webpackBootstrap
 								delay: delay,
 								duration: duration
 							});
+	
 							var delayEveryLoop = _this2.lookupSetting('delayEveryLoop');
 							if (ratioCompleted > 0 && ratioCompleted < 1 && _this2.lastDelaySettingWhileDelaying === null) {
 								_this2.lastDelaySettingWhileDelaying = delay;
@@ -412,7 +415,25 @@ return /******/ (function(modules) { // webpackBootstrap
 							}
 	
 							if (_this2.settings.frame && withinRatioBounds) {
+								// const startExtreme = reverse ? 1 : 0;
+								// if (this.settings.itDescription) {
+								// 	console.log(this.settings.itDescription);
+								// }
+								// console.log(this.lookupSetting('skipZeroFrame'),this.frameCount === 0,ratioCompleted,startExtreme);
+								// if (this.settings.boomer && this.lookupSetting('skipZeroFrame') && this.frameCount === 0 && delay && startExtreme === ratioCompleted) {
+								// console.log('vvvvvvvvvvv');
+								// console.log('--- wtf ---');
+								// console.log('--- ' + this.settings.itDescription);
+								// console.log(this.timestamps.start,this.timestamps.raf);
+								// console.log('^^^^^^^^^^^');
+								// }
+								// if (this.settings.boomer) {
+								// 	console.log('vvvvvvvvvvv');
+								// 	console.log(this.timestamps.start,this.timestamps.recentRaf,ratioCompleted);
+								// 	console.log('^^^^^^^^^^^');
+								// }
 								var progressChanges = _this2.settings.frame.apply(_this2, [_this2.progress]);
+								_this2.frameCount++;
 								Object.assign(_this2.progress, progressChanges);
 							}
 	
@@ -654,262 +675,87 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 11 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var now = __webpack_require__(12)
-	  , root = typeof window === 'undefined' ? global : window
-	  , vendors = ['moz', 'webkit']
-	  , suffix = 'AnimationFrame'
-	  , raf = root['request' + suffix]
-	  , caf = root['cancel' + suffix] || root['cancelRequest' + suffix]
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 	
-	for(var i = 0; !raf && i < vendors.length; i++) {
-	  raf = root[vendors[i] + 'Request' + suffix]
-	  caf = root[vendors[i] + 'Cancel' + suffix]
-	      || root[vendors[i] + 'CancelRequest' + suffix]
+	var now = Date.now,
+	    root = typeof window === 'undefined' ? global : window,
+	    vendors = ['moz', 'webkit'],
+	    suffix = 'AnimationFrame',
+	    raf = root['request' + suffix],
+	    caf = root['cancel' + suffix] || root['cancelRequest' + suffix];
+	
+	for (var i = 0; !raf && i < vendors.length; i++) {
+	  raf = root[vendors[i] + 'Request' + suffix];
+	  caf = root[vendors[i] + 'Cancel' + suffix] || root[vendors[i] + 'CancelRequest' + suffix];
 	}
 	
 	// Some versions of FF have rAF but not cAF
-	if(!raf || !caf) {
-	  var last = 0
-	    , id = 0
-	    , queue = []
-	    , frameDuration = 1000 / 60
+	if (!raf || !caf) {
+	  var last = 0,
+	      id = 0,
+	      queue = [],
+	      frameDuration = 1000 / 60;
 	
-	  raf = function(callback) {
-	    if(queue.length === 0) {
-	      var _now = now()
-	        , next = Math.max(0, frameDuration - (_now - last))
-	      last = next + _now
-	      setTimeout(function() {
-	        var cp = queue.slice(0)
+	  raf = function raf(callback) {
+	    if (queue.length === 0) {
+	      var _now = now(),
+	          next = Math.max(10, frameDuration - (_now - last));
+	      last = next + _now;
+	      setTimeout(function () {
+	        var cp = queue.slice(0);
 	        // Clear queue here to prevent
 	        // callbacks from appending listeners
 	        // to the current frame's queue
-	        queue.length = 0
-	        for(var i = 0; i < cp.length; i++) {
-	          if(!cp[i].cancelled) {
-	            try{
-	              cp[i].callback(last)
-	            } catch(e) {
-	              setTimeout(function() { throw e }, 0)
+	        queue.length = 0;
+	        for (var i = 0; i < cp.length; i++) {
+	          if (!cp[i].cancelled) {
+	            try {
+	              cp[i].callback(last);
+	            } catch (e) {
+	              setTimeout(function () {
+	                throw e;
+	              }, 0);
 	            }
 	          }
 	        }
-	      }, Math.round(next))
+	      }, frameDuration);
 	    }
 	    queue.push({
 	      handle: ++id,
 	      callback: callback,
 	      cancelled: false
-	    })
-	    return id
-	  }
+	    });
+	    return id;
+	  };
 	
-	  caf = function(handle) {
-	    for(var i = 0; i < queue.length; i++) {
-	      if(queue[i].handle === handle) {
-	        queue[i].cancelled = true
+	  caf = function caf(handle) {
+	    for (var i = 0; i < queue.length; i++) {
+	      if (queue[i].handle === handle) {
+	        queue[i].cancelled = true;
 	      }
 	    }
-	  }
+	  };
 	}
 	
-	module.exports = function(fn) {
+	module.exports = function (fn) {
 	  // Wrap in a new function to prevent
 	  // `cancel` potentially being assigned
 	  // to the native rAF function
-	  return raf.call(root, fn)
-	}
-	module.exports.cancel = function() {
-	  caf.apply(root, arguments)
-	}
-	module.exports.polyfill = function() {
-	  root.requestAnimationFrame = raf
-	  root.cancelAnimationFrame = caf
-	}
-	
+	  return raf.call(root, fn);
+	};
+	module.exports.cancel = function () {
+	  caf.apply(root, arguments);
+	};
+	module.exports.polyfill = function () {
+	  root.requestAnimationFrame = raf;
+	  root.cancelAnimationFrame = caf;
+	};
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {// Generated by CoffeeScript 1.7.1
-	(function() {
-	  var getNanoSeconds, hrtime, loadTime;
-	
-	  if ((typeof performance !== "undefined" && performance !== null) && performance.now) {
-	    module.exports = function() {
-	      return performance.now();
-	    };
-	  } else if ((typeof process !== "undefined" && process !== null) && process.hrtime) {
-	    module.exports = function() {
-	      return (getNanoSeconds() - loadTime) / 1e6;
-	    };
-	    hrtime = process.hrtime;
-	    getNanoSeconds = function() {
-	      var hr;
-	      hr = hrtime();
-	      return hr[0] * 1e9 + hr[1];
-	    };
-	    loadTime = getNanoSeconds();
-	  } else if (Date.now) {
-	    module.exports = function() {
-	      return Date.now() - loadTime;
-	    };
-	    loadTime = Date.now();
-	  } else {
-	    module.exports = function() {
-	      return new Date().getTime() - loadTime;
-	    };
-	    loadTime = new Date().getTime();
-	  }
-	
-	}).call(this);
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)))
-
-/***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	// shim for using process in browser
-	var process = module.exports = {};
-	
-	// cached from whatever global is present so that test runners that stub it
-	// don't break things.  But we need to wrap it in a try catch in case it is
-	// wrapped in strict mode code which doesn't define any globals.  It's inside a
-	// function because try/catches deoptimize in certain engines.
-	
-	var cachedSetTimeout;
-	var cachedClearTimeout;
-	
-	(function () {
-	    try {
-	        cachedSetTimeout = setTimeout;
-	    } catch (e) {
-	        cachedSetTimeout = function () {
-	            throw new Error('setTimeout is not defined');
-	        }
-	    }
-	    try {
-	        cachedClearTimeout = clearTimeout;
-	    } catch (e) {
-	        cachedClearTimeout = function () {
-	            throw new Error('clearTimeout is not defined');
-	        }
-	    }
-	} ())
-	function runTimeout(fun) {
-	    if (cachedSetTimeout === setTimeout) {
-	        return setTimeout(fun, 0);
-	    } else {
-	        return cachedSetTimeout.call(null, fun, 0);
-	    }
-	}
-	function runClearTimeout(marker) {
-	    if (cachedClearTimeout === clearTimeout) {
-	        clearTimeout(marker);
-	    } else {
-	        cachedClearTimeout.call(null, marker);
-	    }
-	}
-	var queue = [];
-	var draining = false;
-	var currentQueue;
-	var queueIndex = -1;
-	
-	function cleanUpNextTick() {
-	    if (!draining || !currentQueue) {
-	        return;
-	    }
-	    draining = false;
-	    if (currentQueue.length) {
-	        queue = currentQueue.concat(queue);
-	    } else {
-	        queueIndex = -1;
-	    }
-	    if (queue.length) {
-	        drainQueue();
-	    }
-	}
-	
-	function drainQueue() {
-	    if (draining) {
-	        return;
-	    }
-	    var timeout = runTimeout(cleanUpNextTick);
-	    draining = true;
-	
-	    var len = queue.length;
-	    while(len) {
-	        currentQueue = queue;
-	        queue = [];
-	        while (++queueIndex < len) {
-	            if (currentQueue) {
-	                currentQueue[queueIndex].run();
-	            }
-	        }
-	        queueIndex = -1;
-	        len = queue.length;
-	    }
-	    currentQueue = null;
-	    draining = false;
-	    runClearTimeout(timeout);
-	}
-	
-	process.nextTick = function (fun) {
-	    var args = new Array(arguments.length - 1);
-	    if (arguments.length > 1) {
-	        for (var i = 1; i < arguments.length; i++) {
-	            args[i - 1] = arguments[i];
-	        }
-	    }
-	    queue.push(new Item(fun, args));
-	    if (queue.length === 1 && !draining) {
-	        runTimeout(drainQueue);
-	    }
-	};
-	
-	// v8 likes predictible objects
-	function Item(fun, array) {
-	    this.fun = fun;
-	    this.array = array;
-	}
-	Item.prototype.run = function () {
-	    this.fun.apply(null, this.array);
-	};
-	process.title = 'browser';
-	process.browser = true;
-	process.env = {};
-	process.argv = [];
-	process.version = ''; // empty string to avoid regexp issues
-	process.versions = {};
-	
-	function noop() {}
-	
-	process.on = noop;
-	process.addListener = noop;
-	process.once = noop;
-	process.off = noop;
-	process.removeListener = noop;
-	process.removeAllListeners = noop;
-	process.emit = noop;
-	
-	process.binding = function (name) {
-	    throw new Error('process.binding is not supported');
-	};
-	
-	process.cwd = function () { return '/' };
-	process.chdir = function (dir) {
-	    throw new Error('process.chdir is not supported');
-	};
-	process.umask = function() { return 0; };
-
-
-/***/ },
-/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";

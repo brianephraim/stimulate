@@ -119,14 +119,14 @@ if (env === 'build') {
 		filename: './index.html',
 		...indexHtmlSettings,
 	}));
-	registerPlugin('StringReplacePlugin', new StringReplacePlugin());
+	
 } else {
 	registerPlugin('demoDevIndex-HtmlWebpackPlugin', new HtmlWebpackPlugin({
 		chunks: [outputFiles.demo],
 		filename: './demo/index.html',
 	}));
 }
-
+registerPlugin('StringReplacePlugin', new StringReplacePlugin());
 const config = {
 	entry,
 	devtool: 'source-map',

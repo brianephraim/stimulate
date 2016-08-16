@@ -68,6 +68,8 @@ class StimulationAspect {
 		this.timestamps.start = sharedTiming.stamps.start;
 		this.timestamps.recentRaf = null;
 
+		this.frameCount = 0;
+
 		this.iterateAspectNames((name) => {
 			if (!resetAll) {
 				this.aspects[name] = new StimulationAspect({
@@ -172,6 +174,7 @@ class StimulationAspect {
 						delay,
 						duration,
 					});
+
 					const delayEveryLoop = this.lookupSetting('delayEveryLoop');
 					if (
 						ratioCompleted > 0 &&
@@ -289,7 +292,25 @@ class StimulationAspect {
 					}
 
 					if (this.settings.frame && withinRatioBounds) {
+						// const startExtreme = reverse ? 1 : 0;
+						// if (this.settings.itDescription) {
+						// 	console.log(this.settings.itDescription);
+						// }
+						// console.log(this.lookupSetting('skipZeroFrame'),this.frameCount === 0,ratioCompleted,startExtreme);
+						// if (this.settings.boomer && this.lookupSetting('skipZeroFrame') && this.frameCount === 0 && delay && startExtreme === ratioCompleted) {
+							// console.log('vvvvvvvvvvv');
+							// console.log('--- wtf ---');
+							// console.log('--- ' + this.settings.itDescription);
+							// console.log(this.timestamps.start,this.timestamps.raf);
+							// console.log('^^^^^^^^^^^');
+						// }
+						// if (this.settings.boomer) {
+						// 	console.log('vvvvvvvvvvv');
+						// 	console.log(this.timestamps.start,this.timestamps.recentRaf,ratioCompleted);
+						// 	console.log('^^^^^^^^^^^');
+						// }
 						const progressChanges = this.settings.frame.apply(this, [this.progress]);
+						this.frameCount++;
 						Object.assign(this.progress, progressChanges);
 					}
 

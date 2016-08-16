@@ -196,6 +196,7 @@ describe('Using this library... ', () => {
 			});
 			skipsTrue = stimulate({
 				duration: 500,
+				boomer:true,
 				skipZeroFrame: true,
 				frame() {
 					valWhenTrue = skipsTrue.progress.ratioCompleted;
@@ -229,7 +230,7 @@ describe('Using this library... ', () => {
 					this.stop();
 					setTimeout(() => {
 						done();
-					}, 100);
+					}, 500);
 				},
 			});
 		});
@@ -708,6 +709,7 @@ describe('Using this library... ', () => {
 					duration: 321,
 					...settings,
 				};
+				this.s.itDescription = itDescription;
 				this.s.frame = (progress) => {
 					if (this.s.frameExtra) {
 						this.s.frameExtra(progress, itDescription);
@@ -850,9 +852,12 @@ describe('Using this library... ', () => {
 			});
 		});
 		before((done) => {
+
 			allTests.forEach((test) => {
 				const t = test;
-				t.itTest = test.callTest();
+				// setTimeout(function(){
+					t.itTest = test.callTest();
+				// },Math.floor(Math.random() * 60) + 30);
 			});
 
 			setTimeout(() => {

@@ -1,4 +1,4 @@
-import raf, { cancel as caf } from 'raf';
+import raf, { cancel as caf } from './raf';
 
 class SharedTiming {
 	constructor() {
