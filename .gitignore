@@ -38,3 +38,5 @@ jspm_packages
 
 # Generated files
 build/*
+
+.coveralls.yml

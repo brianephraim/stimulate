@@ -699,7 +699,7 @@ describe('Using this library... ', () => {
 	it('resetAll');
 	it('reverse');
 
-	describe('More test for zero frame behavior with delay, reverse, loop', () => {
+	describe.skip('More test for zero frame behavior with delay, reverse, loop', () => {
 		class Test {
 			constructor(settings, itDescription) {
 				this.frameCount = 0;

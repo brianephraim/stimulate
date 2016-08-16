@@ -1,4 +1,9 @@
 # stimulate
+
+[![Build Status](https://travis-ci.org/defualt/stimulate.svg?branch=master)](https://travis-ci.org/defualt/stimulate)
+
+[![Coverage Status](https://coveralls.io/repos/github/defualt/stimulate/badge.svg?branch=master)](https://coveralls.io/github/defualt/stimulate?branch=master)
+
 javascript animation utility
 
 `npm install stimulate`
