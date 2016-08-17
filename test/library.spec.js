@@ -623,6 +623,14 @@ describe('Using this library... ', () => {
 		it('progressAt will return easedTweened by default', () => {
 			expect(stimulation.aspects.a.aspects.b.progress.easedTweened).to.be.equal(stimulation.progressAt('a.b'));
 		});
+		it('progressAt returns the aspectTree\'s to level progress easedTweened if no path is specified', () => {
+			expect(stimulation.aspectTree.progress.easedTweened).to.be.equal(stimulation.progressAt(''));
+		});
+		it('progressAt throws an error if the path is not valid/available', () => {
+			expect((() => {
+				stimulation.progressAt('a.b.t.s.x');
+			})).to.throw('Error: You specified an invalid aspect path for .progressAt().');
+		});
 	});
 
 	describe('loop it, so ', () => {
@@ -873,6 +881,238 @@ describe('Using this library... ', () => {
 				console.log(test.itDescription,test.itTest.oneCount,test.expectOneCount);
 				expect(test.itTest.oneCount).to.be.equal(test.expectOneCount);
 			});
+		});
+	});
+
+
+	describe('resuming', () => {
+		let stopVal = 999;
+		let stopProgress = {};
+		let resumeVal = -9999;
+		let resumeProgress = {};
+		let a;
+		before((done) => {
+			a = stimulate({
+				duration: 200,
+				onComplete() {
+					done();
+				},
+			});
+
+			setTimeout(() => {
+				a.stop();
+				stopProgress = a.progress;
+				stopVal = a.progress.ratioCompleted;
+				a.resume();
+				resumeProgress = a.progress;
+				resumeVal = a.progress.ratioCompleted;
+			}, 100);
+		});
+		it('when resuming a stumulation, the progress object persists', () => {
+			expect(stopProgress).to.be.equal(resumeProgress);
+		});
+		it('when resuming immedate progress values match the value when stopped', () => {
+			expect(stopVal).to.be.equal(resumeVal);
+		});
+		it('after resuming, progress values increase', () => {
+			expect(stopVal).to.be.lessThan(a.progress.ratioCompleted);
+		});
+	});
+
+	describe('resetting', () => {
+		let a;
+		let valBeforeReset;
+		let valAfterReset;
+		let progressBeforeReset = {};
+		let valBeforeResetAspect;
+		let valAfterResetAspect;
+		let progressBeforeResetAspect = {};
+		before((done) => {
+			a = stimulate({
+				duration: 200,
+				aspects: {
+					b: {
+						duration: 210,
+					},
+				},
+				onComplete() {
+					done();
+				},
+			});
+			setTimeout(() => {
+				progressBeforeReset = a.progress;
+				valBeforeReset = a.progress.ratioCompleted;
+				progressBeforeResetAspect = a.progress.aspects.b;
+				valBeforeResetAspect = a.progress.aspects.b.ratioCompleted;
+				a.resetAll();
+				valAfterReset = a.progress.ratioCompleted;
+				valAfterResetAspect = a.progress.aspects.b.ratioCompleted;
+			}, 100);
+		});
+		it('after resetting, progress goes back to zero', () => {
+			expect(valBeforeReset).to.be.greaterThan(0);
+			expect(valAfterReset).to.be.equal(0);
+		});
+
+		it('after resetting, progress goes back to zero for aspects', () => {
+			expect(valBeforeResetAspect).to.be.greaterThan(0);
+			expect(valAfterResetAspect).to.be.equal(0);
+		});
+
+		it('after resetting, the progress object still persist', () => {
+			expect(progressBeforeReset).to.be.equal(a.progress);
+		});
+
+		it('after resetting, the progress object still persist', () => {
+			expect(progressBeforeResetAspect).to.be.equal(a.progress.aspects.b);
+		});
+	});
+
+	describe('updating setting', () => {
+		let unpersisted;
+		let valBeforeUpdateUnpersisted;
+		let valAfterStopUnpersisted;
+		let persisted;
+		const originalDuration = 200;
+		before((done) => {
+			unpersisted = stimulate({
+				duration: originalDuration,
+			});
+			persisted = stimulate({
+				usePersistedSettings: true,
+				duration: originalDuration,
+			});
+			setTimeout(() => {
+				valBeforeUpdateUnpersisted = unpersisted.progress.ratioCompleted;
+				unpersisted.updateSettings({
+					duration: 10000,
+				});
+				persisted.updateSettings({
+					duration: 10000,
+				});
+				setTimeout(() => {
+					unpersisted.stop();
+					persisted.stop();
+					valAfterStopUnpersisted = unpersisted.progress.ratioCompleted;
+					unpersisted.resetAll();
+					persisted.resetAll();
+					unpersisted.stop();
+					persisted.stop();
+					done();
+				}, 50);
+			}, 50);
+		});
+		it('updateSetting affects future progress values', () => {
+			expect(valBeforeUpdateUnpersisted).to.be.greaterThan(valAfterStopUnpersisted);
+		});
+		it('updateSetting value persists if usePersistedSettings:true after reset', () => {
+			expect(unpersisted.settings.duration).to.be.equal(originalDuration);
+			expect(persisted.settings.duration).to.be.not.equal(originalDuration);
+		});
+	});
+
+	describe('aspectAt method', () => {
+		let a;
+		before((done) => {
+			a = stimulate({
+				duration: 100,
+				aspects: {
+					b: {
+						from: 10,
+						to: 99,
+						aspects: {
+							c: {
+								from: 5,
+								to: 54,
+							},
+						},
+					},
+				},
+			});
+			// console.log('sss',a.aspectAt('b.R'))
+			setTimeout(() => {
+				done();
+			}, 200);
+		});
+		it('aspectAt is a shortcut to traversing the stimulation object with dot syntax', () => {
+			expect(a.aspectAt('b.c')).to.be.equal(a.aspects.b.aspects.c);
+		});
+		it('aspectAt throws an error if the path is not valid/available', () => {
+			expect((() => {
+				a.aspectAt('b.R.x');
+			})).to.throw('Error: You specified an invalid aspect path for .aspectAt().');
+		});
+	});
+
+	describe('reversing', () => {
+		let a;
+		let valBeforeRev;
+		let valAfterRev;
+		before((done) => {
+			a = stimulate({
+				duration: 500,
+				onComplete() {
+					done();
+				},
+			});
+			setTimeout(() => {
+				valBeforeRev = a.progress.ratioCompleted;
+				a.updateSettings({
+					reverse: true,
+				});
+				setTimeout(() => {
+					valAfterRev = a.progress.ratioCompleted;
+				}, 100);
+			}, 300);
+		});
+		it('value after reversing midway have decreased', () => {
+			expect(valAfterRev).to.be.lessThan(valBeforeRev);
+		});
+		it('completed value after reversing midway is 0', () => {
+			expect(a.progress.ratioCompleted).to.be.equal(0);
+		});
+	});
+
+
+	describe.skip('reversing with loops', () => {
+		let a;
+		let lastToComplete = null;
+		const start = Date.now();
+		before((done) => {
+			a = stimulate({
+				loop: 3,
+				duration: 400,
+				frame() {
+					console.log(this.progress.ratioCompleted);
+				},
+				onComplete() {
+					console.log('CC',this.currentLoopCount, Date.now() - start)
+					if (!lastToComplete) {
+						lastToComplete = 'not me';
+					} else {
+						lastToComplete = 'stimulation';
+						done();
+					}
+				},
+			});
+			setTimeout(() => {
+				a.updateSettings({
+					reverse: true,
+				});
+				console.log('REVERSE')
+				setTimeout(() => {
+					console.log('SS', Date.now() - start);
+					if (!lastToComplete) {
+						lastToComplete = 'not me';
+					} else {
+						lastToComplete = 'timeout';
+						done();
+					}
+				}, 200);
+			}, 420);
+		});
+		it('if reversing midway occurs after the inital loop completes, stimulation will continue backwards until through that entire first loop as well as whatever progress of second loop', () => {
+			expect(lastToComplete).to.be.equal('stimulation');
 		});
 	});
 });

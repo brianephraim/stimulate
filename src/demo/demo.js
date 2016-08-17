@@ -21,7 +21,7 @@ ready(() => {
 		// reverse:true,
 		duration: 1000,
 		// delay: 1000,
-		// loop: 2,
+		loop: 3,
 		// delayEveryLoop: true,
 		// skipZeroFrame: false,
 		usePersistedSettings: true,
