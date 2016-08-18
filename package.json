@@ -5,7 +5,8 @@
   "main": "dist/stimulate.js",
   "files": [
     "dist",
-    "src/library"
+    "src/library",
+    "tonicExample.js"
   ],
   "scripts": {
     "build": "webpack --env=build && npm run commonjs2-import-example && npm run es2015-import-example",
