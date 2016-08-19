@@ -1,9 +1,9 @@
 import './stylesheet.css';
 import './file.scss';
-import LIBRARYNAME, { easings } from '../library/index';
-// import LIBRARYNAME, { easings } from '../dist/LIBRARYNAME.min';
+import LIBRARYNAME from '../library/index';
 import buildDemoUI from './buildDemoUI';
 import { setupEl, demoCoords, ready } from './util';
+import easings from './easings';
 import eases from 'eases';
 
 const spring = easings.spring();
@@ -20,7 +20,7 @@ ready(() => {
 	let last = null;
 	let crossedZeroToOneCount = 0;
 	const stimulation = LIBRARYNAME({
-		reverse:true,
+		reverse: true,
 		duration: 1000,
 		// delay: 1000,
 		loop: 3,
@@ -56,7 +56,7 @@ ready(() => {
 		frame() {
 			if (last !== null && this.settings.reverse && last < this.progress.ratioCompleted) {
 				crossedZeroToOneCount++;
-				console.log('d')
+				console.log('d');
 			}
 			if (this.currentLoopCount === 3 && this.progress.ratioCompleted > 0.5 && !once) {
 				this.updateSettings({

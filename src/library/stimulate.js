@@ -230,9 +230,6 @@ class StimulationAspect {
 					if (reverse) {
 						ratioCompleted = 1 - ratioCompleted;
 					}
-
-					
-
 					let ratioLimit = 1;
 					let withinLimit = ratioCompleted < ratioLimit;
 					const from = this.settings.from;
@@ -301,8 +298,15 @@ class StimulationAspect {
 						// if (this.settings.itDescription) {
 						// 	console.log(this.settings.itDescription);
 						// }
-						// console.log(this.lookupSetting('skipZeroFrame'),this.frameCount === 0,ratioCompleted,startExtreme);
-						// if (this.settings.boomer && this.lookupSetting('skipZeroFrame') && this.frameCount === 0 && delay && startExtreme === ratioCompleted) {
+						// console.log(
+							// this.lookupSetting('skipZeroFrame'),
+							// this.frameCount === 0,
+							// ratioCompleted,startExtreme
+						// );
+						// if (
+							// this.settings.boomer && this.lookupSetting('skipZeroFrame') &&
+							// this.frameCount === 0 && delay && startExtreme === ratioCompleted
+						// ) {
 							// console.log('vvvvvvvvvvv');
 							// console.log('--- wtf ---');
 							// console.log('--- ' + this.settings.itDescription);

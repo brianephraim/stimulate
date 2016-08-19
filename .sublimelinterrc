@@ -4,7 +4,7 @@
             "excludes": [
             	"**/import-examples/**",
                 "**/src/tonicExample.js",
-                "**/src/library/easings.js",
+                "**/src/demo/easings.js",
                 "**/src/library/raf.js",
                 "**/node_modules/**",
                 "**/vendor/**"
