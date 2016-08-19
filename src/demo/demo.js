@@ -16,9 +16,11 @@ ready(() => {
 			xy: demoCoords.start,
 		}
 	);
-	// let once = false;
+	let once = false;
+	let last = null;
+	let crossedZeroToOneCount = 0;
 	const stimulation = LIBRARYNAME({
-		// reverse:true,
+		reverse:true,
 		duration: 1000,
 		// delay: 1000,
 		loop: 3,
@@ -52,7 +54,20 @@ ready(() => {
 			},
 		},
 		frame() {
-			// console.log(this.progress.ratioCompleted);
+			if (last !== null && this.settings.reverse && last < this.progress.ratioCompleted) {
+				crossedZeroToOneCount++;
+				console.log('d')
+			}
+			if (this.currentLoopCount === 3 && this.progress.ratioCompleted > 0.5 && !once) {
+				this.updateSettings({
+					reverse: true,
+				});
+				once = true;
+			}
+			last = this.progress.ratioCompleted;
+
+
+			console.log(this.currentLoopCount);
 			const freshCoords = {
 				x: this.progressAt('x'),
 				y: this.progressAt('y'),

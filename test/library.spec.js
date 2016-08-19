@@ -1073,46 +1073,94 @@ describe('Using this library... ', () => {
 		});
 	});
 
-
-	describe.skip('reversing with loops', () => {
+	describe('birthAspect', () => {
 		let a;
-		let lastToComplete = null;
-		const start = Date.now();
+		let b;
+		let x;
+		let xInitial;
 		before((done) => {
 			a = stimulate({
-				loop: 3,
-				duration: 400,
-				frame() {
-					console.log(this.progress.ratioCompleted);
+				aspects: {
+					x: {},
 				},
-				onComplete() {
-					console.log('CC',this.currentLoopCount, Date.now() - start)
-					if (!lastToComplete) {
-						lastToComplete = 'not me';
-					} else {
-						lastToComplete = 'stimulation';
+			});
+			xInitial = a.aspects.x;
+			x = a.birthAspect('x', {
+				duration: 10,
+			});
+			b = a.birthAspect('b', {
+				duration: 10,
+			});
+			a.stop();
+			done();
+		});
+
+		it('stimulation aspects can birth other aspects, that are nested in that parent\'s `aspects` object', () => {
+			expect(!!a.aspects.b).to.be.equal(true);
+			expect(a.aspects.b).to.be.equal(b);
+		});
+		it('birthing an aspect with the same name as an existing aspect replaces', () => {
+			expect(xInitial).to.be.not.equal(x);
+		});
+	});
+
+	describe('easing', () => {
+		let a;
+		before((done) => {
+			a = stimulate({
+				from: 100,
+				to: 200,
+				loop: 2,
+				easing(ratioCompleted) {
+					return 1 - ratioCompleted;
+				},
+				duration: 100,
+				frame() {
+					if (this.currentLoopCount > 1 && this.progress.ratioCompleted > 0.5) {
+						this.stop();
 						done();
 					}
 				},
 			});
-			setTimeout(() => {
-				a.updateSettings({
-					reverse: true,
-				});
-				console.log('REVERSE')
-				setTimeout(() => {
-					console.log('SS', Date.now() - start);
-					if (!lastToComplete) {
-						lastToComplete = 'not me';
-					} else {
-						lastToComplete = 'timeout';
-						done();
-					}
-				}, 200);
-			}, 420);
 		});
-		it('if reversing midway occurs after the inital loop completes, stimulation will continue backwards until through that entire first loop as well as whatever progress of second loop', () => {
-			expect(lastToComplete).to.be.equal('stimulation');
+		it('easing accepts a function that affects progress.easedTweened', () => {
+			expect(a.progress.tweened).to.be.not.equal(a.progress.easedTweened);
+		});
+		it('easing accepts a function that affects progress.easedRatioCompleted', () => {
+			expect(a.progress.ratioCompleted).to.be.not.equal(a.progress.easedRatioCompleted);
+		});
+	});
+
+
+	describe('reversing with loops', () => {
+		let once = false;
+		let last = null;
+		let crossedZeroToOneCount = 0;
+		before((done) => {
+			stimulate({
+				loop: 3,
+				duration: 300,
+				frame() {
+					if (last !== null && this.settings.reverse && last < this.progress.ratioCompleted) {
+						crossedZeroToOneCount++;
+					}
+
+					if (this.currentLoopCount === 3 && this.progress.ratioCompleted > 0.5 && !once) {
+						this.updateSettings({
+							reverse: true,
+						});
+						once = true;
+					}
+
+					last = this.progress.ratioCompleted;
+				},
+				onComplete() {
+					done();
+				},
+			});
+		});
+		it('reversing mid loop traverses backwards even through all the lapsed loops', () => {
+			expect(crossedZeroToOneCount).to.be.equal(2);
 		});
 	});
 });

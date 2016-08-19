@@ -152,6 +152,11 @@ class StimulationAspect {
 					const reverse = !!this.lookupSetting('reverse');
 					const reverseIsNegativeOne = reverse ? -1 : 1;
 					const changedDirections = this.previousReverseSetting !== reverse;
+					const loop = this.lookupSetting('loop');
+
+					if (changedDirections) {
+						this.currentLoopCount = (loop + 1) - this.currentLoopCount;
+					}
 
 					this.previousReverseSetting = reverse;
 
@@ -226,7 +231,7 @@ class StimulationAspect {
 						ratioCompleted = 1 - ratioCompleted;
 					}
 
-					const loop = this.lookupSetting('loop');
+					
 
 					let ratioLimit = 1;
 					let withinLimit = ratioCompleted < ratioLimit;
