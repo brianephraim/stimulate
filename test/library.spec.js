@@ -617,14 +617,12 @@ describe('Using this library... ', () => {
 			});
 		});
 
-		it('longhand traversal produces same result as progressAt', () => {
-			expect(stimulation.aspects.a.aspects.b.progress.ratioCompleted).to.be.equal(stimulation.progressAt('a.b.ratioCompleted'));
+		it('progressAt will return the progress object if it does not end with a property key', () => {
+			expect(typeof stimulation.progressAt('a.b')).to.be.equal('object');
+			expect(typeof stimulation.progressAt('a.b').easedTweened).to.be.equal('number');
 		});
-		it('progressAt will return easedTweened by default', () => {
-			expect(stimulation.aspects.a.aspects.b.progress.easedTweened).to.be.equal(stimulation.progressAt('a.b'));
-		});
-		it('progressAt returns the aspectTree\'s to level progress easedTweened if no path is specified', () => {
-			expect(stimulation.aspectTree.progress.easedTweened).to.be.equal(stimulation.progressAt(''));
+		it('progressAt returns the aspectTree\'s to level progress if no path is specified', () => {
+			expect(stimulation.aspectTree.progress).to.be.equal(stimulation.progressAt(''));
 		});
 		it('progressAt throws an error if the path is not valid/available', () => {
 			expect((() => {

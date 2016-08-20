@@ -69,12 +69,14 @@ ready(() => {
 
 			console.log(this.currentLoopCount);
 			const freshCoords = {
-				x: this.progressAt('x'),
-				y: this.progressAt('y'),
+				x: this.progressAt('x').easedTweened,
+				y: this.progressAt('y').easedTweened,
 			};
 			ball.update({
 				xy: freshCoords,
 			});
+
+			console.log(JSON.stringify(this.progress));
 
 			// if (this.progress.ratioCompleted > 0.5 && !this.settings.reverse) {
 			// 	this.updateSettings({

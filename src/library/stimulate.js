@@ -396,28 +396,17 @@ class StimulationAspect {
 	}
 	progressAt(path) {
 		const pathSplit = path.split('.');
-		let lastItem = pathSplit[pathSplit.length - 1];
-		if (typeof this.progress[lastItem] === 'undefined') {
-			lastItem = 'easedTweened';
-			pathSplit.push(lastItem);
-		}
 		let place = this.aspectTree;
 		if (path) {
 			try {
-				pathSplit.forEach((name) => {
-					if (name !== lastItem) {
-						place = place.aspects[name];
-					} else {
-						place = place.progress[name];
-					}
+				pathSplit.forEach((name, i) => {
+					place = place.aspects[name];
 				});
 			} catch (e) {
 				throw new Error('Error: You specified an invalid aspect path for .progressAt().');
 			}
-		} else {
-			place = place.progress[lastItem];
 		}
-		return place;
+		return place ? place.progress : place;
 	}
 	aspectAt(path) {
 		const pathSplit = path.split('.');
