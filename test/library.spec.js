@@ -12,15 +12,17 @@ import SauceLabs from 'saucelabs';
 import { argv } from 'yargs';
 
 let saucelabs;
-if (typeof process.env.SAUCE_USERNAME !== 'undefined') {
+
+
+const withBrowser = argv.withBrowser;
+const localToSauce = argv.localToSauce;
+const useSauce = argv.useSauce;
+if (useSauce) {
 	saucelabs = new SauceLabs({
 		username: process.env.SAUCE_USERNAME,
 		password: process.env.SAUCE_ACCESS_KEY,
 	});
 }
-
-const withBrowser = argv.withBrowser;
-const localToSauce = argv.localToSauce;
 
 
 chai.expect();
@@ -39,7 +41,7 @@ const processingTimeBenchmarkEnd = Date.now();
 const processingTimeBenchmark = processingTimeBenchmarkEnd - processingTimeBenchmarkStart;
 describe('Using this library... ', () => {
 	beforeEach(function sauceOrNotSetup(done) {
-		if (typeof process.env.SAUCE_USERNAME !== 'undefined') {
+		if (useSauce) {
 			this.timeout(60000);
 			let settings;
 			if (localToSauce) {
@@ -93,7 +95,7 @@ describe('Using this library... ', () => {
 		if (this.browser) {
 			this.browser.quit();
 		}
-		if (typeof process.env.SAUCE_USERNAME !== 'undefined') {
+		if (useSauce) {
 			saucelabs.updateJob(this.browser.sessionID, {
 				name: this.currentTest.title,
 				passed: this.currentTest.state === 'passed',

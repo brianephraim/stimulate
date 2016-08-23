@@ -10,17 +10,22 @@
   ],
   "scripts": {
     "build": "webpack --env=build && npm run commonjs2-import-example && npm run es2015-import-example",
-    "dev": "webpack --progress --colors --watch --env=dev",
-    "test": "mocha --compilers js:babel-core/register --colors ./test/*.spec.js",
-    "testbrowser": "mocha --compilers js:babel-core/register --colors ./test/*.spec.js --withBrowser",
-    "testsauce": "source .sauce_env && mocha --compilers js:babel-core/register --colors ./test/*.spec.js --localToSauce",
-    "testwatch": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js",
-    "watch": "webpack-dev-server --progress --colors --env=watch  && echo 'http://localhost:8080/webpack-dev-server/'",
     "commonjs2-import-example": "browserify ./import-examples/commonjs2/index.js -o ./import-examples/commonjs2/index-compiled.js -d",
     "es2015-import-example": "webpack --config ./src/import-examples/es2015/webpack.config.babel.js",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "cover": "babel-node ./node_modules/.bin/babel-istanbul cover ./node_modules/.bin/_mocha  --report lcovonly -- test/library.spec.js",
-    "coversend": "source .env && npm run cover && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+
+    "watch": "webpack-dev-server --progress --colors --env=watch  && echo 'http://localhost:8080/webpack-dev-server/'",
+    "dev": "webpack --progress --colors --watch --env=dev",
+
+    "test": "babel-node ./node_modules/.bin/babel-istanbul cover ./node_modules/.bin/_mocha  --report lcovonly -- test/library.spec.js",
+    "test-old": "mocha --compilers js:babel-core/register --colors ./test/*.spec.js",
+    "testwatch": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js",
+    "testbrowser": "mocha --compilers js:babel-core/register --colors ./test/*.spec.js --withBrowser",
+    "testsauce": "source .sauce_env && mocha --compilers js:babel-core/register --colors ./test/*.spec.js --localToSauce --useSauce",
+    
+    "saucelab": "mocha --compilers js:babel-core/register --colors ./test/*.spec.js --useSauce",
+    
+    "coveralls": "cat ./coverage/lcov.info | coveralls",
+    "coversend": "source .env && npm run test && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "coverread": "babel-node ./node_modules/.bin/babel-istanbul cover ./node_modules/.bin/_mocha -- test/library.spec.js"
   },
   "repository": {
