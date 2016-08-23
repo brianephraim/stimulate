@@ -40,7 +40,7 @@ const processingTimeBenchmark = processingTimeBenchmarkEnd - processingTimeBench
 describe('Using this library... ', () => {
 	beforeEach(function sauceOrNotSetup(done) {
 		if (typeof process.env.SAUCE_USERNAME !== 'undefined') {
-			this.timeout(10000);
+			this.timeout(60000);
 			let settings;
 			if (localToSauce) {
 				settings = {
@@ -72,7 +72,7 @@ describe('Using this library... ', () => {
 				done();
 			});			
 		} else if (withBrowser) {
-			this.timeout(10000);
+			this.timeout(60000);
 			this.browser = new webdriver.Builder()
 				.withCapabilities({
 					browserName: 'chrome',
@@ -89,7 +89,7 @@ describe('Using this library... ', () => {
 	});
 
 	afterEach(function sauceOrNotBreakdown(done) {
-		this.timeout(10000);
+		this.timeout(60000);
 		if (this.browser) {
 			this.browser.quit();
 		}
