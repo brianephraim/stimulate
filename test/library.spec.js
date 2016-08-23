@@ -3,6 +3,7 @@
 
 import chai from 'chai';
 import stimulate from '../src/library/index';
+// import { polyfill } from '../src/library/raf';
 // import { raf, caf } from '../src/library/stimulate';
 import { it, describe, before } from 'mocha';
 
@@ -228,11 +229,11 @@ describe('Using this library... ', () => {
 				frame() {
 					valWhenFalse = skipsFalse.progress.ratioCompleted;
 					this.stop();
-					setTimeout(() => {
-						done();
-					}, 500);
 				},
 			});
+			setTimeout(() => {
+				done();
+			}, 600);
 		});
 		it('value cached in frame just before stop to match instance.progress value', () => {
 			expect(skipsDefault.progress.ratioCompleted).to.be.equal(valWhenDefault);
@@ -326,14 +327,14 @@ describe('Using this library... ', () => {
 						noSkipsLaterSynced = noSkipsLaterSynced && (noSkips2.progress.ratioCompleted === noSkips1.aspects.nested.progress.ratioCompleted);
 					}
 				},
-				onComplete() {
-					done();
-				},
+				// onComplete() {
+				// 	done();
+				// },
 			});
-			// setTimeout(() => {
+			setTimeout(() => {
 			// 	console.log("noSkips2",noSkips2);
-			// 	done();
-			// }, 250);
+				done();
+			}, 250);
 		});
 		it('when skipping zero frame, initial frames are in sync ', () => {
 			expect(skipsInitialSynced).to.be.equal(true);
@@ -498,8 +499,10 @@ describe('Using this library... ', () => {
 				Object.keys(counters.aspects).forEach((aspectName) => {
 					counters.aspects[aspectName].shortlyAfterRootDelay = counters.aspects[aspectName].progress;
 				});
-				done();
 			}, 220);
+			setTimeout(() => {
+				done();
+			}, 600);
 		});
 		it('it uses a delay setting', () => {
 			expect(counters.root.betweenStartAndRootDelay).to.be.equal(0);
@@ -652,7 +655,7 @@ describe('Using this library... ', () => {
 						hold = true;
 						loop2Count++;
 					}
-					if(this.progress.ratioCompleted > .5) {
+					if (this.progress.ratioCompleted > .5) {
 						hold = false;
 					}
 				},
@@ -681,8 +684,8 @@ describe('Using this library... ', () => {
 			});
 
 			setTimeout(() => {
-				done();
 				loopHasDelay.stop();
+				done();
 			}, 1000);
 		});
 
@@ -705,7 +708,8 @@ describe('Using this library... ', () => {
 	it('resetAll');
 	it('reverse');
 
-	describe.skip('More test for zero frame behavior with delay, reverse, loop', () => {
+	describe('More test for zero frame behavior with delay, reverse, loop', () => {
+		let callCount = 0;
 		class Test {
 			constructor(settings, itDescription) {
 				this.frameCount = 0;
@@ -717,6 +721,10 @@ describe('Using this library... ', () => {
 				};
 				this.s.itDescription = itDescription;
 				this.s.frame = (progress) => {
+					if (!progress.progressRecord) {
+						progress.progressRecord = [];
+					}
+					progress.progressRecord.push(progress.ratioCompleted);
 					if (this.s.frameExtra) {
 						this.s.frameExtra(progress, itDescription);
 					}
@@ -731,7 +739,11 @@ describe('Using this library... ', () => {
 						this.oneCount++;
 					}
 				};
-				this.stimulate();
+				
+				setTimeout(() => {
+					this.stimulation = this.stimulate();
+				},callCount * 15);
+				callCount++;
 			}
 			stimulate() {
 				return stimulate(this.s);
@@ -816,6 +828,13 @@ describe('Using this library... ', () => {
 				delayEveryLoop: true,
 				expectZeroCount: 2,
 				expectOneCount: 2,
+				// repeatTest: 20,
+			},
+		];
+
+
+		/*
+
 				frameExtra(progress, itDescription) {
 					if (itDescription === '_skipZeroFrame:false_delay:117_loop:2_delayEveryLoop:true_reverse:true') {
 						if (progress.ratioCompleted < last) {
@@ -827,17 +846,32 @@ describe('Using this library... ', () => {
 						// console.log(progress.ratioCompleted);
 					}
 				},
-			},
-		];
+		*/
 		const allTests = [];
 		possibilities.forEach((possibility) => {
-			const x = ({
-				...possibility,
-				reverse: true,
-				expectZeroCount: possibility.expectOneCount,
-				expectOneCount: possibility.expectZeroCount,
-			});
-			possibilities.push(x);
+			if (possibility.repeatTest) {
+				for(var i=0; i<possibility.repeatTest; i++){
+					possibilities.push({
+						...possibility,
+						expectZeroCount: possibility.expectOneCount,
+						expectOneCount: possibility.expectZeroCount,
+					});
+					possibilities.push({
+						...possibility,
+						reverse: true,
+						expectZeroCount: possibility.expectOneCount,
+						expectOneCount: possibility.expectZeroCount,
+					});
+				}
+			} else {
+				const x = ({
+					...possibility,
+					reverse: true,
+					expectZeroCount: possibility.expectOneCount,
+					expectOneCount: possibility.expectZeroCount,
+				});
+				possibilities.push(x);
+			}
 		});
 
 
@@ -863,6 +897,7 @@ describe('Using this library... ', () => {
 				const t = test;
 				// setTimeout(function(){
 					t.itTest = test.callTest();
+					// console.log(t.itTest)
 				// },Math.floor(Math.random() * 60) + 30);
 			});
 
@@ -876,7 +911,22 @@ describe('Using this library... ', () => {
 		allTests.forEach((test) => {
 			it(test.itDescription, () => {
 				// expect(test.itTest.zeroCount).to.be.equal(test.expectZeroCount);
-				console.log(test.itDescription,test.itTest.oneCount,test.expectOneCount);
+				// console.log(test.itDescription,test.itTest.oneCount,test.expectOneCount);
+				
+				// console.log(test)
+				// if (test.progressRecord) {
+				// 	console.log(test.progressRecord);
+				// }
+				if (test.itTest.oneCount !== test.expectOneCount) {
+				// if (test.itDescription === '_skipZeroFrame:false_delay:117_loop:2_delayEveryLoop:true_repeatTest:20_reverse:true') {
+					console.log('$$$$$$$$');
+					if (test.itTest.oneCount !== test.expectOneCount) {
+						console.log('!!!!!!!!!');
+					}
+					console.log(test.itDescription);
+					console.log('f',test.itTest.stimulation.progress.progressRecord);
+
+				}
 				expect(test.itTest.oneCount).to.be.equal(test.expectOneCount);
 			});
 		});
