@@ -791,229 +791,229 @@ describe('Using this library... ', () => {
 	// it('resetAll');
 	// it('reverse');
 
-	// describe.skip('More test for zero frame behavior with delay, reverse, loop', () => {
-	// 	let callCount = 0;
-	// 	class Test {
-	// 		constructor(settings, itDescription) {
-	// 			this.frameCount = 0;
-	// 			this.zeroCount = 0;
-	// 			this.oneCount = 0;
-	// 			this.s = {
-	// 				duration: 321,
-	// 				...settings,
-	// 			};
-	// 			this.s.itDescription = itDescription;
-	// 			this.s.frame = (progress) => {
-	// 				if (!progress.progressRecord) {
-	// 					progress.progressRecord = [];
-	// 				}
-	// 				progress.progressRecord.push(progress.ratioCompleted);
-	// 				if (this.s.frameExtra) {
-	// 					this.s.frameExtra(progress, itDescription);
-	// 				}
-	// 				this.frameCount++;
-	// 				if (progress.ratioCompleted === 0) {
-	// 					this.zeroCount++;
-	// 				}
-	// 				if (progress.ratioCompleted === 1) {
-	// 					if (itDescription === '_skipZeroFrame:true_delay:217_loop:2_delayEveryLoop:true') {
-	// 						console.log('++++++++++');
-	// 					}
-	// 					this.oneCount++;
-	// 				}
-	// 			};
+	describe.skip('More test for zero frame behavior with delay, reverse, loop', () => {
+		let callCount = 0;
+		class Test {
+			constructor(settings, itDescription) {
+				this.frameCount = 0;
+				this.zeroCount = 0;
+				this.oneCount = 0;
+				this.s = {
+					duration: 321,
+					...settings,
+				};
+				this.s.itDescription = itDescription;
+				this.s.frame = (progress) => {
+					if (!progress.progressRecord) {
+						progress.progressRecord = [];
+					}
+					progress.progressRecord.push(progress.ratioCompleted);
+					if (this.s.frameExtra) {
+						this.s.frameExtra(progress, itDescription);
+					}
+					this.frameCount++;
+					if (progress.ratioCompleted === 0) {
+						this.zeroCount++;
+					}
+					if (progress.ratioCompleted === 1) {
+						if (itDescription === '_skipZeroFrame:true_delay:217_loop:2_delayEveryLoop:true') {
+							console.log('++++++++++');
+						}
+						this.oneCount++;
+					}
+				};
 				
-	// 			setTimeout(() => {
-	// 				this.stimulation = this.stimulate();
-	// 			},callCount * 15);
-	// 			callCount++;
-	// 		}
-	// 		stimulate() {
-	// 			return stimulate(this.s);
-	// 		}
-	// 	}
-	// 	let last = 0;
-	// 	let additional = 0;
-	// 	const delayAmt = 117;
-	// 	const possibilities = [
-	// 		{
-	// 			skipZeroFrame: true,
-	// 			expectZeroCount: 0,
-	// 			expectOneCount: 1,
-	// 		},
-	// 		{
-	// 			skipZeroFrame: true,
-	// 			expectZeroCount: 0,
-	// 			expectOneCount: 1,
-	// 			loop: 2,
-	// 		},
-	// 		{
-	// 			skipZeroFrame: true,
-	// 			expectZeroCount: 0,
-	// 			expectOneCount: 1,
-	// 			delay: delayAmt,
-	// 		},
-	// 		{
-	// 			skipZeroFrame: true,
-	// 			delay: delayAmt,
-	// 			loop: 2,
-	// 			expectZeroCount: 0,
-	// 			expectOneCount: 1,
-	// 		},
-	// 		{
-	// 			skipZeroFrame: true,
-	// 			delay: delayAmt,
-	// 			loop: 2,
-	// 			delayEveryLoop: true,
-	// 			expectZeroCount: 1,
-	// 			expectOneCount: 2,
-	// 			test: true,
-	// 			frameExtra(progress, itDescription) {
-	// 				if (itDescription === '_skipZeroFrame:true_delay:217_loop:2_delayEveryLoop:true') {
-	// 					if (progress.ratioCompleted < last) {
-	// 						additional = 1;
-	// 					}
-	// 					const diff = (progress.ratioCompleted + additional) - last;
-	// 					last = progress.ratioCompleted + additional;
-	// 					// console.log('++', diff, last, progress.ratioCompleted, itDescription);
-	// 					console.log(progress.ratioCompleted);
-	// 				}
-	// 			},
-	// 		},
-	// 		{
-	// 			skipZeroFrame: false,
-	// 			expectZeroCount: 1,
-	// 			expectOneCount: 1,
-	// 		},
-	// 		{
-	// 			skipZeroFrame: false,
-	// 			loop: 2,
-	// 			expectZeroCount: 1,
-	// 			expectOneCount: 1,
-	// 		},
-	// 		{
-	// 			skipZeroFrame: false,
-	// 			delay: delayAmt,
-	// 			expectZeroCount: 1,
-	// 			expectOneCount: 1,
-	// 		},
-	// 		{
-	// 			skipZeroFrame: false,
-	// 			delay: delayAmt,
-	// 			loop: 2,
-	// 			expectZeroCount: 1,
-	// 			expectOneCount: 1,
-	// 		},
-	// 		{
-	// 			skipZeroFrame: false,
-	// 			delay: delayAmt,
-	// 			loop: 2,
-	// 			delayEveryLoop: true,
-	// 			expectZeroCount: 2,
-	// 			expectOneCount: 2,
-	// 			// repeatTest: 20,
-	// 		},
-	// 	];
+				setTimeout(() => {
+					this.stimulation = this.stimulate();
+				},callCount * 15);
+				callCount++;
+			}
+			stimulate() {
+				return stimulate(this.s);
+			}
+		}
+		let last = 0;
+		let additional = 0;
+		const delayAmt = 117;
+		const possibilities = [
+			{
+				skipZeroFrame: true,
+				expectZeroCount: 0,
+				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: true,
+				expectZeroCount: 0,
+				expectOneCount: 1,
+				loop: 2,
+			},
+			{
+				skipZeroFrame: true,
+				expectZeroCount: 0,
+				expectOneCount: 1,
+				delay: delayAmt,
+			},
+			{
+				skipZeroFrame: true,
+				delay: delayAmt,
+				loop: 2,
+				expectZeroCount: 0,
+				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: true,
+				delay: delayAmt,
+				loop: 2,
+				delayEveryLoop: true,
+				expectZeroCount: 1,
+				expectOneCount: 2,
+				test: true,
+				frameExtra(progress, itDescription) {
+					if (itDescription === '_skipZeroFrame:true_delay:217_loop:2_delayEveryLoop:true') {
+						if (progress.ratioCompleted < last) {
+							additional = 1;
+						}
+						const diff = (progress.ratioCompleted + additional) - last;
+						last = progress.ratioCompleted + additional;
+						// console.log('++', diff, last, progress.ratioCompleted, itDescription);
+						console.log(progress.ratioCompleted);
+					}
+				},
+			},
+			{
+				skipZeroFrame: false,
+				expectZeroCount: 1,
+				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: false,
+				loop: 2,
+				expectZeroCount: 1,
+				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: false,
+				delay: delayAmt,
+				expectZeroCount: 1,
+				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: false,
+				delay: delayAmt,
+				loop: 2,
+				expectZeroCount: 1,
+				expectOneCount: 1,
+			},
+			{
+				skipZeroFrame: false,
+				delay: delayAmt,
+				loop: 2,
+				delayEveryLoop: true,
+				expectZeroCount: 2,
+				expectOneCount: 2,
+				// repeatTest: 20,
+			},
+		];
 
 
-	// 	/*
+		/*
 
-	// 			frameExtra(progress, itDescription) {
-	// 				if (itDescription === '_skipZeroFrame:false_delay:117_loop:2_delayEveryLoop:true_reverse:true') {
-	// 					if (progress.ratioCompleted < last) {
-	// 						additional = 1;
-	// 					}
-	// 					const diff = (progress.ratioCompleted + additional) - last;
-	// 					last = progress.ratioCompleted + additional;
-	// 					// console.log('++', diff, last, progress.ratioCompleted, itDescription);
-	// 					// console.log(progress.ratioCompleted);
-	// 				}
-	// 			},
-	// 	*/
-	// 	const allTests = [];
-	// 	possibilities.forEach((possibility) => {
-	// 		if (possibility.repeatTest) {
-	// 			for(var i=0; i<possibility.repeatTest; i++){
-	// 				possibilities.push({
-	// 					...possibility,
-	// 					expectZeroCount: possibility.expectOneCount,
-	// 					expectOneCount: possibility.expectZeroCount,
-	// 				});
-	// 				possibilities.push({
-	// 					...possibility,
-	// 					reverse: true,
-	// 					expectZeroCount: possibility.expectOneCount,
-	// 					expectOneCount: possibility.expectZeroCount,
-	// 				});
-	// 			}
-	// 		} else {
-	// 			const x = ({
-	// 				...possibility,
-	// 				reverse: true,
-	// 				expectZeroCount: possibility.expectOneCount,
-	// 				expectOneCount: possibility.expectZeroCount,
-	// 			});
-	// 			possibilities.push(x);
-	// 		}
-	// 	});
+				frameExtra(progress, itDescription) {
+					if (itDescription === '_skipZeroFrame:false_delay:117_loop:2_delayEveryLoop:true_reverse:true') {
+						if (progress.ratioCompleted < last) {
+							additional = 1;
+						}
+						const diff = (progress.ratioCompleted + additional) - last;
+						last = progress.ratioCompleted + additional;
+						// console.log('++', diff, last, progress.ratioCompleted, itDescription);
+						// console.log(progress.ratioCompleted);
+					}
+				},
+		*/
+		const allTests = [];
+		possibilities.forEach((possibility) => {
+			if (possibility.repeatTest) {
+				for(var i=0; i<possibility.repeatTest; i++){
+					possibilities.push({
+						...possibility,
+						expectZeroCount: possibility.expectOneCount,
+						expectOneCount: possibility.expectZeroCount,
+					});
+					possibilities.push({
+						...possibility,
+						reverse: true,
+						expectZeroCount: possibility.expectOneCount,
+						expectOneCount: possibility.expectZeroCount,
+					});
+				}
+			} else {
+				const x = ({
+					...possibility,
+					reverse: true,
+					expectZeroCount: possibility.expectOneCount,
+					expectOneCount: possibility.expectZeroCount,
+				});
+				possibilities.push(x);
+			}
+		});
 
 
-	// 	possibilities.forEach((possibility) => {
-	// 		let itDescription = '';
-	// 		Object.keys(possibility).forEach((key) => {
-	// 			if (key.indexOf('expect') === -1 && key !== 'frameExtra' && key !== 'test') {
-	// 				itDescription = `${itDescription}_${key}:${possibility[key]}`;
-	// 			}
-	// 		});
-	// 		allTests.push({
-	// 			itDescription,
-	// 			callTest: () => {
-	// 				return new Test(possibility, itDescription);
-	// 			},
-	// 			expectOneCount: possibility.expectOneCount,
-	// 			expectZeroCount: possibility.expectZeroCount,
-	// 		});
-	// 	});
-	// 	before((done) => {
+		possibilities.forEach((possibility) => {
+			let itDescription = '';
+			Object.keys(possibility).forEach((key) => {
+				if (key.indexOf('expect') === -1 && key !== 'frameExtra' && key !== 'test') {
+					itDescription = `${itDescription}_${key}:${possibility[key]}`;
+				}
+			});
+			allTests.push({
+				itDescription,
+				callTest: () => {
+					return new Test(possibility, itDescription);
+				},
+				expectOneCount: possibility.expectOneCount,
+				expectZeroCount: possibility.expectZeroCount,
+			});
+		});
+		before((done) => {
 
-	// 		allTests.forEach((test) => {
-	// 			const t = test;
-	// 			// setTimeout(function(){
-	// 				t.itTest = test.callTest();
-	// 				// console.log(t.itTest)
-	// 			// },Math.floor(Math.random() * 60) + 30);
-	// 		});
+			allTests.forEach((test) => {
+				const t = test;
+				// setTimeout(function(){
+					t.itTest = test.callTest();
+					// console.log(t.itTest)
+				// },Math.floor(Math.random() * 60) + 30);
+			});
 
-	// 		setTimeout(() => {
-	// 			console.log('DONE')
-	// 			done();
-	// 			last = 0;
-	// 			additional = 0;
-	// 		}, 1900);
-	// 	});
-	// 	allTests.forEach((test) => {
-	// 		it(test.itDescription, () => {
-	// 			// expect(test.itTest.zeroCount).to.be.equal(test.expectZeroCount);
-	// 			// console.log(test.itDescription,test.itTest.oneCount,test.expectOneCount);
+			setTimeout(() => {
+				console.log('DONE')
+				done();
+				last = 0;
+				additional = 0;
+			}, 1900);
+		});
+		allTests.forEach((test) => {
+			it(test.itDescription, () => {
+				// expect(test.itTest.zeroCount).to.be.equal(test.expectZeroCount);
+				// console.log(test.itDescription,test.itTest.oneCount,test.expectOneCount);
 				
-	// 			// console.log(test)
-	// 			// if (test.progressRecord) {
-	// 			// 	console.log(test.progressRecord);
-	// 			// }
-	// 			if (test.itTest.oneCount !== test.expectOneCount) {
-	// 			// if (test.itDescription === '_skipZeroFrame:false_delay:117_loop:2_delayEveryLoop:true_repeatTest:20_reverse:true') {
-	// 				console.log('$$$$$$$$');
-	// 				if (test.itTest.oneCount !== test.expectOneCount) {
-	// 					console.log('!!!!!!!!!');
-	// 				}
-	// 				console.log(test.itDescription);
-	// 				console.log('f',test.itTest.stimulation.progress.progressRecord);
+				// console.log(test)
+				// if (test.progressRecord) {
+				// 	console.log(test.progressRecord);
+				// }
+				if (test.itTest.oneCount !== test.expectOneCount) {
+				// if (test.itDescription === '_skipZeroFrame:false_delay:117_loop:2_delayEveryLoop:true_repeatTest:20_reverse:true') {
+					console.log('$$$$$$$$');
+					if (test.itTest.oneCount !== test.expectOneCount) {
+						console.log('!!!!!!!!!');
+					}
+					console.log(test.itDescription);
+					console.log('f',test.itTest.stimulation.progress.progressRecord);
 
-	// 			}
-	// 			expect(test.itTest.oneCount).to.be.equal(test.expectOneCount);
-	// 		});
-	// 	});
-	// });
+				}
+				expect(test.itTest.oneCount).to.be.equal(test.expectOneCount);
+			});
+		});
+	});
 
 
 	describe('resuming', () => {
