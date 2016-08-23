@@ -8,7 +8,16 @@ import stimulate from '../src/library/index';
 import { it, describe, before, beforeEach, afterEach } from 'mocha';
 require('chromedriver');
 import webdriver from 'selenium-webdriver';
+import SauceLabs from 'saucelabs';
 import { argv } from 'yargs';
+
+let saucelabs;
+if (typeof process.env.SAUCE_USERNAME !== 'undefined') {
+	saucelabs = new SauceLabs({
+		username: process.env.SAUCE_USERNAME,
+		password: process.env.SAUCE_ACCESS_KEY,
+	});
+}
 
 const withBrowser = argv.withBrowser;
 const localToSauce = argv.localToSauce;
@@ -29,7 +38,7 @@ while (c < 1000) {
 const processingTimeBenchmarkEnd = Date.now();
 const processingTimeBenchmark = processingTimeBenchmarkEnd - processingTimeBenchmarkStart;
 describe('Using this library... ', () => {
-	beforeEach(function sauceOrNotSetup() {
+	beforeEach(function sauceOrNotSetup(done) {
 		if (typeof process.env.SAUCE_USERNAME !== 'undefined') {
 			this.timeout(10000);
 			let settings;
@@ -39,6 +48,8 @@ describe('Using this library... ', () => {
 					username: process.env.SAUCE_USERNAME,
 					accessKey: process.env.SAUCE_ACCESS_KEY,
 					browserName: 'chrome',
+					// autoAcceptAlerts: true,
+					// waitForAppScript: true,
 				};
 			} else {
 				settings = {
@@ -53,22 +64,43 @@ describe('Using this library... ', () => {
 				.usingServer(`http://${process.env.SAUCE_USERNAME}:${process.env.SAUCE_ACCESS_KEY}@ondemand.saucelabs.com:80/wd/hub`)
 				.withCapabilities(settings)
 				.build();
-			return this.browser.get('http://localhost:8000/page/index.html');
+			this.browser.getSession().then((sessionid) => {
+				/* eslint-disable no-underscore-dangle */
+				this.browser.sessionID = sessionid.id_;
+				/* eslint-enable no-underscore-dangle */
+				this.browser.get('http://localhost:8000/page/index.html');
+				done();
+			});			
 		} else if (withBrowser) {
+			this.timeout(10000);
 			this.browser = new webdriver.Builder()
 				.withCapabilities({
 					browserName: 'chrome',
 				}).build();
+			this.browser.getSession().then((sessionid) => {
+				/* eslint-disable no-underscore-dangle */
+				this.browser.sessionID = sessionid.id_;
+				/* eslint-enable no-underscore-dangle */
+				done();
+			});
+		} else {
+			done();
 		}
-		return true;
-	});
-	afterEach(function sauceOrNotBreakdown() {
-		if (typeof process.env.SAUCE_USERNAME !== 'undefined' || withBrowser) {
-			return this.browser.quit();
-		}
-		return true;
 	});
 
+	afterEach(function sauceOrNotBreakdown(done) {
+		if (this.browser) {
+			this.browser.quit();
+		}
+		if (typeof process.env.SAUCE_USERNAME !== 'undefined') {
+			saucelabs.updateJob(this.browser.sessionID, {
+				name: this.currentTest.title,
+				passed: this.currentTest.state === 'passed',
+			}, done);
+		} else {
+			done();
+		}
+	});
 
 	const runScenario = (done, extraSettings = {}) => {
 		const output = {
@@ -245,7 +277,7 @@ describe('Using this library... ', () => {
 			});
 			skipsTrue = stimulate({
 				duration: 500,
-				boomer:true,
+				boomer: true,
 				skipZeroFrame: true,
 				frame() {
 					valWhenTrue = skipsTrue.progress.ratioCompleted;

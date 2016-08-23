@@ -1,5 +1,12 @@
 # stimulate
 javascript animation utility
+
+[![Build Status](https://travis-ci.org/defualt/stimulate.svg?branch=master)](https://travis-ci.org/defualt/stimulate)
+
+[![Coverage Status](https://coveralls.io/repos/github/defualt/stimulate/badge.svg?branch=master)](https://coveralls.io/github/defualt/stimulate?branch=master)
+
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/defualt.svg)](https://saucelabs.com/u/defualt)
+
  
 **[demo](https:/defualt.github.io/stimulate)**
 
