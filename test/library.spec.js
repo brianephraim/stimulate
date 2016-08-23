@@ -782,12 +782,12 @@ describe('Using this library... ', () => {
 		// 	expect(loopHasDelayCount).to.be.equal(2);
 		// });
 	});
-	// it('aspect frame can update progress argument and affect root frame progress');
-	// it('aspect frame can return new progress progress object that updates its this.progress');
-	// it('loop');
-	// it('delayEveryLoop');
-	// it('resetAll');
-	// it('reverse');
+	it('aspect frame can update progress argument and affect root frame progress');
+	it('aspect frame can return new progress progress object that updates its this.progress');
+	it('loop');
+	it('delayEveryLoop');
+	it('resetAll');
+	it('reverse');
 
 	// describe.skip('More test for zero frame behavior with delay, reverse, loop', () => {
 	// 	let callCount = 0;
