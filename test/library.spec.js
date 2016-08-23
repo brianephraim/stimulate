@@ -5,7 +5,14 @@ import chai from 'chai';
 import stimulate from '../src/library/index';
 // import { polyfill } from '../src/library/raf';
 // import { raf, caf } from '../src/library/stimulate';
-import { it, describe, before } from 'mocha';
+import { it, describe, before, beforeEach, afterEach } from 'mocha';
+require('chromedriver');
+import webdriver from 'selenium-webdriver';
+import { argv } from 'yargs';
+
+const withBrowser = argv.withBrowser;
+const localToSauce = argv.localToSauce;
+
 
 chai.expect();
 
@@ -22,6 +29,47 @@ while (c < 1000) {
 const processingTimeBenchmarkEnd = Date.now();
 const processingTimeBenchmark = processingTimeBenchmarkEnd - processingTimeBenchmarkStart;
 describe('Using this library... ', () => {
+	beforeEach(function sauceOrNotSetup() {
+		if (typeof process.env.SAUCE_USERNAME !== 'undefined') {
+			this.timeout(10000);
+			let settings;
+			if (localToSauce) {
+				settings = {
+					name: 'localToSauce_stimulate',
+					username: process.env.SAUCE_USERNAME,
+					accessKey: process.env.SAUCE_ACCESS_KEY,
+					browserName: 'chrome',
+				};
+			} else {
+				settings = {
+					'tunnel-identifier': process.env.TRAVIS_JOB_NUMBER,
+					build: process.env.TRAVIS_BUILD_NUMBER,
+					username: process.env.SAUCE_USERNAME,
+					accessKey: process.env.SAUCE_ACCESS_KEY,
+					browserName: 'chrome',
+				};
+			}
+			this.browser = new webdriver.Builder()
+				.usingServer(`http://${process.env.SAUCE_USERNAME}:${process.env.SAUCE_ACCESS_KEY}@ondemand.saucelabs.com:80/wd/hub`)
+				.withCapabilities(settings)
+				.build();
+			return this.browser.get('http://localhost:8000/page/index.html');
+		} else if (withBrowser) {
+			this.browser = new webdriver.Builder()
+				.withCapabilities({
+					browserName: 'chrome',
+				}).build();
+		}
+		return true;
+	});
+	afterEach(function sauceOrNotBreakdown() {
+		if (typeof process.env.SAUCE_USERNAME !== 'undefined' || withBrowser) {
+			return this.browser.quit();
+		}
+		return true;
+	});
+
+
 	const runScenario = (done, extraSettings = {}) => {
 		const output = {
 			counter: 0,

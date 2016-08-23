@@ -40,5 +40,6 @@ jspm_packages
 build/*
 
 .env
+.sauce_env
 
 coverage
