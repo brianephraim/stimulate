@@ -89,6 +89,7 @@ describe('Using this library... ', () => {
 	});
 
 	afterEach(function sauceOrNotBreakdown(done) {
+		this.timeout(10000);
 		if (this.browser) {
 			this.browser.quit();
 		}
