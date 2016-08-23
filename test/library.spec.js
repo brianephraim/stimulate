@@ -13,11 +13,14 @@ import { argv } from 'yargs';
 
 let saucelabs;
 
+let testTimeout = 2000;
+
 
 const withBrowser = argv.withBrowser;
 const localToSauce = argv.localToSauce;
 const useSauce = argv.useSauce;
 if (useSauce) {
+	testTimeout = 0;
 	saucelabs = new SauceLabs({
 		username: process.env.SAUCE_USERNAME,
 		password: process.env.SAUCE_ACCESS_KEY,
@@ -42,29 +45,54 @@ const processingTimeBenchmark = processingTimeBenchmarkEnd - processingTimeBench
 describe('Using this library... ', () => {
 	beforeEach(function sauceOrNotSetup(done) {
 		if (useSauce) {
-			this.timeout(60000);
-			let settings;
+			this.timeout(testTimeout);
+			// let fundamentalSettings;
+
+			const userCaps = {
+				username: process.env.SAUCE_USERNAME,
+				accessKey: process.env.SAUCE_ACCESS_KEY,
+			};
+			let envCaps = {};
 			if (localToSauce) {
-				settings = {
-					name: 'localToSauce_stimulate',
-					username: process.env.SAUCE_USERNAME,
-					accessKey: process.env.SAUCE_ACCESS_KEY,
-					browserName: 'chrome',
-					// autoAcceptAlerts: true,
-					// waitForAppScript: true,
-				};
 			} else {
-				settings = {
+				envCaps = {
 					'tunnel-identifier': process.env.TRAVIS_JOB_NUMBER,
 					build: process.env.TRAVIS_BUILD_NUMBER,
-					username: process.env.SAUCE_USERNAME,
-					accessKey: process.env.SAUCE_ACCESS_KEY,
-					browserName: 'chrome',
 				};
 			}
+			//https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
+			const browserToTest = 'safari';
+			const caps = {};
+			if (browserToTest === 'safari') {
+				caps['browserName'] = 'safari';
+				caps['platform'] = 'OS X 10.11';
+				caps['version'] = '9.0';
+				caps['recordVideo'] = false;
+				caps['recordScreenshots'] = false;
+				caps['screenResolution'] = '1024x768';
+			} else if (browserToTest === 'firefox'){
+				caps['browserName'] = 'firefox';
+				caps['platform'] = 'OS X 10.11';
+				caps['version'] = '47.0';
+			}else {
+				caps['browserName'] = 'chrome';
+			}
+
+			
+			// caps['browserName'] = 'Safari';
+			// caps['appiumVersion'] = '1.5.3';
+			// caps['deviceName'] = 'iPhone 6 Plus Simulator';
+			// caps['deviceOrientation'] = 'portrait';
+			// caps['platformVersion'] = '9.3';
+			// caps['platformName'] = 'iOS';
 			this.browser = new webdriver.Builder()
 				.usingServer(`http://${process.env.SAUCE_USERNAME}:${process.env.SAUCE_ACCESS_KEY}@ondemand.saucelabs.com:80/wd/hub`)
-				.withCapabilities(settings)
+				// .withCapabilities(settings)
+				.withCapabilities({
+					...caps,
+					...envCaps,
+					...userCaps,
+				})
 				.build();
 			this.browser.getSession().then((sessionid) => {
 				/* eslint-disable no-underscore-dangle */
@@ -72,9 +100,9 @@ describe('Using this library... ', () => {
 				/* eslint-enable no-underscore-dangle */
 				this.browser.get('http://localhost:8000/page/index.html');
 				done();
-			});			
+			});	
 		} else if (withBrowser) {
-			this.timeout(60000);
+			this.timeout(testTimeout);
 			this.browser = new webdriver.Builder()
 				.withCapabilities({
 					browserName: 'chrome',
@@ -91,7 +119,7 @@ describe('Using this library... ', () => {
 	});
 
 	afterEach(function sauceOrNotBreakdown(done) {
-		this.timeout(60000);
+		this.timeout(testTimeout);
 		if (this.browser) {
 			this.browser.quit();
 		}
