@@ -8,7 +8,7 @@ javascript animation utility
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/defualt.svg)](https://saucelabs.com/u/defualt)
 
  
-**[demo](https:/defualt.github.io/stimulate)**
+**[demo](https://defualt.github.io/stimulate)**
 
 `npm install stimulate --save`
 
