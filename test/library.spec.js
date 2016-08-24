@@ -51,6 +51,9 @@ describe('Using this library... ', () => {
 			const userCaps = {
 				username: process.env.SAUCE_USERNAME,
 				accessKey: process.env.SAUCE_ACCESS_KEY,
+				idleTimeout: 1000,
+				commandTimeout: 600,
+				maxDuration: 10800,
 			};
 			let envCaps = {};
 			if (localToSauce) {
@@ -61,19 +64,19 @@ describe('Using this library... ', () => {
 				};
 			}
 			//https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-			const browserToTest = 'safari';
+			const browserToTest = 'firefox';
 			const caps = {};
 			if (browserToTest === 'safari') {
 				caps['browserName'] = 'safari';
-				caps['platform'] = 'OS X 10.11';
-				caps['version'] = '9.0';
-				caps['recordVideo'] = false;
-				caps['recordScreenshots'] = false;
-				caps['screenResolution'] = '1024x768';
+				// caps['platform'] = 'OS X 10.11';
+				// caps['version'] = '9.0';
+				// caps['recordVideo'] = false;
+				// caps['recordScreenshots'] = false;
+				// caps['screenResolution'] = '1024x768';
 			} else if (browserToTest === 'firefox'){
 				caps['browserName'] = 'firefox';
-				caps['platform'] = 'OS X 10.11';
-				caps['version'] = '47.0';
+				// caps['platform'] = 'OS X 10.11';
+				// caps['version'] = '47.0';
 			}else {
 				caps['browserName'] = 'chrome';
 			}
@@ -120,9 +123,6 @@ describe('Using this library... ', () => {
 
 	afterEach(function sauceOrNotBreakdown(done) {
 		this.timeout(testTimeout);
-		if (this.browser) {
-			this.browser.quit();
-		}
 		if (useSauce) {
 			saucelabs.updateJob(this.browser.sessionID, {
 				name: this.currentTest.title,
@@ -130,6 +130,9 @@ describe('Using this library... ', () => {
 			}, done);
 		} else {
 			done();
+		}
+		if (this.browser) {
+			this.browser.quit();
 		}
 	});
 
