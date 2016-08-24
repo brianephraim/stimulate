@@ -45,6 +45,7 @@ const processingTimeBenchmarkEnd = Date.now();
 const processingTimeBenchmark = processingTimeBenchmarkEnd - processingTimeBenchmarkStart;
 describe('Using this library... ', () => {
 	beforeEach(function sauceOrNotSetup(done) {
+		this.retries(4);
 		if (useSauce) {
 			this.timeout(testTimeout);
 			// let fundamentalSettings;
