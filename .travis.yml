@@ -3,7 +3,6 @@ node_js:
   - "6"
 after_success:
 - npm run coveralls
-- npm run saucelab -- --browser=ios
 - npm run saucelab -- --browser=chrome
 - npm run saucelab -- --browser=firefox
 - npm run saucelab -- --browser=safari
