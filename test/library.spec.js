@@ -17,6 +17,7 @@ let testTimeout = 2000;
 
 
 const withBrowser = argv.withBrowser;
+const browser = argv.browser;
 const localToSauce = argv.localToSauce;
 const useSauce = argv.useSauce;
 if (useSauce) {
@@ -64,7 +65,9 @@ describe('Using this library... ', () => {
 				};
 			}
 			//https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-			const browserToTest = 'safari';
+			// const browserToTest = 'safari';
+			const browserToTest = browser;
+			console.log('browserToTest',browserToTest);
 			const caps = {};
 			if (browserToTest === 'safari') {
 				caps['browserName'] = 'safari';
