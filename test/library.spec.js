@@ -70,7 +70,14 @@ describe('Using this library... ', () => {
 			const browserToTest = browser;
 			console.log('browserToTest',browserToTest);
 			const caps = {};
-			if (browserToTest === 'safari') {
+			if (browserToTest === 'ios'){
+				caps['browserName'] = 'Safari';
+				caps['appiumVersion'] = '1.5.3';
+				caps['deviceName'] = 'iPhone 6 Simulator';
+				caps['deviceOrientation'] = 'portrait';
+				caps['platformVersion'] = '9.3';
+				caps['platformName'] = 'iOS';
+			} else if (browserToTest === 'safari') {
 				caps['browserName'] = 'safari';
 				// caps['platform'] = 'OS X 10.11';
 				// caps['version'] = '9.0';
@@ -81,7 +88,7 @@ describe('Using this library... ', () => {
 				caps['browserName'] = 'firefox';
 				// caps['platform'] = 'OS X 10.11';
 				// caps['version'] = '47.0';
-			}else {
+			} else {
 				caps['browserName'] = 'chrome';
 			}
 
@@ -107,7 +114,7 @@ describe('Using this library... ', () => {
 				/* eslint-enable no-underscore-dangle */
 				this.browser.get('http://localhost:8000/page/index.html');
 				done();
-			});	
+			});
 		} else if (withBrowser) {
 			this.timeout(testTimeout);
 			this.browser = new webdriver.Builder()
