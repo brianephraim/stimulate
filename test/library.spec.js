@@ -123,16 +123,20 @@ describe('Using this library... ', () => {
 
 	afterEach(function sauceOrNotBreakdown(done) {
 		this.timeout(testTimeout);
+		const that = this;
 		if (useSauce) {
 			saucelabs.updateJob(this.browser.sessionID, {
 				name: this.currentTest.title,
 				passed: this.currentTest.state === 'passed',
-			}, done);
+			}, function updateJobComplete(...args) {
+				that.browser.quit();
+				done(...args);
+			});
 		} else {
+			if (this.browser) {
+				this.browser.quit();
+			}
 			done();
-		}
-		if (this.browser) {
-			this.browser.quit();
 		}
 	});
 
