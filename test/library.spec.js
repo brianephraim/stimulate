@@ -64,7 +64,7 @@ describe('Using this library... ', () => {
 				};
 			}
 			//https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-			const browserToTest = 'firefox';
+			const browserToTest = 'safari';
 			const caps = {};
 			if (browserToTest === 'safari') {
 				caps['browserName'] = 'safari';
