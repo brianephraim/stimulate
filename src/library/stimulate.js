@@ -6,7 +6,9 @@ class StimulationAspect {
 		this.parent = parent;
 		this.debug = debug;
 		this.options = options;
-		this.init();
+		if (!options.noInit) {
+			this.init();
+		}
 	}
 	init(resetAll) {
 		this.aspects = {};
@@ -319,6 +321,7 @@ class StimulationAspect {
 						// 	console.log('^^^^^^^^^^^');
 						// }
 						const progressChanges = this.settings.frame.apply(this, [this.progress]);
+						this.iterateFrameCbs(this.progress);
 						this.frameCount++;
 						Object.assign(this.progress, progressChanges);
 					}
@@ -332,6 +335,27 @@ class StimulationAspect {
 						}
 					}
 				}
+			});
+		}
+	}
+	onFrame(cb) {
+		if (!this.callbacks) {
+			this.callbacks = {};
+		}
+		if (!this.callbacks.frame) {
+			this.callbacks.frame = [];
+		}
+		this.callbacks.frame.push(cb);
+		return () => {
+			this.callbacks = this.callbacks.frame.filter((accum,cachedCb) => {
+				return cachedCb !== cb;
+			});
+		};
+	}
+	iterateFrameCbs(...args) {
+		if (this.callbacks && this.callbacks.frame) {
+			this.callbacks.frame.forEach((cb) => {
+				cb(...args);
 			});
 		}
 	}

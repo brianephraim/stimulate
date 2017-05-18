@@ -82,7 +82,7 @@
 	      return t && t.__esModule ? t : { "default": t };
 	    }Object.defineProperty(e, "__esModule", { value: !0 }), e.caf = e.raf = e.sharedTiming = e.stimulate = void 0;var i = n(9),
 	        s = r(i),
-	        o = n(10);n(12), e.stimulate = s["default"], e.sharedTiming = o.sharedTiming, e.raf = o.raf, e.caf = o.caf, e["default"] = s["default"];
+	        a = n(10);n(12), e.stimulate = s["default"], e.sharedTiming = a.sharedTiming, e.raf = a.raf, e.caf = a.caf, e["default"] = s["default"];
 	  }, function (t, e, n) {
 	    "use strict";
 	    function r(t) {
@@ -96,7 +96,7 @@
 	        }
 	      }return t;
 	    },
-	        o = function () {
+	        a = function () {
 	      function t(t, e) {
 	        for (var n = 0; n < e.length; n++) {
 	          var r = e[n];r.enumerable = r.enumerable || !1, r.configurable = !0, "value" in r && (r.writable = !0), Object.defineProperty(t, r.key, r);
@@ -105,16 +105,16 @@
 	        return n && t(e.prototype, n), r && t(e, r), e;
 	      };
 	    }(),
-	        a = n(10),
-	        u = r(a),
+	        o = n(10),
+	        u = r(o),
 	        c = function () {
 	      function t(e) {
 	        var n = arguments.length <= 1 || void 0 === arguments[1] ? "root" : arguments[1],
-	            r = arguments[2];i(this, t), this.parent = r, this.debug = n, this.options = e, this.init();
-	      }return o(t, [{ key: "init", value: function value(e) {
+	            r = arguments[2];i(this, t), this.parent = r, this.debug = n, this.options = e, e.noInit || this.init();
+	      }return a(t, [{ key: "init", value: function value(e) {
 	          var n = this;this.aspects = {}, this.persistedSettings || (this.persistedSettings = {}), this.inheritableDefaults = { duration: 1e3, delay: 0, delayEveryLoop: !1, loop: !1, skipZeroFrame: !0, endless: !1, reverse: !1, usePersistedSettings: !1 }, this.defaultSettings = { delayAddsParentDelay: !1, from: 0, to: 1, easing: null, aspects: this.aspects, frame: null, chainedStop: !0 }, this.settings = s({}, this.defaultSettings, this.options), this.lookupSetting("usePersistedSettings") && Object.assign(this.settings, this.persistedSettings), this.aspects = this.settings.aspects, this.parent ? this.aspectTree = this.parent.aspectTree : this.aspectTree = this;var r = !!this.lookupSetting("reverse");this.previousReverseSetting = r;var i = this.getProgressDefault(r);this.progress ? Object.assign(this.progress, i) : (this.progress = i, this.progress.aspects = {}), this.currentLoopCount = 1, this.lastDelaySettingWhileDelaying = null, this.running = !0, this.nextRafId = null, this.timestamps = {}, u["default"].makeStamp("start"), this.timestamps.start = u["default"].stamps.start, this.timestamps.recentRaf = null, this.frameCount = 0, this.iterateAspectNames(function (r) {
 	            e ? n.aspects[r].init(!0) : (n.aspects[r] = new t(s({}, n.settings.aspects[r]), r, n), n.progress.aspects[r] = n.aspects[r].progress);
-	          });var o = this.lookupSetting("skipZeroFrame");this.recurse(!o);
+	          });var a = this.lookupSetting("skipZeroFrame");this.recurse(!a);
 	        } }, { key: "getCumulativeDelay", value: function value() {
 	          var t = this.lookupSetting("delay");return this.parent && this.settings.delayAddsParentDelay && (t += this.parent.getCumulativeDelay()), t;
 	        } }, { key: "updateSettings", value: function value(t) {
@@ -139,24 +139,36 @@
 	              n.timestamps.recentRaf = u["default"].stamps.raf, t && (n.timestamps.start = n.timestamps.recentRaf);var r = !!n.lookupSetting("reverse"),
 	                  i = r ? -1 : 1,
 	                  s = n.previousReverseSetting !== r,
-	                  o = n.lookupSetting("loop");s && (n.currentLoopCount = o + 1 - n.currentLoopCount), n.previousReverseSetting = r, e && Object.assign(n.progress, n.getProgressDefault(r));var a = 0;a = null !== n.lastDelaySettingWhileDelaying ? n.lastDelaySettingWhileDelaying : n.getCumulativeDelay();var c = n.lookupSetting("duration"),
-	                  l = n.calculateRatio({ start: n.timestamps.start, later: n.timestamps.recentRaf, delay: a, duration: c }),
-	                  f = n.lookupSetting("delayEveryLoop");if (l > 0 && l < 1 && null === n.lastDelaySettingWhileDelaying && (n.lastDelaySettingWhileDelaying = a, (!n.lookupSetting("skipZeroFrame") && a && n.currentLoopCount <= 1 || a && f && n.currentLoopCount > 1) && (n.timestamps.start = n.timestamps.recentRaf - a, l = n.calculateRatio({ start: n.timestamps.start, later: n.timestamps.recentRaf, delay: a, duration: c }))), s) {
-	                null === n.lastDelaySettingWhileDelaying && (n.currentLoopCount--, n.progress.ratioCompleted = -i * (1 + (-i * n.progress.ratioCompleted + a / c)));var p = n.progress.ratioCompleted;r && (p = 1 - n.progress.ratioCompleted);var h = p * c,
-	                    d = n.timestamps.recentRaf - h;n.timestamps.start = d - a, l = n.calculateRatio({ start: n.timestamps.start, later: n.timestamps.recentRaf, delay: a, duration: c });
-	              }r && (l = 1 - l);var g = 1,
-	                  m = l < g,
+	                  a = n.lookupSetting("loop");s && (n.currentLoopCount = a + 1 - n.currentLoopCount), n.previousReverseSetting = r, e && Object.assign(n.progress, n.getProgressDefault(r));var o = 0;o = null !== n.lastDelaySettingWhileDelaying ? n.lastDelaySettingWhileDelaying : n.getCumulativeDelay();var c = n.lookupSetting("duration"),
+	                  l = n.calculateRatio({ start: n.timestamps.start, later: n.timestamps.recentRaf, delay: o, duration: c }),
+	                  f = n.lookupSetting("delayEveryLoop");if (l > 0 && l < 1 && null === n.lastDelaySettingWhileDelaying && (n.lastDelaySettingWhileDelaying = o, (!n.lookupSetting("skipZeroFrame") && o && n.currentLoopCount <= 1 || o && f && n.currentLoopCount > 1) && (n.timestamps.start = n.timestamps.recentRaf - o, l = n.calculateRatio({ start: n.timestamps.start, later: n.timestamps.recentRaf, delay: o, duration: c }))), s) {
+	                null === n.lastDelaySettingWhileDelaying && (n.currentLoopCount--, n.progress.ratioCompleted = -i * (1 + (-i * n.progress.ratioCompleted + o / c)));var p = n.progress.ratioCompleted;r && (p = 1 - n.progress.ratioCompleted);var h = p * c,
+	                    g = n.timestamps.recentRaf - h;n.timestamps.start = g - o, l = n.calculateRatio({ start: n.timestamps.start, later: n.timestamps.recentRaf, delay: o, duration: c });
+	              }r && (l = 1 - l);var d = 1,
+	                  m = l < d,
 	                  v = n.settings.from,
-	                  y = n.settings.to;r && (g = 0, m = l > g);var S = !1,
-	                  b = !1,
-	                  w = !1,
-	                  x = n.progress;if (x.ratioCompleted = l, m || !c || n.lookupSetting("endless")) n.settings.easing ? x.easedRatioCompleted = n.settings.easing(x.ratioCompleted) : x.easedRatioCompleted = x.ratioCompleted, x.tweened = n.getTween(v, y, x.ratioCompleted), x.easedTweened = n.getTween(v, y, x.easedRatioCompleted);else {
-	                var k = o === !0 || o && n.currentLoopCount < o;k && !f ? (x.ratioCompleted = -i + l, n.timestamps.start = n.timestamps.start + c, n.settings.easing ? x.easedRatioCompleted = n.settings.easing(x.ratioCompleted) : x.easedRatioCompleted = x.ratioCompleted, x.tweened = n.getTween(v, y, x.ratioCompleted), x.easedTweened = n.getTween(v, y, x.easedRatioCompleted), b = !0) : (x.ratioCompleted = g, x.easedRatioCompleted = g, x.tweened = y, x.easedTweened = y, r && (x.tweened = v, x.easedTweened = v)), k ? (n.currentLoopCount++, w = !b, n.lastDelaySettingWhileDelaying = null) : S = !0;
-	              }var C = n.progress.ratioCompleted >= 0;if (r && (C = n.progress.ratioCompleted <= 1), n.settings.frame && C) {
-	                var j = n.settings.frame.apply(n, [n.progress]);n.frameCount++, Object.assign(n.progress, j);
-	              }S ? (n.running = !1, n.settings.onComplete && n.settings.onComplete.apply(n, [n.progress])) : n.recurse(w, w);
+	                  y = n.settings.to;r && (d = 0, m = l > d);var b = !1,
+	                  S = !1,
+	                  k = !1,
+	                  w = n.progress;if (w.ratioCompleted = l, m || !c || n.lookupSetting("endless")) n.settings.easing ? w.easedRatioCompleted = n.settings.easing(w.ratioCompleted) : w.easedRatioCompleted = w.ratioCompleted, w.tweened = n.getTween(v, y, w.ratioCompleted), w.easedTweened = n.getTween(v, y, w.easedRatioCompleted);else {
+	                var C = a === !0 || a && n.currentLoopCount < a;C && !f ? (w.ratioCompleted = -i + l, n.timestamps.start = n.timestamps.start + c, n.settings.easing ? w.easedRatioCompleted = n.settings.easing(w.ratioCompleted) : w.easedRatioCompleted = w.ratioCompleted, w.tweened = n.getTween(v, y, w.ratioCompleted), w.easedTweened = n.getTween(v, y, w.easedRatioCompleted), S = !0) : (w.ratioCompleted = d, w.easedRatioCompleted = d, w.tweened = y, w.easedTweened = y, r && (w.tweened = v, w.easedTweened = v)), C ? (n.currentLoopCount++, k = !S, n.lastDelaySettingWhileDelaying = null) : b = !0;
+	              }var x = n.progress.ratioCompleted >= 0;if (r && (x = n.progress.ratioCompleted <= 1), n.settings.frame && x) {
+	                var j = n.settings.frame.apply(n, [n.progress]);n.iterateFrameCbs(n.progress), n.frameCount++, Object.assign(n.progress, j);
+	              }b ? (n.running = !1, n.settings.onComplete && n.settings.onComplete.apply(n, [n.progress])) : n.recurse(k, k);
 	            }
 	          }));
+	        } }, { key: "onFrame", value: function value(t) {
+	          var e = this;return this.callbacks || (this.callbacks = {}), this.callbacks.frame || (this.callbacks.frame = []), this.callbacks.frame.push(t), function () {
+	            e.callbacks = e.callbacks.frame.filter(function (e, n) {
+	              return n !== t;
+	            });
+	          };
+	        } }, { key: "iterateFrameCbs", value: function value() {
+	          for (var t = arguments.length, e = Array(t), n = 0; n < t; n++) {
+	            e[n] = arguments[n];
+	          }this.callbacks && this.callbacks.frame && this.callbacks.frame.forEach(function (t) {
+	            t.apply(void 0, e);
+	          });
 	        } }, { key: "resetAll", value: function value() {
 	          return this.stop(!0), this.init(!0), this;
 	        } }, { key: "stop", value: function value(t) {
@@ -175,13 +187,13 @@
 	          return this.aspects[e] && this.aspects[e].stop(), this.aspects[e] = new t(s({}, n), e, this), this.aspects[e];
 	        } }, { key: "progressAt", value: function value(t) {
 	          var e = t.split("."),
-	              n = e[e.length - 1];"undefined" == typeof this.progress[n] && (n = "easedTweened", e.push(n));var r = this.aspectTree;if (t) try {
-	            e.forEach(function (t) {
-	              r = t !== n ? r.aspects[t] : r.progress[t];
+	              n = this.aspectTree;if (t) try {
+	            e.forEach(function (t, e) {
+	              n = n.aspects[t];
 	            });
-	          } catch (i) {
+	          } catch (r) {
 	            throw new Error("Error: You specified an invalid aspect path for .progressAt().");
-	          } else r = r.progress[n];return r;
+	          }return n ? n.progress : n;
 	        } }, { key: "aspectAt", value: function value(t) {
 	          var e = t.split("."),
 	              n = this.aspectTree;if (t) try {
@@ -206,9 +218,9 @@
 	      if (!(t instanceof e)) throw new TypeError("Cannot call a class as a function");
 	    }function s() {
 	      return f.raf.apply(f, arguments);
-	    }function o() {
+	    }function a() {
 	      return f.caf.apply(f, arguments);
-	    }Object.defineProperty(e, "__esModule", { value: !0 }), e.caf = e.raf = e.sharedTiming = void 0;var a = function () {
+	    }Object.defineProperty(e, "__esModule", { value: !0 }), e.caf = e.raf = e.sharedTiming = void 0;var o = function () {
 	      function t(t, e) {
 	        for (var n = 0; n < e.length; n++) {
 	          var r = e[n];r.enumerable = r.enumerable || !1, r.configurable = !0, "value" in r && (r.writable = !0), Object.defineProperty(t, r.key, r);
@@ -222,7 +234,7 @@
 	        l = function () {
 	      function t() {
 	        i(this, t), this.running = { count: 0, limit: 0 }, this.stamps = { start: null, raf: null }, this.rafIdRegistry = {};
-	      }return a(t, [{ key: "makeStamp", value: function value(t, e) {
+	      }return o(t, [{ key: "makeStamp", value: function value(t, e) {
 	          return this.stamps[t] && !e || (this.stamps[t] = Date.now()), this.stamps[t];
 	        } }, { key: "raf", value: function value(t) {
 	          var e = this;this.running.count ? this.running.count++ : this.running.count = 1;var n = (0, c["default"])(function () {
@@ -232,17 +244,17 @@
 	          t && this.rafIdRegistry[t] && ((0, u.cancel)(t), this.stamps.start = null, this.running.count--, delete this.rafIdRegistry[t]);
 	        } }]), t;
 	    }(),
-	        f = new l();e.sharedTiming = f, e.raf = s, e.caf = o, e["default"] = f;
+	        f = new l();e.sharedTiming = f, e.raf = s, e.caf = a, e["default"] = f;
 	  }, function (t, e) {
 	    (function (e) {
 	      "use strict";
-	      for (var n = Date.now, r = "undefined" == typeof window ? e : window, i = ["moz", "webkit"], s = "AnimationFrame", o = r["request" + s], a = r["cancel" + s] || r["cancelRequest" + s], u = 0; !o && u < i.length; u++) {
-	        o = r[i[u] + "Request" + s], a = r[i[u] + "Cancel" + s] || r[i[u] + "CancelRequest" + s];
-	      }if (!o || !a) {
+	      for (var n = Date.now, r = "undefined" == typeof window ? e : window, i = ["moz", "webkit"], s = "AnimationFrame", a = r["request" + s], o = r["cancel" + s] || r["cancelRequest" + s], u = 0; !a && u < i.length; u++) {
+	        a = r[i[u] + "Request" + s], o = r[i[u] + "Cancel" + s] || r[i[u] + "CancelRequest" + s];
+	      }if (!a || !o) {
 	        var c = 0,
 	            l = 0,
 	            f = [],
-	            p = 1e3 / 60;o = function o(t) {
+	            p = 1e3 / 60;a = function a(t) {
 	          if (0 === f.length) {
 	            var e = n(),
 	                r = Math.max(10, p - (e - c));c = r + e, setTimeout(function () {
@@ -257,17 +269,15 @@
 	              }
 	            }, p);
 	          }return f.push({ handle: ++l, callback: t, cancelled: !1 }), l;
-	        }, a = function a(t) {
+	        }, o = function o(t) {
 	          for (var e = 0; e < f.length; e++) {
 	            f[e].handle === t && (f[e].cancelled = !0);
 	          }
 	        };
 	      }t.exports = function (t) {
-	        return o.call(r, t);
+	        return a.call(r, t);
 	      }, t.exports.cancel = function () {
-	        a.apply(r, arguments);
-	      }, t.exports.polyfill = function () {
-	        r.requestAnimationFrame = o, r.cancelAnimationFrame = a;
+	        o.apply(r, arguments);
 	      };
 	    }).call(e, function () {
 	      return this;
@@ -280,23 +290,23 @@
 	    var r = n(15),
 	        i = n(16),
 	        s = n(17),
-	        o = n(27),
-	        a = n(30),
+	        a = n(27),
+	        o = n(30),
 	        u = "prototype",
 	        c = function c(t, e, n) {
 	      var l,
 	          f,
 	          p,
 	          h,
-	          d = t & c.F,
-	          g = t & c.G,
+	          g = t & c.F,
+	          d = t & c.G,
 	          m = t & c.S,
 	          v = t & c.P,
 	          y = t & c.B,
-	          S = g ? r : m ? r[e] || (r[e] = {}) : (r[e] || {})[u],
-	          b = g ? i : i[e] || (i[e] = {}),
-	          w = b[u] || (b[u] = {});g && (n = e);for (l in n) {
-	        f = !d && S && void 0 !== S[l], p = (f ? S : n)[l], h = y && f ? a(p, r) : v && "function" == typeof p ? a(Function.call, p) : p, S && o(S, l, p, t & c.U), b[l] != p && s(b, l, h), v && w[l] != p && (w[l] = p);
+	          b = d ? r : m ? r[e] || (r[e] = {}) : (r[e] || {})[u],
+	          S = d ? i : i[e] || (i[e] = {}),
+	          k = S[u] || (S[u] = {});d && (n = e);for (l in n) {
+	        f = !g && b && void 0 !== b[l], p = (f ? b : n)[l], h = y && f ? o(p, r) : v && "function" == typeof p ? o(Function.call, p) : p, b && a(b, l, p, t & c.U), S[l] != p && s(S, l, h), v && k[l] != p && (k[l] = p);
 	      }
 	    };r.core = i, c.F = 1, c.G = 2, c.S = 4, c.P = 8, c.B = 16, c.W = 32, c.U = 64, c.R = 128, t.exports = c;
 	  }, function (t, e) {
@@ -314,10 +324,10 @@
 	    var r = n(19),
 	        i = n(21),
 	        s = n(25),
-	        o = Object.defineProperty;e.f = n(22) ? Object.defineProperty : function (t, e, n) {
+	        a = Object.defineProperty;e.f = n(22) ? Object.defineProperty : function (t, e, n) {
 	      if (r(t), e = s(e, !0), r(n), i) try {
-	        return o(t, e, n);
-	      } catch (a) {}if ("get" in n || "set" in n) throw TypeError("Accessors not supported!");return "value" in n && (t[e] = n.value), t;
+	        return a(t, e, n);
+	      } catch (o) {}if ("get" in n || "set" in n) throw TypeError("Accessors not supported!");return "value" in n && (t[e] = n.value), t;
 	    };
 	  }, function (t, e, n) {
 	    var r = n(20);t.exports = function (t) {
@@ -365,15 +375,15 @@
 	    var r = n(15),
 	        i = n(17),
 	        s = n(28),
-	        o = n(29)("src"),
-	        a = "toString",
-	        u = Function[a],
-	        c = ("" + u).split(a);n(16).inspectSource = function (t) {
+	        a = n(29)("src"),
+	        o = "toString",
+	        u = Function[o],
+	        c = ("" + u).split(o);n(16).inspectSource = function (t) {
 	      return u.call(t);
-	    }, (t.exports = function (t, e, n, a) {
-	      var u = "function" == typeof n;u && (s(n, "name") || i(n, "name", e)), t[e] !== n && (u && (s(n, o) || i(n, o, t[e] ? "" + t[e] : c.join(String(e)))), t === r ? t[e] = n : a ? t[e] ? t[e] = n : i(t, e, n) : (delete t[e], i(t, e, n)));
-	    })(Function.prototype, a, function () {
-	      return "function" == typeof this && this[o] || u.call(this);
+	    }, (t.exports = function (t, e, n, o) {
+	      var u = "function" == typeof n;u && (s(n, "name") || i(n, "name", e)), t[e] !== n && (u && (s(n, a) || i(n, a, t[e] ? "" + t[e] : c.join(String(e)))), t === r ? t[e] = n : o ? t[e] ? t[e] = n : i(t, e, n) : (delete t[e], i(t, e, n)));
+	    })(Function.prototype, o, function () {
+	      return "function" == typeof this && this[a] || u.call(this);
 	    });
 	  }, function (t, e) {
 	    var n = {}.hasOwnProperty;t.exports = function (t, e) {
@@ -408,8 +418,8 @@
 	    var r = n(33),
 	        i = n(46),
 	        s = n(47),
-	        o = n(48),
-	        a = n(36),
+	        a = n(48),
+	        o = n(36),
 	        u = Object.assign;t.exports = !u || n(23)(function () {
 	      var t = {},
 	          e = {},
@@ -418,9 +428,9 @@
 	        e[t] = t;
 	      }), 7 != u({}, t)[n] || Object.keys(u({}, e)).join("") != r;
 	    }) ? function (t, e) {
-	      for (var n = o(t), u = arguments.length, c = 1, l = i.f, f = s.f; u > c;) {
-	        for (var p, h = a(arguments[c++]), d = l ? r(h).concat(l(h)) : r(h), g = d.length, m = 0; g > m;) {
-	          f.call(h, p = d[m++]) && (n[p] = h[p]);
+	      for (var n = a(t), u = arguments.length, c = 1, l = i.f, f = s.f; u > c;) {
+	        for (var p, h = o(arguments[c++]), g = l ? r(h).concat(l(h)) : r(h), d = g.length, m = 0; d > m;) {
+	          f.call(h, p = g[m++]) && (n[p] = h[p]);
 	        }
 	      }return n;
 	    } : u;
@@ -433,14 +443,14 @@
 	    var r = n(28),
 	        i = n(35),
 	        s = n(39)(!1),
-	        o = n(43)("IE_PROTO");t.exports = function (t, e) {
+	        a = n(43)("IE_PROTO");t.exports = function (t, e) {
 	      var n,
-	          a = i(t),
+	          o = i(t),
 	          u = 0,
-	          c = [];for (n in a) {
-	        n != o && r(a, n) && c.push(n);
+	          c = [];for (n in o) {
+	        n != a && r(o, n) && c.push(n);
 	      }for (; e.length > u;) {
-	        r(a, n = e[u++]) && (~s(c, n) || c.push(n));
+	        r(o, n = e[u++]) && (~s(c, n) || c.push(n));
 	      }return c;
 	    };
 	  }, function (t, e, n) {
@@ -464,13 +474,13 @@
 	    var r = n(35),
 	        i = n(40),
 	        s = n(42);t.exports = function (t) {
-	      return function (e, n, o) {
-	        var a,
+	      return function (e, n, a) {
+	        var o,
 	            u = r(e),
 	            c = i(u.length),
-	            l = s(o, c);if (t && n != n) {
+	            l = s(a, c);if (t && n != n) {
 	          for (; c > l;) {
-	            if (a = u[l++], a != a) return !0;
+	            if (o = u[l++], o != o) return !0;
 	          }
 	        } else for (; c > l; l++) {
 	          if ((t || l in u) && u[l] === n) return t || l || 0;

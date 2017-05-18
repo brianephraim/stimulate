@@ -123,7 +123,9 @@ return /******/ (function(modules) { // webpackBootstrap
 			this.parent = parent;
 			this.debug = debug;
 			this.options = options;
-			this.init();
+			if (!options.noInit) {
+				this.init();
+			}
 		}
 	
 		_createClass(StimulationAspect, [{
@@ -438,6 +440,7 @@ return /******/ (function(modules) { // webpackBootstrap
 								// 	console.log('^^^^^^^^^^^');
 								// }
 								var progressChanges = _this2.settings.frame.apply(_this2, [_this2.progress]);
+								_this2.iterateFrameCbs(_this2.progress);
 								_this2.frameCount++;
 								Object.assign(_this2.progress, progressChanges);
 							}
@@ -455,6 +458,37 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 		}, {
+			key: 'onFrame',
+			value: function onFrame(cb) {
+				var _this3 = this;
+	
+				if (!this.callbacks) {
+					this.callbacks = {};
+				}
+				if (!this.callbacks.frame) {
+					this.callbacks.frame = [];
+				}
+				this.callbacks.frame.push(cb);
+				return function () {
+					_this3.callbacks = _this3.callbacks.frame.filter(function (accum, cachedCb) {
+						return cachedCb !== cb;
+					});
+				};
+			}
+		}, {
+			key: 'iterateFrameCbs',
+			value: function iterateFrameCbs() {
+				for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+					args[_key] = arguments[_key];
+				}
+	
+				if (this.callbacks && this.callbacks.frame) {
+					this.callbacks.frame.forEach(function (cb) {
+						cb.apply(undefined, args);
+					});
+				}
+			}
+		}, {
 			key: 'resetAll',
 			value: function resetAll() {
 				this.stop(true);
@@ -465,7 +499,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}, {
 			key: 'stop',
 			value: function stop(skipCallback) {
-				var _this3 = this;
+				var _this4 = this;
 	
 				this.running = false;
 				_sharedTiming2.default.caf(this.nextRafId);
@@ -475,9 +509,9 @@ return /******/ (function(modules) { // webpackBootstrap
 					}
 				}
 				this.iterateAspectNames(function (name) {
-					var aspect = _this3.aspects[name];
+					var aspect = _this4.aspects[name];
 					if (aspect.settings.chainedStop) {
-						_this3.aspects[name].stop(skipCallback);
+						_this4.aspects[name].stop(skipCallback);
 					}
 				});
 	
@@ -486,7 +520,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}, {
 			key: 'resume',
 			value: function resume() {
-				var _this4 = this;
+				var _this5 = this;
 	
 				if (!this.running) {
 					_sharedTiming2.default.makeStamp('start');
@@ -505,7 +539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					this.running = true;
 	
 					this.iterateAspectNames(function (name) {
-						_this4.aspects[name].resume();
+						_this5.aspects[name].resume();
 					});
 	
 					this.recurse();
@@ -526,28 +560,17 @@ return /******/ (function(modules) { // webpackBootstrap
 			key: 'progressAt',
 			value: function progressAt(path) {
 				var pathSplit = path.split('.');
-				var lastItem = pathSplit[pathSplit.length - 1];
-				if (typeof this.progress[lastItem] === 'undefined') {
-					lastItem = 'easedTweened';
-					pathSplit.push(lastItem);
-				}
 				var place = this.aspectTree;
 				if (path) {
 					try {
-						pathSplit.forEach(function (name) {
-							if (name !== lastItem) {
-								place = place.aspects[name];
-							} else {
-								place = place.progress[name];
-							}
+						pathSplit.forEach(function (name, i) {
+							place = place.aspects[name];
 						});
 					} catch (e) {
 						throw new Error('Error: You specified an invalid aspect path for .progressAt().');
 					}
-				} else {
-					place = place.progress[lastItem];
 				}
-				return place;
+				return place ? place.progress : place;
 			}
 		}, {
 			key: 'aspectAt',
@@ -571,8 +594,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 	
 	var stimulate = function stimulate() {
-		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-			args[_key] = arguments[_key];
+		for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+			args[_key2] = arguments[_key2];
 		}
 	
 		return new (Function.prototype.bind.apply(StimulationAspect, [null].concat(args)))();
@@ -752,10 +775,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	module.exports.cancel = function () {
 	  caf.apply(root, arguments);
-	};
-	module.exports.polyfill = function () {
-	  root.requestAnimationFrame = raf;
-	  root.cancelAnimationFrame = caf;
 	};
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
