@@ -43,3 +43,5 @@ build/*
 .sauce_env
 
 coverage
+
+_webpack-config-preview.json

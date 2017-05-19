@@ -211,4 +211,5 @@ const config = {
 	plugins,
 };
 
+fs.writeFileSync('./_webpack-config-preview.json',JSON.stringify(config,null,2));
 module.exports = config;
