@@ -408,7 +408,6 @@ The second way to spawn a child is by calling `.birthChild` on a StimulationAspe
 ```
 var myStimulation = stimulate({duration: 100});
 var someChildOfMyStimulation = myStimulation.birthAspect('someChild',{duration:200}');
-// myStimulation.aspects.someChild === someChildOfMyStimulation
 ```
 
 
