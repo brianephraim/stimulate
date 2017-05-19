@@ -31,12 +31,14 @@ function registerPlugin(name, plugin) {
 	return false;
 }
 
-function conditionalExtractTextLoaderCss(usePlugin, argArray) {
+function conditionalExtractTextLoaderCss(usePlugin, moreLoaderParams) {
 	if (usePlugin) {
 		registerPlugin('ExtractTextPlugin', new ExtractTextPlugin('[name].css'));
-		return { loader: ExtractTextPlugin.extract(...argArray) };
-	}
-	return { loaders: argArray };
+		return { use: ExtractTextPlugin.extract(moreLoaderParams) };
+	};
+	return {
+		use : [moreLoaderParams.fallback, ...moreLoaderParams.use]
+	};
 }
 
 const env = argv.env;
@@ -60,9 +62,14 @@ if (env === 'build') {
 //  Error: a dependency to an entry point is not allowed
 // Workaround:
 //  https://github.com/webpack/webpack/issues/300
-entry[outputFiles.library] = [entryFiles.library];
-entry[outputFiles.libraryMin] = [entryFiles.library];
-entry[outputFiles.demo] = [entryFiles.demo];
+
+entry[outputFiles.library] = entryFiles.library;
+if (outputFiles.libraryMin) {
+	entry[outputFiles.libraryMin] = entryFiles.library;
+}
+entry[outputFiles.demo] = entryFiles.demo;
+console.log('envenvenvenvenv',env)
+console.log('outputFiles',outputFiles)
 
 
 function moveModify(source, modifyPath, modifyContent) {
@@ -127,6 +134,16 @@ if (env === 'build') {
 	}));
 }
 registerPlugin('StringReplacePlugin', new StringReplacePlugin());
+
+registerPlugin('LoaderOptionsPlugin', new webpack.LoaderOptionsPlugin({
+  options: {
+    sassLoader: {
+      importer: jsonImporter,
+    },
+    context: __dirname,
+  },
+}));
+
 const config = {
 	entry,
 	devtool: 'source-map',
@@ -139,54 +156,66 @@ const config = {
 		// publicPath: '/assets/',
 	},
 	module: {
-		loaders: [
-			{
-				test: /(\.jsx|\.js)$/,
-				loader: 'babel',
-				exclude: /(node_modules|bower_components)/,
-				query: {
-					presets: ['es2015'],
-					// "plugins": ["babel-plugin-add-module-exports"]
-				},
-			},
-			{
-				test: /(\.jsx|\.js)$/,
-				loader: 'eslint-loader',
-				exclude: /node_modules/,
-				query: {
-					presets: ['es2015'],
-					// "plugins": ["babel-plugin-add-module-exports"]
-				},
-			},
-			{
-				test: /\.css$/,
-				...conditionalExtractTextLoaderCss(env === 'build', [
-					'style-loader',
-					'css-loader',
-				]),
-				// loaders: ['style-loader','css-loader'],
-				// loader: 'style-loader!css-loader',
-			},
-			{
-				test: /\.scss$/,
-				...conditionalExtractTextLoaderCss(env === 'build', [
-					'style-loader',
-					'css-loader?sourceMap!sass-loader?sourceMap',
-				]),
-				// loader: ExtractTextPlugin.extract("style-loader", "css-loader!sass-loader"),
-				// loaders: ['style', 'css?sourceMap', 'sass?sourceMap'],
-			},
-			{
+    rules: [
+      {
+        test: /\.(js)?$/,
+        loader: 'babel-loader',
+        // exclude: /node_modules/,
+        // include: __dirname,
+        options: {
+          presets: [
+
+            [
+              'es2015',
+              // needed for tree shaking
+              { modules: false },
+            ],
+            // 'react',
+          ],
+          plugins: [
+            'transform-es2015-spread',
+            'transform-object-rest-spread',
+          ],
+          // mocha needs .babelrc,
+          // and .babelrc cannot use the above config
+          // so ignore .babelrc here
+          babelrc: false,
+        },
+      },
+      {
+        test: /\.css$/,
+        ...conditionalExtractTextLoaderCss(env === 'build', {
+						fallback: 'style-loader',
+						use: ['css-loader']
+					}),
+      },
+      {
+        test: /\.scss$/,
+        ...conditionalExtractTextLoaderCss(env === 'build', {
+						fallback: 'style-loader',
+						use: [
+							'css-loader?sourceMap',
+							{
+			          loader: 'sass-loader?sourceMap',
+			          // Apply the JSON importer via sass-loader's options.
+			          options: {
+			            importer: jsonImporter,
+			          },
+			        },
+						]
+					}),
+      },
+      {
 				test: /\.json$/,
-				loaders: ['json'],
+				loaders: ['json-loader'],
 			},
 			{
 				test: /\.ejs$/,
-				loader: 'ejs-compiled',
+				loader: 'ejs-compiled-loader',
 			},
 			{
 				test: /\.md/,
-				loaders: ['html', 'markdown'],
+				loaders: ['html-loader', 'markdown-loader'],
 			},
 			{
 				test: /\.js|\.html|\.ejs$/,
@@ -199,15 +228,80 @@ const config = {
 					}],
 				}),
 			},
-		],
-	},
-	sassLoader: {
-		importer: jsonImporter,
+    ],
+
+
+
+		// loaders: [
+		// 	{
+		// 		test: /(\.jsx|\.js)$/,
+		// 		loader: 'babel-loader',
+		// 		exclude: /(node_modules|bower_components)/,
+		// 		query: {
+		// 			presets: ['es2015'],
+		// 			// "plugins": ["babel-plugin-add-module-exports"]
+		// 		},
+		// 	},
+		// 	// {
+		// 	// 	test: /(\.jsx|\.js)$/,
+		// 	// 	loader: 'eslint-loader',
+		// 	// 	exclude: /node_modules/,
+		// 	// 	query: {
+		// 	// 		presets: ['es2015'],
+		// 	// 		// "plugins": ["babel-plugin-add-module-exports"]
+		// 	// 	},
+		// 	// },
+		// 	{
+		// 		test: /\.css$/,
+		// 		...conditionalExtractTextLoaderCss(env === 'build', [
+		// 			{
+		// 				fallback: 'style-loader',
+		// 				use: 'css-loader'
+		// 			},
+		// 		]),
+		// 		// loaders: ['style-loader','css-loader'],
+		// 		// loader: 'style-loader!css-loader',
+		// 	},
+		// 	{
+		// 		test: /\.scss$/,
+		// 		...conditionalExtractTextLoaderCss(env === 'build', [
+		// 			{
+		// 				fallback: 'style-loader',
+		// 				use: 'css-loader?sourceMap!sass-loader?sourceMap'
+		// 			},
+		// 		]),
+		// 		// loader: ExtractTextPlugin.extract("style-loader", "css-loader!sass-loader"),
+		// 		// loaders: ['style', 'css?sourceMap', 'sass?sourceMap'],
+		// 	},
+		// 	{
+		// 		test: /\.json$/,
+		// 		loaders: ['json-loader'],
+		// 	},
+		// 	{
+		// 		test: /\.ejs$/,
+		// 		loader: 'ejs-compiled-loader',
+		// 	},
+		// 	{
+		// 		test: /\.md/,
+		// 		loaders: ['html', 'markdown-loader'],
+		// 	},
+		// 	{
+		// 		test: /\.js|\.html|\.ejs$/,
+		// 		loader: StringReplacePlugin.replace({
+		// 			replacements: [{
+		// 				pattern: /LIBRARYNAME/g,
+		// 				replacement(/* match, p1, offset, string */) {
+		// 					return libraryName;
+		// 				},
+		// 			}],
+		// 		}),
+		// 	},
+		// ],
 	},
 	resolve: {
-		root: path.resolve('./src/library'),
-		extensions: ['', '.js'],
-	},
+    modules: [path.resolve('./src/library'), 'node_modules'],
+    extensions: ['.js']
+  },
 	plugins,
 };
 

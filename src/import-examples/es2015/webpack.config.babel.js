@@ -11,7 +11,7 @@ const config = {
 		loaders: [
 			{
 				test: /(\.jsx|\.js)$/,
-				loader: 'babel',
+				loader: 'babel-loader',
 				query: {
 					presets: ['es2015'],
 				},
