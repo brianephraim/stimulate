@@ -347,7 +347,7 @@ class StimulationAspect {
 		}
 		this.callbacks.frame.push(cb);
 		return () => {
-			this.callbacks = this.callbacks.frame.filter((accum,cachedCb) => {
+			this.callbacks = this.callbacks.frame.filter((accum, cachedCb) => {
 				return cachedCb !== cb;
 			});
 		};
@@ -423,7 +423,7 @@ class StimulationAspect {
 		let place = this.aspectTree;
 		if (path) {
 			try {
-				pathSplit.forEach((name, i) => {
+				pathSplit.forEach((name) => {
 					place = place.aspects[name];
 				});
 			} catch (e) {
