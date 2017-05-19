@@ -131,9 +131,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return l.raf.apply(l, arguments);
     }function s() {
       return l.caf.apply(l, arguments);
-    }n.d(e, "a", function () {
-      return l;
-    }), n.d(e, "b", function () {
+    }n.d(e, "b", function () {
       return i;
     }), n.d(e, "c", function () {
       return s;
@@ -244,27 +242,27 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         } }, { key: "calculateRatio", value: function value(t) {
           var e = t.start + t.delay;return (t.later - e) / t.duration;
         } }, { key: "recurse", value: function value(t, e) {
-          var n = this;this.running && (this.nextRafId = i.d.raf(function () {
-            if (n.running) {
-              n.timestamps.recentRaf = i.d.stamps.raf, t && (n.timestamps.start = n.timestamps.recentRaf);var r = !!n.lookupSetting("reverse"),
-                  s = r ? -1 : 1,
-                  o = n.previousReverseSetting !== r,
-                  a = n.lookupSetting("loop");o && (n.currentLoopCount = a + 1 - n.currentLoopCount), n.previousReverseSetting = r, e && Object.assign(n.progress, n.getProgressDefault(r));var u = 0;u = null !== n.lastDelaySettingWhileDelaying ? n.lastDelaySettingWhileDelaying : n.getCumulativeDelay();var c = n.lookupSetting("duration"),
-                  l = n.calculateRatio({ start: n.timestamps.start, later: n.timestamps.recentRaf, delay: u, duration: c }),
-                  f = n.lookupSetting("delayEveryLoop");if (l > 0 && l < 1 && null === n.lastDelaySettingWhileDelaying && (n.lastDelaySettingWhileDelaying = u, (!n.lookupSetting("skipZeroFrame") && u && n.currentLoopCount <= 1 || u && f && n.currentLoopCount > 1) && (n.timestamps.start = n.timestamps.recentRaf - u, l = n.calculateRatio({ start: n.timestamps.start, later: n.timestamps.recentRaf, delay: u, duration: c }))), o) {
-                null === n.lastDelaySettingWhileDelaying && (n.currentLoopCount--, n.progress.ratioCompleted = -s * (-s * n.progress.ratioCompleted + u / c + 1));var p = n.progress.ratioCompleted;r && (p = 1 - n.progress.ratioCompleted);var h = p * c,
-                    g = n.timestamps.recentRaf - h;n.timestamps.start = g - u, l = n.calculateRatio({ start: n.timestamps.start, later: n.timestamps.recentRaf, delay: u, duration: c });
-              }r && (l = 1 - l);var d = 1,
+          var r = this;this.running && (this.nextRafId = n.i(i.b)(function () {
+            if (r.running) {
+              r.timestamps.recentRaf = i.d.stamps.raf, t && (r.timestamps.start = r.timestamps.recentRaf);var n = !!r.lookupSetting("reverse"),
+                  s = n ? -1 : 1,
+                  o = r.previousReverseSetting !== n,
+                  a = r.lookupSetting("loop");o && (r.currentLoopCount = a + 1 - r.currentLoopCount), r.previousReverseSetting = n, e && Object.assign(r.progress, r.getProgressDefault(n));var u = 0;u = null !== r.lastDelaySettingWhileDelaying ? r.lastDelaySettingWhileDelaying : r.getCumulativeDelay();var c = r.lookupSetting("duration"),
+                  l = r.calculateRatio({ start: r.timestamps.start, later: r.timestamps.recentRaf, delay: u, duration: c }),
+                  f = r.lookupSetting("delayEveryLoop");if (l > 0 && l < 1 && null === r.lastDelaySettingWhileDelaying && (r.lastDelaySettingWhileDelaying = u, (!r.lookupSetting("skipZeroFrame") && u && r.currentLoopCount <= 1 || u && f && r.currentLoopCount > 1) && (r.timestamps.start = r.timestamps.recentRaf - u, l = r.calculateRatio({ start: r.timestamps.start, later: r.timestamps.recentRaf, delay: u, duration: c }))), o) {
+                null === r.lastDelaySettingWhileDelaying && (r.currentLoopCount--, r.progress.ratioCompleted = -s * (-s * r.progress.ratioCompleted + u / c + 1));var p = r.progress.ratioCompleted;n && (p = 1 - r.progress.ratioCompleted);var h = p * c,
+                    g = r.timestamps.recentRaf - h;r.timestamps.start = g - u, l = r.calculateRatio({ start: r.timestamps.start, later: r.timestamps.recentRaf, delay: u, duration: c });
+              }n && (l = 1 - l);var d = 1,
                   m = l < d,
-                  y = n.settings.from,
-                  v = n.settings.to;r && (d = 0, m = l > d);var b = !1,
+                  y = r.settings.from,
+                  v = r.settings.to;n && (d = 0, m = l > d);var b = !1,
                   S = !1,
                   w = !1,
-                  k = n.progress;if (k.ratioCompleted = l, m || !c || n.lookupSetting("endless")) n.settings.easing ? k.easedRatioCompleted = n.settings.easing(k.ratioCompleted) : k.easedRatioCompleted = k.ratioCompleted, k.tweened = n.getTween(y, v, k.ratioCompleted), k.easedTweened = n.getTween(y, v, k.easedRatioCompleted);else {
-                var C = !0 === a || a && n.currentLoopCount < a;C && !f ? (k.ratioCompleted = -s + l, n.timestamps.start = n.timestamps.start + c, n.settings.easing ? k.easedRatioCompleted = n.settings.easing(k.ratioCompleted) : k.easedRatioCompleted = k.ratioCompleted, k.tweened = n.getTween(y, v, k.ratioCompleted), k.easedTweened = n.getTween(y, v, k.easedRatioCompleted), S = !0) : (k.ratioCompleted = d, k.easedRatioCompleted = d, k.tweened = v, k.easedTweened = v, r && (k.tweened = y, k.easedTweened = y)), C ? (n.currentLoopCount++, w = !S, n.lastDelaySettingWhileDelaying = null) : b = !0;
-              }var x = n.progress.ratioCompleted >= 0;if (r && (x = n.progress.ratioCompleted <= 1), n.settings.frame && x) {
-                var j = n.settings.frame.apply(n, [n.progress]);n.iterateFrameCbs(n.progress), n.frameCount++, Object.assign(n.progress, j);
-              }b ? (n.running = !1, n.settings.onComplete && n.settings.onComplete.apply(n, [n.progress])) : n.recurse(w, w);
+                  k = r.progress;if (k.ratioCompleted = l, m || !c || r.lookupSetting("endless")) r.settings.easing ? k.easedRatioCompleted = r.settings.easing(k.ratioCompleted) : k.easedRatioCompleted = k.ratioCompleted, k.tweened = r.getTween(y, v, k.ratioCompleted), k.easedTweened = r.getTween(y, v, k.easedRatioCompleted);else {
+                var C = !0 === a || a && r.currentLoopCount < a;C && !f ? (k.ratioCompleted = -s + l, r.timestamps.start = r.timestamps.start + c, r.settings.easing ? k.easedRatioCompleted = r.settings.easing(k.ratioCompleted) : k.easedRatioCompleted = k.ratioCompleted, k.tweened = r.getTween(y, v, k.ratioCompleted), k.easedTweened = r.getTween(y, v, k.easedRatioCompleted), S = !0) : (k.ratioCompleted = d, k.easedRatioCompleted = d, k.tweened = v, k.easedTweened = v, n && (k.tweened = y, k.easedTweened = y)), C ? (r.currentLoopCount++, w = !S, r.lastDelaySettingWhileDelaying = null) : b = !0;
+              }var x = r.progress.ratioCompleted >= 0;if (n && (x = r.progress.ratioCompleted <= 1), r.settings.frame && x) {
+                var j = r.settings.frame.apply(r, [r.progress]);r.iterateFrameCbs(r.progress), r.frameCount++, Object.assign(r.progress, j);
+              }b ? (r.running = !1, r.settings.onComplete && r.settings.onComplete.apply(r, [r.progress])) : r.recurse(w, w);
             }
           }));
         } }, { key: "onFrame", value: function value(t) {
@@ -340,7 +338,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         s = n(5);n.d(e, "stimulate", function () {
       return i.a;
     }), n.d(e, "sharedTiming", function () {
-      return s.a;
+      return s.sharedTiming;
     }), n.d(e, "raf", function () {
       return s.b;
     }), n.d(e, "caf", function () {

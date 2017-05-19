@@ -129,7 +129,6 @@ module.exports = function (it) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return sharedTiming; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return sharedTimingRaf; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return sharedTimingCaf; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__raf__ = __webpack_require__(41);
@@ -310,495 +309,495 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /* eslint no-inner-declarations:0 */
-
+/* eslint-disable class-methods-use-this */
 
 
 var StimulationAspect = function () {
-	function StimulationAspect(options) {
-		var debug = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'root';
-		var parent = arguments[2];
+  function StimulationAspect(options) {
+    var debug = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'root';
+    var parent = arguments[2];
 
-		_classCallCheck(this, StimulationAspect);
+    _classCallCheck(this, StimulationAspect);
 
-		this.parent = parent;
-		this.debug = debug;
-		this.options = options;
-		if (!options.noInit) {
-			this.init();
-		}
-	}
+    this.parent = parent;
+    this.debug = debug;
+    this.options = options;
+    if (!options.noInit) {
+      this.init();
+    }
+  }
 
-	_createClass(StimulationAspect, [{
-		key: 'init',
-		value: function init(resetAll) {
-			var _this = this;
+  _createClass(StimulationAspect, [{
+    key: 'init',
+    value: function init(resetAll) {
+      var _this = this;
 
-			this.aspects = {};
-			if (!this.persistedSettings) {
-				this.persistedSettings = {};
-			}
-			this.inheritableDefaults = {
-				duration: 1000,
-				delay: 0,
-				delayEveryLoop: false,
-				loop: false,
-				skipZeroFrame: true,
-				endless: false,
-				reverse: false,
-				usePersistedSettings: false
-			};
-			this.defaultSettings = {
-				delayAddsParentDelay: false,
-				from: 0,
-				to: 1,
-				easing: null,
-				aspects: this.aspects,
-				frame: null,
-				chainedStop: true
-			};
-			this.settings = _extends({}, this.defaultSettings, this.options);
-			if (this.lookupSetting('usePersistedSettings')) {
-				Object.assign(this.settings, this.persistedSettings);
-			}
+      this.aspects = {};
+      if (!this.persistedSettings) {
+        this.persistedSettings = {};
+      }
+      this.inheritableDefaults = {
+        duration: 1000,
+        delay: 0,
+        delayEveryLoop: false,
+        loop: false,
+        skipZeroFrame: true,
+        endless: false,
+        reverse: false,
+        usePersistedSettings: false
+      };
+      this.defaultSettings = {
+        delayAddsParentDelay: false,
+        from: 0,
+        to: 1,
+        easing: null,
+        aspects: this.aspects,
+        frame: null,
+        chainedStop: true
+      };
+      this.settings = _extends({}, this.defaultSettings, this.options);
+      if (this.lookupSetting('usePersistedSettings')) {
+        Object.assign(this.settings, this.persistedSettings);
+      }
 
-			this.aspects = this.settings.aspects;
-			if (this.parent) {
-				this.aspectTree = this.parent.aspectTree;
-			} else {
-				this.aspectTree = this;
-			}
+      this.aspects = this.settings.aspects;
+      if (this.parent) {
+        this.aspectTree = this.parent.aspectTree;
+      } else {
+        this.aspectTree = this;
+      }
 
-			var reverse = !!this.lookupSetting('reverse');
-			this.previousReverseSetting = reverse;
-			var progressDefaults = this.getProgressDefault(reverse);
-			if (!this.progress) {
-				this.progress = progressDefaults;
-				this.progress.aspects = {};
-			} else {
-				Object.assign(this.progress, progressDefaults);
-			}
+      var reverse = !!this.lookupSetting('reverse');
+      this.previousReverseSetting = reverse;
+      var progressDefaults = this.getProgressDefault(reverse);
+      if (!this.progress) {
+        this.progress = progressDefaults;
+        this.progress.aspects = {};
+      } else {
+        Object.assign(this.progress, progressDefaults);
+      }
 
-			this.currentLoopCount = 1;
-			this.lastDelaySettingWhileDelaying = null;
-			this.running = true;
+      this.currentLoopCount = 1;
+      this.lastDelaySettingWhileDelaying = null;
+      this.running = true;
 
-			this.nextRafId = null;
-			this.timestamps = {};
+      this.nextRafId = null;
+      this.timestamps = {};
 
-			__WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].makeStamp('start');
-			this.timestamps.start = __WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].stamps.start;
-			this.timestamps.recentRaf = null;
+      __WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].makeStamp('start');
+      this.timestamps.start = __WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].stamps.start;
+      this.timestamps.recentRaf = null;
 
-			this.frameCount = 0;
+      this.frameCount = 0;
 
-			this.iterateAspectNames(function (name) {
-				if (!resetAll) {
-					_this.aspects[name] = new StimulationAspect(_extends({}, _this.settings.aspects[name]), name, _this);
-					_this.progress.aspects[name] = _this.aspects[name].progress;
-				} else {
-					_this.aspects[name].init(true);
-				}
-			});
-			var skipZeroFrame = this.lookupSetting('skipZeroFrame');
-			this.recurse(!skipZeroFrame);
-		}
-	}, {
-		key: 'getCumulativeDelay',
-		value: function getCumulativeDelay() {
-			var total = this.lookupSetting('delay');
-			if (this.parent && this.settings.delayAddsParentDelay) {
-				total += this.parent.getCumulativeDelay();
-			}
-			return total;
-		}
-	}, {
-		key: 'updateSettings',
-		value: function updateSettings(changeDict) {
-			if (this.lookupSetting('usePersistedSettings')) {
-				Object.assign(this.persistedSettings, changeDict);
-			}
-			Object.assign(this.settings, changeDict);
+      this.iterateAspectNames(function (name) {
+        if (!resetAll) {
+          _this.aspects[name] = new StimulationAspect(_extends({}, _this.settings.aspects[name]), name, _this);
+          _this.progress.aspects[name] = _this.aspects[name].progress;
+        } else {
+          _this.aspects[name].init(true);
+        }
+      });
+      var skipZeroFrame = this.lookupSetting('skipZeroFrame');
+      this.recurse(!skipZeroFrame);
+    }
+  }, {
+    key: 'getCumulativeDelay',
+    value: function getCumulativeDelay() {
+      var total = this.lookupSetting('delay');
+      if (this.parent && this.settings.delayAddsParentDelay) {
+        total += this.parent.getCumulativeDelay();
+      }
+      return total;
+    }
+  }, {
+    key: 'updateSettings',
+    value: function updateSettings(changeDict) {
+      if (this.lookupSetting('usePersistedSettings')) {
+        Object.assign(this.persistedSettings, changeDict);
+      }
+      Object.assign(this.settings, changeDict);
 
-			return this;
-		}
-	}, {
-		key: 'lookupSetting',
-		value: function lookupSetting(settingsName) {
-			if (typeof this.settings[settingsName] !== 'undefined' && this.settings[settingsName] !== 'inherit') {
-				return this.settings[settingsName];
-			} else if (this.parent) {
-				return this.parent.lookupSetting(settingsName);
-			}
-			return this.inheritableDefaults[settingsName];
-		}
-	}, {
-		key: 'iterateAspectNames',
-		value: function iterateAspectNames(cb) {
-			this.settings.aspectNames = Object.keys(this.settings.aspects);
-			this.settings.aspectNames.forEach(function (name) {
-				cb(name);
-			});
-		}
-	}, {
-		key: 'getProgressDefault',
-		value: function getProgressDefault(reverse) {
-			if (reverse) {
-				return {
-					ratioCompleted: 1,
-					easedRatioCompleted: 1,
-					tweened: this.settings.to,
-					easedTweened: this.settings.to
-				};
-			}
-			return {
-				ratioCompleted: 0,
-				easedRatioCompleted: 0,
-				tweened: this.settings.from,
-				easedTweened: this.settings.from
-			};
-		}
-	}, {
-		key: 'getTween',
-		value: function getTween(from, to, ratioCompleted) {
-			return from + ratioCompleted * (to - from);
-		}
-	}, {
-		key: 'calculateRatio',
-		value: function calculateRatio(options) {
-			var startDelay = options.start + options.delay;
-			var diff = options.later - startDelay;
-			var ratioCompleted = diff / options.duration;
-			return ratioCompleted;
-		}
-	}, {
-		key: 'recurse',
-		value: function recurse(resetTimestampStart, resetProgress) {
-			var _this2 = this;
+      return this;
+    }
+  }, {
+    key: 'lookupSetting',
+    value: function lookupSetting(settingsName) {
+      if (typeof this.settings[settingsName] !== 'undefined' && this.settings[settingsName] !== 'inherit') {
+        return this.settings[settingsName];
+      } else if (this.parent) {
+        return this.parent.lookupSetting(settingsName);
+      }
+      return this.inheritableDefaults[settingsName];
+    }
+  }, {
+    key: 'iterateAspectNames',
+    value: function iterateAspectNames(cb) {
+      this.settings.aspectNames = Object.keys(this.settings.aspects);
+      this.settings.aspectNames.forEach(function (name) {
+        cb(name);
+      });
+    }
+  }, {
+    key: 'getProgressDefault',
+    value: function getProgressDefault(reverse) {
+      if (reverse) {
+        return {
+          ratioCompleted: 1,
+          easedRatioCompleted: 1,
+          tweened: this.settings.to,
+          easedTweened: this.settings.to
+        };
+      }
+      return {
+        ratioCompleted: 0,
+        easedRatioCompleted: 0,
+        tweened: this.settings.from,
+        easedTweened: this.settings.from
+      };
+    }
+  }, {
+    key: 'getTween',
+    value: function getTween(from, to, ratioCompleted) {
+      return from + ratioCompleted * (to - from);
+    }
+  }, {
+    key: 'calculateRatio',
+    value: function calculateRatio(options) {
+      var startDelay = options.start + options.delay;
+      var diff = options.later - startDelay;
+      var ratioCompleted = diff / options.duration;
+      return ratioCompleted;
+    }
+  }, {
+    key: 'recurse',
+    value: function recurse(resetTimestampStart, resetProgress) {
+      var _this2 = this;
 
-			if (this.running) {
-				this.nextRafId = __WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].raf(function () {
-					if (_this2.running) {
-						_this2.timestamps.recentRaf = __WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].stamps.raf;
-						if (resetTimestampStart) {
-							_this2.timestamps.start = _this2.timestamps.recentRaf;
-						}
+      if (this.running) {
+        this.nextRafId = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__sharedTiming__["b" /* raf */])(function () {
+          if (_this2.running) {
+            _this2.timestamps.recentRaf = __WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].stamps.raf;
+            if (resetTimestampStart) {
+              _this2.timestamps.start = _this2.timestamps.recentRaf;
+            }
 
-						var reverse = !!_this2.lookupSetting('reverse');
-						var reverseIsNegativeOne = reverse ? -1 : 1;
-						var changedDirections = _this2.previousReverseSetting !== reverse;
-						var loop = _this2.lookupSetting('loop');
+            var reverse = !!_this2.lookupSetting('reverse');
+            var reverseIsNegativeOne = reverse ? -1 : 1;
+            var changedDirections = _this2.previousReverseSetting !== reverse;
+            var loop = _this2.lookupSetting('loop');
 
-						if (changedDirections) {
-							_this2.currentLoopCount = loop + 1 - _this2.currentLoopCount;
-						}
+            if (changedDirections) {
+              _this2.currentLoopCount = loop + 1 - _this2.currentLoopCount;
+            }
 
-						_this2.previousReverseSetting = reverse;
+            _this2.previousReverseSetting = reverse;
 
-						if (resetProgress) {
-							Object.assign(_this2.progress, _this2.getProgressDefault(reverse));
-						}
+            if (resetProgress) {
+              Object.assign(_this2.progress, _this2.getProgressDefault(reverse));
+            }
 
-						var delay = 0;
-						if (_this2.lastDelaySettingWhileDelaying !== null) {
-							delay = _this2.lastDelaySettingWhileDelaying;
-						} else {
-							delay = _this2.getCumulativeDelay();
-						}
+            var delay = 0;
+            if (_this2.lastDelaySettingWhileDelaying !== null) {
+              delay = _this2.lastDelaySettingWhileDelaying;
+            } else {
+              delay = _this2.getCumulativeDelay();
+            }
 
-						var duration = _this2.lookupSetting('duration');
+            var duration = _this2.lookupSetting('duration');
 
-						var ratioCompleted = _this2.calculateRatio({
-							start: _this2.timestamps.start,
-							later: _this2.timestamps.recentRaf,
-							delay: delay,
-							duration: duration
-						});
+            var ratioCompleted = _this2.calculateRatio({
+              start: _this2.timestamps.start,
+              later: _this2.timestamps.recentRaf,
+              delay: delay,
+              duration: duration
+            });
 
-						var delayEveryLoop = _this2.lookupSetting('delayEveryLoop');
-						if (ratioCompleted > 0 && ratioCompleted < 1 && _this2.lastDelaySettingWhileDelaying === null) {
-							_this2.lastDelaySettingWhileDelaying = delay;
-							if (!_this2.lookupSetting('skipZeroFrame') && delay && _this2.currentLoopCount <= 1 || delay && delayEveryLoop && _this2.currentLoopCount > 1) {
-								_this2.timestamps.start = _this2.timestamps.recentRaf - delay;
-								ratioCompleted = _this2.calculateRatio({
-									start: _this2.timestamps.start,
-									later: _this2.timestamps.recentRaf,
-									delay: delay,
-									duration: duration
-								});
-							}
-						}
+            var delayEveryLoop = _this2.lookupSetting('delayEveryLoop');
+            if (ratioCompleted > 0 && ratioCompleted < 1 && _this2.lastDelaySettingWhileDelaying === null) {
+              _this2.lastDelaySettingWhileDelaying = delay;
+              if (!_this2.lookupSetting('skipZeroFrame') && delay && _this2.currentLoopCount <= 1 || delay && delayEveryLoop && _this2.currentLoopCount > 1) {
+                _this2.timestamps.start = _this2.timestamps.recentRaf - delay;
+                ratioCompleted = _this2.calculateRatio({
+                  start: _this2.timestamps.start,
+                  later: _this2.timestamps.recentRaf,
+                  delay: delay,
+                  duration: duration
+                });
+              }
+            }
 
-						if (changedDirections) {
-							if (_this2.lastDelaySettingWhileDelaying === null) {
-								_this2.currentLoopCount--;
-								_this2.progress.ratioCompleted = -reverseIsNegativeOne * (1 + (-reverseIsNegativeOne * _this2.progress.ratioCompleted + delay / duration));
-							}
+            if (changedDirections) {
+              if (_this2.lastDelaySettingWhileDelaying === null) {
+                _this2.currentLoopCount--;
+                _this2.progress.ratioCompleted = -reverseIsNegativeOne * (1 + (-reverseIsNegativeOne * _this2.progress.ratioCompleted + delay / duration));
+              }
 
-							var reverseAdjustedRatioCompleted = _this2.progress.ratioCompleted;
-							if (reverse) {
-								reverseAdjustedRatioCompleted = 1 - _this2.progress.ratioCompleted;
-							}
-							var diff = reverseAdjustedRatioCompleted * duration;
-							var startDelay = _this2.timestamps.recentRaf - diff;
-							_this2.timestamps.start = startDelay - delay;
+              var reverseAdjustedRatioCompleted = _this2.progress.ratioCompleted;
+              if (reverse) {
+                reverseAdjustedRatioCompleted = 1 - _this2.progress.ratioCompleted;
+              }
+              var diff = reverseAdjustedRatioCompleted * duration;
+              var startDelay = _this2.timestamps.recentRaf - diff;
+              _this2.timestamps.start = startDelay - delay;
 
-							ratioCompleted = _this2.calculateRatio({
-								start: _this2.timestamps.start,
-								later: _this2.timestamps.recentRaf,
-								delay: delay,
-								duration: duration
-							});
-						}
+              ratioCompleted = _this2.calculateRatio({
+                start: _this2.timestamps.start,
+                later: _this2.timestamps.recentRaf,
+                delay: delay,
+                duration: duration
+              });
+            }
 
-						if (reverse) {
-							ratioCompleted = 1 - ratioCompleted;
-						}
-						var ratioLimit = 1;
-						var withinLimit = ratioCompleted < ratioLimit;
-						var from = _this2.settings.from;
-						var to = _this2.settings.to;
+            if (reverse) {
+              ratioCompleted = 1 - ratioCompleted;
+            }
+            var ratioLimit = 1;
+            var withinLimit = ratioCompleted < ratioLimit;
+            var from = _this2.settings.from;
+            var to = _this2.settings.to;
 
-						if (reverse) {
-							ratioLimit = 0;
-							withinLimit = ratioCompleted > ratioLimit;
-						}
+            if (reverse) {
+              ratioLimit = 0;
+              withinLimit = ratioCompleted > ratioLimit;
+            }
 
-						var durationAchieved = false;
-						var overlapLoop = false;
-						var stillLooping = false;
-						var p = _this2.progress;
-						p.ratioCompleted = ratioCompleted;
-						if (withinLimit || !duration || _this2.lookupSetting('endless')) {
-							if (_this2.settings.easing) {
-								p.easedRatioCompleted = _this2.settings.easing(p.ratioCompleted);
-							} else {
-								p.easedRatioCompleted = p.ratioCompleted;
-							}
-							p.tweened = _this2.getTween(from, to, p.ratioCompleted);
-							p.easedTweened = _this2.getTween(from, to, p.easedRatioCompleted);
-						} else {
-							var needsAnotherLoop = loop === true || loop && _this2.currentLoopCount < loop;
-							if (needsAnotherLoop && !delayEveryLoop) {
-								p.ratioCompleted = -reverseIsNegativeOne + ratioCompleted;
-								_this2.timestamps.start = _this2.timestamps.start + duration;
-								if (_this2.settings.easing) {
-									p.easedRatioCompleted = _this2.settings.easing(p.ratioCompleted);
-								} else {
-									p.easedRatioCompleted = p.ratioCompleted;
-								}
-								p.tweened = _this2.getTween(from, to, p.ratioCompleted);
-								p.easedTweened = _this2.getTween(from, to, p.easedRatioCompleted);
-								overlapLoop = true;
-							} else {
-								p.ratioCompleted = ratioLimit;
-								p.easedRatioCompleted = ratioLimit;
-								p.tweened = to;
-								p.easedTweened = to;
-								if (reverse) {
-									p.tweened = from;
-									p.easedTweened = from;
-								}
-							}
+            var durationAchieved = false;
+            var overlapLoop = false;
+            var stillLooping = false;
+            var p = _this2.progress;
+            p.ratioCompleted = ratioCompleted;
+            if (withinLimit || !duration || _this2.lookupSetting('endless')) {
+              if (_this2.settings.easing) {
+                p.easedRatioCompleted = _this2.settings.easing(p.ratioCompleted);
+              } else {
+                p.easedRatioCompleted = p.ratioCompleted;
+              }
+              p.tweened = _this2.getTween(from, to, p.ratioCompleted);
+              p.easedTweened = _this2.getTween(from, to, p.easedRatioCompleted);
+            } else {
+              var needsAnotherLoop = loop === true || loop && _this2.currentLoopCount < loop;
+              if (needsAnotherLoop && !delayEveryLoop) {
+                p.ratioCompleted = -reverseIsNegativeOne + ratioCompleted;
+                _this2.timestamps.start = _this2.timestamps.start + duration;
+                if (_this2.settings.easing) {
+                  p.easedRatioCompleted = _this2.settings.easing(p.ratioCompleted);
+                } else {
+                  p.easedRatioCompleted = p.ratioCompleted;
+                }
+                p.tweened = _this2.getTween(from, to, p.ratioCompleted);
+                p.easedTweened = _this2.getTween(from, to, p.easedRatioCompleted);
+                overlapLoop = true;
+              } else {
+                p.ratioCompleted = ratioLimit;
+                p.easedRatioCompleted = ratioLimit;
+                p.tweened = to;
+                p.easedTweened = to;
+                if (reverse) {
+                  p.tweened = from;
+                  p.easedTweened = from;
+                }
+              }
 
-							if (needsAnotherLoop) {
-								_this2.currentLoopCount++;
-								stillLooping = true && !overlapLoop;
-								_this2.lastDelaySettingWhileDelaying = null;
-							} else {
-								durationAchieved = true;
-							}
-						}
+              if (needsAnotherLoop) {
+                _this2.currentLoopCount++;
+                stillLooping = true && !overlapLoop;
+                _this2.lastDelaySettingWhileDelaying = null;
+              } else {
+                durationAchieved = true;
+              }
+            }
 
-						var withinRatioBounds = _this2.progress.ratioCompleted >= 0;
-						if (reverse) {
-							withinRatioBounds = _this2.progress.ratioCompleted <= 1;
-						}
+            var withinRatioBounds = _this2.progress.ratioCompleted >= 0;
+            if (reverse) {
+              withinRatioBounds = _this2.progress.ratioCompleted <= 1;
+            }
 
-						if (_this2.settings.frame && withinRatioBounds) {
-							// const startExtreme = reverse ? 1 : 0;
-							// if (this.settings.itDescription) {
-							// 	console.log(this.settings.itDescription);
-							// }
-							// console.log(
-							// this.lookupSetting('skipZeroFrame'),
-							// this.frameCount === 0,
-							// ratioCompleted,startExtreme
-							// );
-							// if (
-							// this.settings.boomer && this.lookupSetting('skipZeroFrame') &&
-							// this.frameCount === 0 && delay && startExtreme === ratioCompleted
-							// ) {
-							// console.log('vvvvvvvvvvv');
-							// console.log('--- wtf ---');
-							// console.log('--- ' + this.settings.itDescription);
-							// console.log(this.timestamps.start,this.timestamps.raf);
-							// console.log('^^^^^^^^^^^');
-							// }
-							// if (this.settings.boomer) {
-							// 	console.log('vvvvvvvvvvv');
-							// 	console.log(this.timestamps.start,this.timestamps.recentRaf,ratioCompleted);
-							// 	console.log('^^^^^^^^^^^');
-							// }
-							var progressChanges = _this2.settings.frame.apply(_this2, [_this2.progress]);
-							_this2.iterateFrameCbs(_this2.progress);
-							_this2.frameCount++;
-							Object.assign(_this2.progress, progressChanges);
-						}
+            if (_this2.settings.frame && withinRatioBounds) {
+              // const startExtreme = reverse ? 1 : 0;
+              // if (this.settings.itDescription) {
+              //   console.log(this.settings.itDescription);
+              // }
+              // console.log(
+              // this.lookupSetting('skipZeroFrame'),
+              // this.frameCount === 0,
+              // ratioCompleted,startExtreme
+              // );
+              // if (
+              // this.settings.boomer && this.lookupSetting('skipZeroFrame') &&
+              // this.frameCount === 0 && delay && startExtreme === ratioCompleted
+              // ) {
+              // console.log('vvvvvvvvvvv');
+              // console.log('--- wtf ---');
+              // console.log('--- ' + this.settings.itDescription);
+              // console.log(this.timestamps.start,this.timestamps.raf);
+              // console.log('^^^^^^^^^^^');
+              // }
+              // if (this.settings.boomer) {
+              //   console.log('vvvvvvvvvvv');
+              //   console.log(this.timestamps.start,this.timestamps.recentRaf,ratioCompleted);
+              //   console.log('^^^^^^^^^^^');
+              // }
+              var progressChanges = _this2.settings.frame.apply(_this2, [_this2.progress]);
+              _this2.iterateFrameCbs(_this2.progress);
+              _this2.frameCount++;
+              Object.assign(_this2.progress, progressChanges);
+            }
 
-						if (!durationAchieved) {
-							_this2.recurse(stillLooping, stillLooping);
-						} else {
-							_this2.running = false;
-							if (_this2.settings.onComplete) {
-								_this2.settings.onComplete.apply(_this2, [_this2.progress]);
-							}
-						}
-					}
-				});
-			}
-		}
-	}, {
-		key: 'onFrame',
-		value: function onFrame(cb) {
-			var _this3 = this;
+            if (!durationAchieved) {
+              _this2.recurse(stillLooping, stillLooping);
+            } else {
+              _this2.running = false;
+              if (_this2.settings.onComplete) {
+                _this2.settings.onComplete.apply(_this2, [_this2.progress]);
+              }
+            }
+          }
+        });
+      }
+    }
+  }, {
+    key: 'onFrame',
+    value: function onFrame(cb) {
+      var _this3 = this;
 
-			if (!this.callbacks) {
-				this.callbacks = {};
-			}
-			if (!this.callbacks.frame) {
-				this.callbacks.frame = [];
-			}
-			this.callbacks.frame.push(cb);
-			return function () {
-				_this3.callbacks = _this3.callbacks.frame.filter(function (accum, cachedCb) {
-					return cachedCb !== cb;
-				});
-			};
-		}
-	}, {
-		key: 'iterateFrameCbs',
-		value: function iterateFrameCbs() {
-			for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-				args[_key] = arguments[_key];
-			}
+      if (!this.callbacks) {
+        this.callbacks = {};
+      }
+      if (!this.callbacks.frame) {
+        this.callbacks.frame = [];
+      }
+      this.callbacks.frame.push(cb);
+      return function () {
+        _this3.callbacks = _this3.callbacks.frame.filter(function (accum, cachedCb) {
+          return cachedCb !== cb;
+        });
+      };
+    }
+  }, {
+    key: 'iterateFrameCbs',
+    value: function iterateFrameCbs() {
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
 
-			if (this.callbacks && this.callbacks.frame) {
-				this.callbacks.frame.forEach(function (cb) {
-					cb.apply(undefined, args);
-				});
-			}
-		}
-	}, {
-		key: 'resetAll',
-		value: function resetAll() {
-			this.stop(true);
-			this.init(true);
+      if (this.callbacks && this.callbacks.frame) {
+        this.callbacks.frame.forEach(function (cb) {
+          cb.apply(undefined, args);
+        });
+      }
+    }
+  }, {
+    key: 'resetAll',
+    value: function resetAll() {
+      this.stop(true);
+      this.init(true);
 
-			return this;
-		}
-	}, {
-		key: 'stop',
-		value: function stop(skipCallback) {
-			var _this4 = this;
+      return this;
+    }
+  }, {
+    key: 'stop',
+    value: function stop(skipCallback) {
+      var _this4 = this;
 
-			this.running = false;
-			__WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].caf(this.nextRafId);
-			if (this.settings.onStop) {
-				if (!skipCallback) {
-					this.settings.onStop.apply(this, [this.progress]);
-				}
-			}
-			this.iterateAspectNames(function (name) {
-				var aspect = _this4.aspects[name];
-				if (aspect.settings.chainedStop) {
-					_this4.aspects[name].stop(skipCallback);
-				}
-			});
+      this.running = false;
+      __WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].caf(this.nextRafId);
+      if (this.settings.onStop) {
+        if (!skipCallback) {
+          this.settings.onStop.apply(this, [this.progress]);
+        }
+      }
+      this.iterateAspectNames(function (name) {
+        var aspect = _this4.aspects[name];
+        if (aspect.settings.chainedStop) {
+          _this4.aspects[name].stop(skipCallback);
+        }
+      });
 
-			return this;
-		}
-	}, {
-		key: 'resume',
-		value: function resume() {
-			var _this5 = this;
+      return this;
+    }
+  }, {
+    key: 'resume',
+    value: function resume() {
+      var _this5 = this;
 
-			if (!this.running) {
-				__WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].makeStamp('start');
-				var duration = this.lookupSetting('duration');
-				var reverse = this.lookupSetting('reverse');
+      if (!this.running) {
+        __WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].makeStamp('start');
+        var duration = this.lookupSetting('duration');
+        var reverse = this.lookupSetting('reverse');
 
-				var adjustment = this.progress.ratioCompleted * duration;
-				if (reverse) {
-					adjustment = (1 - this.progress.ratioCompleted) * duration;
-				}
-				if (this.lastDelaySettingWhileDelaying) {
-					adjustment += this.lastDelaySettingWhileDelaying;
-				}
-				this.timestamps.start = __WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].stamps.start - adjustment;
-				this.timestamps.recentRaf = null;
-				this.running = true;
+        var adjustment = this.progress.ratioCompleted * duration;
+        if (reverse) {
+          adjustment = (1 - this.progress.ratioCompleted) * duration;
+        }
+        if (this.lastDelaySettingWhileDelaying) {
+          adjustment += this.lastDelaySettingWhileDelaying;
+        }
+        this.timestamps.start = __WEBPACK_IMPORTED_MODULE_0__sharedTiming__["d" /* default */].stamps.start - adjustment;
+        this.timestamps.recentRaf = null;
+        this.running = true;
 
-				this.iterateAspectNames(function (name) {
-					_this5.aspects[name].resume();
-				});
+        this.iterateAspectNames(function (name) {
+          _this5.aspects[name].resume();
+        });
 
-				this.recurse();
-			}
-			return this;
-		}
-	}, {
-		key: 'birthAspect',
-		value: function birthAspect(name, settings) {
-			if (this.aspects[name]) {
-				this.aspects[name].stop();
-			}
-			this.aspects[name] = new StimulationAspect(_extends({}, settings), name, this);
+        this.recurse();
+      }
+      return this;
+    }
+  }, {
+    key: 'birthAspect',
+    value: function birthAspect(name, settings) {
+      if (this.aspects[name]) {
+        this.aspects[name].stop();
+      }
+      this.aspects[name] = new StimulationAspect(_extends({}, settings), name, this);
 
-			return this.aspects[name];
-		}
-	}, {
-		key: 'progressAt',
-		value: function progressAt(path) {
-			var pathSplit = path.split('.');
-			var place = this.aspectTree;
-			if (path) {
-				try {
-					pathSplit.forEach(function (name) {
-						place = place.aspects[name];
-					});
-				} catch (e) {
-					throw new Error('Error: You specified an invalid aspect path for .progressAt().');
-				}
-			}
-			return place ? place.progress : place;
-		}
-	}, {
-		key: 'aspectAt',
-		value: function aspectAt(path) {
-			var pathSplit = path.split('.');
-			var place = this.aspectTree;
-			if (path) {
-				try {
-					pathSplit.forEach(function (name) {
-						place = place.aspects[name];
-					});
-				} catch (e) {
-					throw new Error('Error: You specified an invalid aspect path for .aspectAt().');
-				}
-			}
-			return place;
-		}
-	}]);
+      return this.aspects[name];
+    }
+  }, {
+    key: 'progressAt',
+    value: function progressAt(path) {
+      var pathSplit = path.split('.');
+      var place = this.aspectTree;
+      if (path) {
+        try {
+          pathSplit.forEach(function (name) {
+            place = place.aspects[name];
+          });
+        } catch (e) {
+          throw new Error('Error: You specified an invalid aspect path for .progressAt().');
+        }
+      }
+      return place ? place.progress : place;
+    }
+  }, {
+    key: 'aspectAt',
+    value: function aspectAt(path) {
+      var pathSplit = path.split('.');
+      var place = this.aspectTree;
+      if (path) {
+        try {
+          pathSplit.forEach(function (name) {
+            place = place.aspects[name];
+          });
+        } catch (e) {
+          throw new Error('Error: You specified an invalid aspect path for .aspectAt().');
+        }
+      }
+      return place;
+    }
+  }]);
 
-	return StimulationAspect;
+  return StimulationAspect;
 }();
 
 var stimulate = function stimulate() {
-	for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-		args[_key2] = arguments[_key2];
-	}
+  for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
 
-	return new (Function.prototype.bind.apply(StimulationAspect, [null].concat(args)))();
+  return new (Function.prototype.bind.apply(StimulationAspect, [null].concat(args)))();
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (stimulate);
@@ -841,7 +840,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__stimulate__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__sharedTiming__ = __webpack_require__(5);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "stimulate", function() { return __WEBPACK_IMPORTED_MODULE_1__stimulate__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "sharedTiming", function() { return __WEBPACK_IMPORTED_MODULE_2__sharedTiming__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "sharedTiming", function() { return __WEBPACK_IMPORTED_MODULE_2__sharedTiming__["sharedTiming"]; });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "raf", function() { return __WEBPACK_IMPORTED_MODULE_2__sharedTiming__["b"]; });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "caf", function() { return __WEBPACK_IMPORTED_MODULE_2__sharedTiming__["c"]; });
 

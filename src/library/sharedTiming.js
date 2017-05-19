@@ -56,5 +56,5 @@ function sharedTimingCaf(...args) {
 	return sharedTiming.caf(...args);
 }
 
-export { sharedTiming, sharedTimingRaf as raf, sharedTimingCaf as caf };
+export { sharedTimingRaf as raf, sharedTimingCaf as caf };
 export default sharedTiming;
