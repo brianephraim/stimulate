@@ -9,6 +9,7 @@
     "tonicExample.js"
   ],
   "scripts": {
+    "x": "./node_modules/.bin/babel-node ./webpack.start.js",
     "build": "webpack --env=build && npm run commonjs2-import-example && npm run es2015-import-example",
     "commonjs2-import-example": "browserify ./import-examples/commonjs2/index.js -o ./import-examples/commonjs2/index-compiled.js -d",
     "es2015-import-example": "webpack --config ./src/import-examples/es2015/webpack.config.babel.js",
