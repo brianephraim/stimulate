@@ -1,7 +1,7 @@
 import { demoHeight, demoWidth, ballDiameter } from './cssJsSharedConstants.json';
 import prefixer from 'react-prefixer';
 
-
+console.log('asdf');
 export const ready = (fn) => {
 	if (document.readyState !== 'loading') {
 		fn();
