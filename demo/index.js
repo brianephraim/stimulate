@@ -1415,6 +1415,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 
 
+console.log('asdf');
 var ready = function ready(fn) {
 	if (document.readyState !== 'loading') {
 		fn();

@@ -1,79 +1,79 @@
 (function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define("stimulate", [], factory);
-	else if(typeof exports === 'object')
-		exports["stimulate"] = factory();
-	else
-		root["stimulate"] = factory();
+  if(typeof exports === 'object' && typeof module === 'object')
+    module.exports = factory();
+  else if(typeof define === 'function' && define.amd)
+    define("stimulate", [], factory);
+  else if(typeof exports === 'object')
+    exports["stimulate"] = factory();
+  else
+    root["stimulate"] = factory();
 })(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
+/******/  // The module cache
+/******/  var installedModules = {};
 /******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
+/******/  // The require function
+/******/  function __webpack_require__(moduleId) {
 /******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
+/******/    // Check if module is in cache
+/******/    if(installedModules[moduleId]) {
+/******/      return installedModules[moduleId].exports;
+/******/    }
+/******/    // Create a new module (and put it into the cache)
+/******/    var module = installedModules[moduleId] = {
+/******/      i: moduleId,
+/******/      l: false,
+/******/      exports: {}
+/******/    };
 /******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/    // Execute the module function
+/******/    modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 /******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
+/******/    // Flag the module as loaded
+/******/    module.l = true;
 /******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
+/******/    // Return the exports of the module
+/******/    return module.exports;
+/******/  }
 /******/
 /******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
+/******/  // expose the modules object (__webpack_modules__)
+/******/  __webpack_require__.m = modules;
 /******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
+/******/  // expose the module cache
+/******/  __webpack_require__.c = installedModules;
 /******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
+/******/  // identity function for calling harmony imports with the correct context
+/******/  __webpack_require__.i = function(value) { return value; };
 /******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
-/******/ 		}
-/******/ 	};
+/******/  // define getter function for harmony exports
+/******/  __webpack_require__.d = function(exports, name, getter) {
+/******/    if(!__webpack_require__.o(exports, name)) {
+/******/      Object.defineProperty(exports, name, {
+/******/        configurable: false,
+/******/        enumerable: true,
+/******/        get: getter
+/******/      });
+/******/    }
+/******/  };
 /******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
+/******/  // getDefaultExport function for compatibility with non-harmony modules
+/******/  __webpack_require__.n = function(module) {
+/******/    var getter = module && module.__esModule ?
+/******/      function getDefault() { return module['default']; } :
+/******/      function getModuleExports() { return module; };
+/******/    __webpack_require__.d(getter, 'a', getter);
+/******/    return getter;
+/******/  };
 /******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/  // Object.prototype.hasOwnProperty.call
+/******/  __webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
+/******/  // __webpack_public_path__
+/******/  __webpack_require__.p = "";
 /******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 16);
+/******/  // Load entry module and return exports
+/******/  return __webpack_require__(__webpack_require__.s = 16);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -140,74 +140,74 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 
 var SharedTiming = function () {
-	function SharedTiming() {
-		_classCallCheck(this, SharedTiming);
+  function SharedTiming() {
+    _classCallCheck(this, SharedTiming);
 
-		this.running = {
-			count: 0,
-			limit: 0
-		};
-		this.stamps = {
-			start: null,
-			raf: null
-		};
-		this.rafIdRegistry = {};
-	}
+    this.running = {
+      count: 0,
+      limit: 0
+    };
+    this.stamps = {
+      start: null,
+      raf: null
+    };
+    this.rafIdRegistry = {};
+  }
 
-	_createClass(SharedTiming, [{
-		key: 'makeStamp',
-		value: function makeStamp(stamp, reset) {
-			if (!this.stamps[stamp] || reset) {
-				this.stamps[stamp] = Date.now();
-			}
-			return this.stamps[stamp];
-		}
-	}, {
-		key: 'raf',
-		value: function raf(cb) {
-			var _this = this;
+  _createClass(SharedTiming, [{
+    key: 'makeStamp',
+    value: function makeStamp(stamp, reset) {
+      if (!this.stamps[stamp] || reset) {
+        this.stamps[stamp] = Date.now();
+      }
+      return this.stamps[stamp];
+    }
+  }, {
+    key: 'raf',
+    value: function raf(cb) {
+      var _this = this;
 
-			if (!this.running.count) {
-				this.running.count = 1;
-			} else {
-				this.running.count++;
-			}
-			var rafId = __WEBPACK_IMPORTED_MODULE_0__raf___default()(function () {
-				delete _this.rafIdRegistry[rafId];
-				_this.stamps.start = null;
-				if (!_this.running.limit) {
-					_this.running.limit = _this.running.count;
-					_this.makeStamp('raf', true);
-					_this.running.count = 0;
-				}
-				_this.running.limit--;
-				cb();
-			});
-			this.rafIdRegistry[rafId] = true;
-			return rafId;
-		}
-	}, {
-		key: 'caf',
-		value: function caf(rafId) {
-			if (rafId && this.rafIdRegistry[rafId]) {
-				__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__raf__["cancel"])(rafId);
-				this.stamps.start = null;
-				this.running.count--;
-				delete this.rafIdRegistry[rafId];
-			}
-		}
-	}]);
+      if (!this.running.count) {
+        this.running.count = 1;
+      } else {
+        this.running.count++;
+      }
+      var rafId = __WEBPACK_IMPORTED_MODULE_0__raf___default()(function () {
+        delete _this.rafIdRegistry[rafId];
+        _this.stamps.start = null;
+        if (!_this.running.limit) {
+          _this.running.limit = _this.running.count;
+          _this.makeStamp('raf', true);
+          _this.running.count = 0;
+        }
+        _this.running.limit--;
+        cb();
+      });
+      this.rafIdRegistry[rafId] = true;
+      return rafId;
+    }
+  }, {
+    key: 'caf',
+    value: function caf(rafId) {
+      if (rafId && this.rafIdRegistry[rafId]) {
+        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__raf__["cancel"])(rafId);
+        this.stamps.start = null;
+        this.running.count--;
+        delete this.rafIdRegistry[rafId];
+      }
+    }
+  }]);
 
-	return SharedTiming;
+  return SharedTiming;
 }();
 
 var sharedTiming = new SharedTiming();
 
 function sharedTimingRaf() {
-	return sharedTiming.raf.apply(sharedTiming, arguments);
+  return sharedTiming.raf.apply(sharedTiming, arguments);
 }
 function sharedTimingCaf() {
-	return sharedTiming.caf.apply(sharedTiming, arguments);
+  return sharedTiming.caf.apply(sharedTiming, arguments);
 }
 
 
@@ -812,15 +812,15 @@ var g;
 
 // This works in non-strict mode
 g = function () {
-	return this;
+  return this;
 }();
 
 try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1, eval)("this");
+  // This works if eval is allowed (see CSP)
+  g = g || Function("return this")() || (1, eval)("this");
 } catch (e) {
-	// This works if the window reference is available
-	if ((typeof window === "undefined" ? "undefined" : _typeof(window)) === "object") g = window;
+  // This works if the window reference is available
+  if ((typeof window === "undefined" ? "undefined" : _typeof(window)) === "object") g = window;
 }
 
 // g can still be undefined, but nothing to do about it...
