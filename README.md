@@ -417,6 +417,7 @@ var someChildOfMyStimulation = myStimulation.birthAspect('someChild',{duration:2
 
 
 
+
 ---
 
 
