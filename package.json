@@ -50,7 +50,7 @@
   "homepage": "https://github.com/defualt/stimulate",
   "tonicExampleFilename": "tonicExample.js",
   "devDependencies": {
-    "devEnv": "0.0.1"
+    "devEnv": "^0.0.1"
   },
   "dependencies": {
     "core-js": "^2.4.1",
