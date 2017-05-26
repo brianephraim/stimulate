@@ -45,3 +45,7 @@ build/*
 coverage
 
 _webpack-config-preview.json
+
+.DS_Store
+
+tempRepos
