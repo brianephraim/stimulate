@@ -1,6 +1,6 @@
 {
   "name": "stimulate",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "animation utility",
   "main": "dist/stimulate.js",
   "files": [
@@ -50,7 +50,7 @@
   "homepage": "https://github.com/defualt/stimulate",
   "tonicExampleFilename": "tonicExample.js",
   "devDependencies": {
-    "dev_env": "^0.0.0"
+    "@defualt/dev_env": "^0.0.1"
   },
   "dependencies": {
     "core-js": "^2.4.1",
