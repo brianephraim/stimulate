@@ -1,6 +1,6 @@
 {
   "name": "stimulate",
-  "version": "0.0.13",
+  "version": "0.0.16",
   "description": "animation utility",
   "main": "dist/stimulate.js",
   "files": [
@@ -10,13 +10,13 @@
   ],
   "scripts": {
     "y": "devenv",
-    "x": "node ./node_modules/devEnv/babel.start.js",
-    "build": "./node_modules/.bin/babel-node ./node_modules/devEnv/webpack.start.js --env=build",
-    "XXX_build": "./node_modules/devEnv/webpack --env=build && npm run commonjs2-import-example && npm run es2015-import-example",
+    "x": "node ./node_modules/dev_env/babel.start.js",
+    "build": "./node_modules/.bin/babel-node ./node_modules/dev_env/webpack.start.js --env=build",
+    "XXX_build": "./node_modules/dev_env/webpack --env=build && npm run commonjs2-import-example && npm run es2015-import-example",
     "XXX_commonjs2-import-example": "browserify ./import-examples/commonjs2/index.js -o ./import-examples/commonjs2/index-compiled.js -d",
-    "XXX_es2015-import-example": "./node_modules/devEnv/webpack --config ./src/import-examples/es2015/webpack.config.babel.js",
-    "XXX_watch": "./node_modules/devEnv/webpack-dev-server --progress --colors --env=watch  && echo 'http://localhost:8080/webpack-dev-server/'",
-    "XXX_dev": "./node_modules/devEnv/webpack --progress --colors --watch --env=dev",
+    "XXX_es2015-import-example": "./node_modules/dev_env/webpack --config ./src/import-examples/es2015/webpack.config.babel.js",
+    "XXX_watch": "./node_modules/dev_env/webpack-dev-server --progress --colors --env=watch  && echo 'http://localhost:8080/webpack-dev-server/'",
+    "XXX_dev": "./node_modules/dev_env/webpack --progress --colors --watch --env=dev",
     "XXX_test": "babel-node ./node_modules/.bin/babel-istanbul cover ./node_modules/.bin/_mocha  --report lcovonly -- test/library.spec.js",
     "XXX_test-old": "mocha --compilers js:babel-core/register --colors ./test/*.spec.js",
     "XXX_testwatch": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js",
@@ -50,7 +50,7 @@
   "homepage": "https://github.com/defualt/stimulate",
   "tonicExampleFilename": "tonicExample.js",
   "devDependencies": {
-    "devEnv": "^0.0.1"
+    "dev_env": "^0.0.0"
   },
   "dependencies": {
     "core-js": "^2.4.1",
