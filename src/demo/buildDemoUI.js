@@ -1,10 +1,10 @@
 import { demoHeight, demoWidth, ballDiameter, demoDuration } from './cssJsSharedConstants.json';
 import { setupEl, demoCoords } from './util';
 const duration = demoDuration;
-export const buildDemoUI = (ball, stimulation) => {
+export const buildDemoUI = (ball, stimulation, appendTo) => {
 	const coords = demoCoords;
 	let reverse = false;
-	const demoEl = document.getElementById('demo');
+	const demoEl = appendTo || document.getElementById('demo');
 
 	setupEl({
 		className: 'demo',
