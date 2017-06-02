@@ -1,6 +1,6 @@
 {
   "name": "stimulate",
-  "version": "0.0.20",
+  "version": "0.0.22",
   "description": "animation utility",
   "main": "dist/stimulate.js",
   "files": [
@@ -48,7 +48,7 @@
   "homepage": "https://github.com/defualt/stimulate",
   "tonicExampleFilename": "tonicExample.js",
   "devDependencies": {
-    "@defualt/dev_env": "^0.0.4",
+    "@defualt/dev_env": "^0.0.6",
     "babel-cli": "^6.24.1",
     "babel-istanbul": "^0.12.2",
     "babel-plugin-add-module-exports": "^0.2.1",
